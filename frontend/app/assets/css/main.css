@@ -1,0 +1,108 @@
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #1a1a1a;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d5d5d5;
+}
+
+.etiqueta {
+    @apply inline-flex items-center gap-1 px-[7px] py-[2px] text-[11px] font-medium;
+}
+
+.etiqueta-ok {
+    @apply bg-green-bg text-green;
+}
+
+.etiqueta-alerta {
+    @apply bg-amber-bg text-amber;
+}
+
+.etiqueta-critico {
+    @apply bg-red-bg text-red;
+}
+
+.etiqueta-info {
+    @apply bg-blue-bg text-blue;
+}
+
+.etiqueta-inativo {
+    @apply bg-[#F0F0F0] text-tx-mid;
+}
+
+.ponto {
+    @apply w-[5px] h-[5px] rounded-full flex-shrink-0;
+}
+
+.ponto-ok {
+    background: #16a34a;
+}
+
+.ponto-alerta {
+    background: #d97706;
+}
+
+.ponto-critico {
+    background: #dc2626;
+}
+
+.ponto-info {
+    @apply bg-blue;
+}
+
+.ponto-inativo {
+    @apply bg-tx-soft;
+}
+
+.botao {
+    @apply inline-flex items-center gap-1.5 px-[13px] py-[6px] text-[13px] font-medium cursor-pointer transition-all duration-75 whitespace-nowrap border border-transparent font-sans;
+}
+
+.botao-primario {
+    @apply bg-blue text-white border-blue;
+}
+
+.botao-primario:hover {
+    background: #1835a0;
+}
+
+.botao-secundario {
+    @apply bg-surface text-tx border-line2;
+}
+
+.botao-secundario:hover {
+    @apply bg-bg;
+}
+
+.botao-ghost {
+    @apply bg-transparent text-tx-mid px-[10px];
+}
+
+.botao-ghost:hover {
+    @apply bg-bg text-tx;
+}
+
+.cabecalho-secao {
+    @apply flex items-end justify-between mb-[11px];
+}
+
+.titulo-secao {
+    @apply text-[13px] font-semibold;
+}
+
+.subtitulo-secao {
+    @apply text-[11.5px] text-tx-soft;
+}

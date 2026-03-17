@@ -2,11 +2,11 @@
 definePageMeta({ titulo: "Dashboard" });
 
 const itensAlertas = [
-    { nome: "Cabo HDMI 2.0 2m", sku: "CBL-HDMI-002", estoque: 4, minimo: 20, status: "critico" },
-    { nome: "Teclado Mecânico TK200", sku: "TEC-MEC-200", estoque: 7, minimo: 15, status: "alerta" },
-    { nome: "Mouse Sem Fio M320", sku: "MOU-WLS-320", estoque: 2, minimo: 10, status: "critico" },
-    { nome: 'Monitor 24" Full HD', sku: "MON-FHD-240", estoque: 3, minimo: 8, status: "alerta" },
-    { nome: "Headset USB HX100", sku: "HDS-USB-100", estoque: 1, minimo: 12, status: "critico" },
+    { nome: "Cabo HDMI 2.0 2m", sku: "CBL-HDMI-002", estoque: 4, minimo: 20 },
+    { nome: "Teclado Mecânico TK200", sku: "TEC-MEC-200", estoque: 7, minimo: 15 },
+    { nome: "Mouse Sem Fio M320", sku: "MOU-WLS-320", estoque: 2, minimo: 10 },
+    { nome: 'Monitor 24" Full HD', sku: "MON-FHD-240", estoque: 3, minimo: 8 },
+    { nome: "Headset USB HX100", sku: "HDS-USB-100", estoque: 1, minimo: 12 },
 ];
 </script>
 
@@ -46,7 +46,7 @@ const itensAlertas = [
                             <td class="col-td font-mono text-[11.5px] text-tx-mid">{{ item.sku }}</td>
                             <td class="col-td text-amber font-medium">{{ item.estoque }}</td>
                             <td class="col-td text-tx-mid">{{ item.minimo }}</td>
-                            <td class="col-td"><Etiqueta :status="item.status" /></td>
+                            <td class="col-td"><Etiqueta :status="statusEstoque(item.estoque, item.minimo)" /></td>
                         </tr>
                     </tbody>
                 </table>

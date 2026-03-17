@@ -3,7 +3,7 @@ defineProps<{
     status: "ok" | "alerta" | "critico" | "info" | "inativo";
 }>();
 
-const rotulos: Record<string, string> = {
+const rotulos = {
     ok: "Ok",
     alerta: "Alerta",
     critico: "Crítico",

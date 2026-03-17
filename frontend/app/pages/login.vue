@@ -1,39 +1,13 @@
 <script setup lang="ts">
 definePageMeta({ layout: "auth" });
 
-const email = ref("");
-const senha = ref("");
-const carregando = ref(false);
-const erroEmail = ref(false);
-const erroSenha = ref(false);
-const mensagemErro = ref("");
-
 const itensAlerta = [
-    { nome: "Headset USB HX100", qtd: "1 un", min: "mín 12", critico: true },
-    { nome: "Mouse Sem Fio M320", qtd: "2 un", min: "mín 10", critico: true },
-    { nome: "Teclado Mecânico TK200", qtd: "7 un", min: "mín 15", critico: false },
-    { nome: "Cabo HDMI 2.0 2m", qtd: "4 un", min: "mín 20", critico: true },
-    { nome: 'Monitor 24" Full HD', qtd: "3 un", min: "mín 8", critico: false },
+    { nome: "Headset USB HX100", estoque: 1, minimo: 12 },
+    { nome: "Mouse Sem Fio M320", estoque: 2, minimo: 10 },
+    { nome: "Teclado Mecânico TK200", estoque: 7, minimo: 15 },
+    { nome: "Cabo HDMI 2.0 2m", estoque: 4, minimo: 20 },
+    { nome: 'Monitor 24" Full HD', estoque: 3, minimo: 8 },
 ];
-
-async function entrar() {
-    erroEmail.value = false;
-    erroSenha.value = false;
-    mensagemErro.value = "";
-
-    if (!email.value || !senha.value) {
-        mensagemErro.value = "Preencha e-mail e senha.";
-        if (!email.value) erroEmail.value = true;
-        if (!senha.value) erroSenha.value = true;
-        return;
-    }
-
-    carregando.value = true;
-    await new Promise((r) => setTimeout(r, 900));
-    carregando.value = false;
-
-    navigateTo("/");
-}
 </script>
 
 <template>
@@ -47,38 +21,20 @@ async function entrar() {
                 <h1 class="titulo-login">Bem-vindo de volta</h1>
                 <p class="subtitulo-login">Entre com sua conta para acessar o painel.</p>
 
-                <form @submit.prevent="entrar">
+                <form @submit.prevent>
                     <div class="campo">
                         <label for="email">E-mail</label>
-                        <input
-                            id="email"
-                            v-model="email"
-                            type="email"
-                            placeholder="voce@empresa.com.br"
-                            autocomplete="email"
-                            :class="{ erro: erroEmail }"
-                        />
+                        <input id="email" type="email" placeholder="voce@empresa.com.br" autocomplete="email" />
                     </div>
 
                     <div class="campo">
                         <label for="senha">Senha</label>
-                        <input
-                            id="senha"
-                            v-model="senha"
-                            type="password"
-                            placeholder="••••••••"
-                            autocomplete="current-password"
-                            :class="{ erro: erroSenha }"
-                        />
-                        <span v-if="mensagemErro" class="msg-erro">{{ mensagemErro }}</span>
+                        <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password" />
                     </div>
 
                     <div class="link-esqueceu">Esqueceu a senha?</div>
 
-                    <button type="submit" class="botao-entrar" :class="{ carregando }">
-                        <span v-if="!carregando" class="btn-label">Entrar</span>
-                        <span v-else class="spinner" />
-                    </button>
+                    <button type="submit" class="botao-entrar">Entrar</button>
                 </form>
             </div>
         </div>
@@ -123,10 +79,10 @@ async function entrar() {
                     </div>
 
                     <div v-for="item in itensAlerta" :key="item.nome" class="preview-linha">
-                        <div class="ponto-status" :class="item.critico ? 'ponto-critico' : 'ponto-alerta-cor'" />
+                        <div class="ponto" :class="`ponto-${statusEstoque(item.estoque, item.minimo)}`" />
                         <div class="item-nome">{{ item.nome }}</div>
-                        <div class="item-qtd" :class="item.critico ? 'qtd-critico' : 'qtd-alerta'">{{ item.qtd }}</div>
-                        <div class="item-min">{{ item.min }}</div>
+                        <div class="item-qtd" :class="`qtd-${statusEstoque(item.estoque, item.minimo)}`">{{ item.estoque }} un</div>
+                        <div class="item-min">mín {{ item.minimo }}</div>
                     </div>
                 </div>
             </div>
@@ -218,16 +174,6 @@ async function entrar() {
     color: #9a9a9a;
 }
 
-.campo input.erro {
-    border-color: #dc2626;
-}
-
-.msg-erro {
-    font-size: 11.5px;
-    color: #dc2626;
-    margin-top: 2px;
-}
-
 .link-esqueceu {
     font-size: 12px;
     color: #1e40af;
@@ -260,27 +206,6 @@ async function entrar() {
 
 .botao-entrar:hover {
     background: #333;
-}
-
-.botao-entrar.carregando {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: girar 0.6s linear infinite;
-    display: block;
-}
-
-@keyframes girar {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .painel-direito {
@@ -395,20 +320,6 @@ async function entrar() {
 
 .preview-linha:last-child {
     border-bottom: none;
-}
-
-.ponto-status {
-    width: 5px;
-    height: 5px;
-    flex-shrink: 0;
-}
-
-.ponto-critico {
-    background: #dc2626;
-}
-
-.ponto-alerta-cor {
-    background: #d97706;
 }
 
 .item-nome {

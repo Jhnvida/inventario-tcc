@@ -4,7 +4,7 @@ defineProps<{
 }>();
 
 const rotulos: Record<string, string> = {
-    ok: "OK",
+    ok: "Ok",
     alerta: "Alerta",
     critico: "Crítico",
     info: "Info",

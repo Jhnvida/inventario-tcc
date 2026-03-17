@@ -7,7 +7,7 @@ const titulo = computed(() => route.meta.titulo as string);
     <div class="flex h-screen">
         <aside class="w-[220px] bg-surface border-r border-line flex flex-col flex-shrink-0">
             <div class="h-[52px] border-b border-line flex items-center px-[18px] gap-[9px] flex-shrink-0">
-                <span class="text-[14px] font-semibold tracking-[-0.3px]">Inventário Inteligente</span>
+                <span class="text-[14px] font-semibold tracking-[-0.3px]">Inventário</span>
             </div>
 
             <nav class="flex-1 px-[10px] py-2 overflow-y-auto">

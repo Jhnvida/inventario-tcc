@@ -13,16 +13,16 @@ const itensAlertas = [
 <template>
     <div class="flex flex-col gap-6">
         <div class="grid grid-cols-4 gap-px bg-line border border-line">
-            <CartaoStat rotulo="Valor Total" valor="R$487k" icone="lucide:circle-dollar-sign" />
-            <CartaoStat rotulo="Produtos" valor="1.248" icone="lucide:package" />
-            <CartaoStat rotulo="Em Alerta" valor="23" icone="lucide:triangle-alert" cor-valor="text-amber" />
-            <CartaoStat rotulo="Pedidos Abertos" valor="8" icone="lucide:clipboard-check" />
+            <Cartao rotulo="Valor Total" valor="R$487k" icone="lucide:circle-dollar-sign" />
+            <Cartao rotulo="Produtos" valor="1.248" icone="lucide:package" />
+            <Cartao rotulo="Em Alerta" valor="23" icone="lucide:triangle-alert" cor-valor="text-amber" />
+            <Cartao rotulo="Pedidos Abertos" valor="8" icone="lucide:clipboard-check" />
         </div>
 
         <div>
-            <CabecalhoSecao titulo="Estoque Crítico" subtitulo="Produtos abaixo do mínimo">
+            <Cabecalho titulo="Estoque Crítico" subtitulo="Produtos abaixo do mínimo">
                 <NuxtLink to="/produtos" class="botao botao-ghost text-[12px]">Ver todos</NuxtLink>
-            </CabecalhoSecao>
+            </Cabecalho>
 
             <div class="bg-surface border border-line">
                 <table class="w-full border-collapse">
@@ -46,9 +46,7 @@ const itensAlertas = [
                             <td class="col-td font-mono text-[11.5px] text-tx-mid">{{ item.sku }}</td>
                             <td class="col-td text-amber font-medium">{{ item.estoque }}</td>
                             <td class="col-td text-tx-mid">{{ item.minimo }}</td>
-                            <td class="col-td">
-                                <EtiquetaStatus :status="item.status as 'critico' | 'alerta'" />
-                            </td>
+                            <td class="col-td"><Etiqueta :status="item.status" /></td>
                         </tr>
                     </tbody>
                 </table>

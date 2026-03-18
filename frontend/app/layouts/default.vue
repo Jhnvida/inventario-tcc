@@ -23,6 +23,11 @@ const titulo = computed(() => route.meta.titulo as string);
                 <div class="mb-5">
                     <div class="nav-rotulo">Estoque</div>
 
+                    <NuxtLink to="/pedidos" active-class="ativo" class="item-nav">
+                        <Icon name="lucide:clipboard-check" class="w-[14px] h-[14px] flex-shrink-0" />
+                        Pedidos
+                    </NuxtLink>
+
                     <NuxtLink to="/produtos" active-class="ativo" class="item-nav">
                         <Icon name="lucide:package" class="w-[14px] h-[14px] flex-shrink-0" />
                         Produtos
@@ -33,9 +38,9 @@ const titulo = computed(() => route.meta.titulo as string);
                         Fornecedores
                     </NuxtLink>
 
-                    <NuxtLink to="/pedidos" active-class="ativo" class="item-nav">
-                        <Icon name="lucide:clipboard-check" class="w-[14px] h-[14px] flex-shrink-0" />
-                        Pedidos
+                    <NuxtLink to="/movimentacoes" active-class="ativo" class="item-nav">
+                        <Icon name="lucide:arrow-left-right" class="w-[14px] h-[14px] flex-shrink-0" />
+                        Movimentações
                     </NuxtLink>
                 </div>
 
@@ -93,7 +98,7 @@ const titulo = computed(() => route.meta.titulo as string);
 }
 
 :deep(.ativo) {
-    @apply bg-blue-bg text-blue font-medium border-l-blue;
+    @apply bg-surface2 text-tx font-medium border-l-tx;
 }
 
 .usuario {
@@ -101,7 +106,7 @@ const titulo = computed(() => route.meta.titulo as string);
 }
 
 .avatar {
-    @apply w-[26px] h-[26px] bg-blue-dim text-blue flex items-center justify-center text-[9.5px] font-bold flex-shrink-0;
+    @apply w-[26px] h-[26px] bg-surface2 text-tx flex items-center justify-center text-[9.5px] font-bold flex-shrink-0;
 }
 
 .usuario-nome {

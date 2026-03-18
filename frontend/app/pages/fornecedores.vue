@@ -1,22 +1,53 @@
 <script setup lang="ts">
+import type { Fornecedor } from "~/types";
 definePageMeta({ titulo: "Fornecedores" });
 
-interface Fornecedor {
-    id: number;
-    razaoSocial: string;
-    nomeFantasia: string;
-    cnpj: string;
-    contato: string;
-    prazoMedio: string;
-    status: "ok" | "inativo";
-}
-
 const fornecedores: Fornecedor[] = [
-    { id: 1, razaoSocial: "Fornecedor A Ltda.", nomeFantasia: "Fornecedor A", cnpj: "00.000.001/0001-00", contato: "contato@fornecedora.com", prazoMedio: "7 dias", status: "ok" },
-    { id: 2, razaoSocial: "Fornecedor B S.A.", nomeFantasia: "Fornecedor B", cnpj: "00.000.002/0001-00", contato: "contato@fornecedorb.com", prazoMedio: "12 dias", status: "ok" },
-    { id: 3, razaoSocial: "Fornecedor C ME", nomeFantasia: "Fornecedor C", cnpj: "00.000.003/0001-00", contato: "contato@fornecedorc.com", prazoMedio: "21 dias", status: "inativo" },
-    { id: 4, razaoSocial: "Fornecedor D Distribuidora", nomeFantasia: "Fornecedor D", cnpj: "00.000.004/0001-00", contato: "contato@fornecedord.com", prazoMedio: "5 dias", status: "ok" },
-    { id: 5, razaoSocial: "Fornecedor E Ltda.", nomeFantasia: "Fornecedor E", cnpj: "00.000.005/0001-00", contato: "contato@fornecedore.com", prazoMedio: "10 dias", status: "ok" },
+    {
+        id: 1,
+        razaoSocial: "Fornecedor A Ltda.",
+        nomeFantasia: "Fornecedor A",
+        cnpj: "00.000.001/0001-00",
+        contato: "contato@fornecedora.com",
+        prazoMedio: "7 dias",
+        status: "ok",
+    },
+    {
+        id: 2,
+        razaoSocial: "Fornecedor B S.A.",
+        nomeFantasia: "Fornecedor B",
+        cnpj: "00.000.002/0001-00",
+        contato: "contato@fornecedorb.com",
+        prazoMedio: "12 dias",
+        status: "ok",
+    },
+    {
+        id: 3,
+        razaoSocial: "Fornecedor C ME",
+        nomeFantasia: "Fornecedor C",
+        cnpj: "00.000.003/0001-00",
+        contato: "contato@fornecedorc.com",
+        prazoMedio: "21 dias",
+        status: "inativo",
+    },
+    {
+        id: 4,
+        razaoSocial: "Fornecedor D Distribuidora",
+        nomeFantasia: "Fornecedor D",
+        cnpj: "00.000.004/0001-00",
+        contato: "contato@fornecedord.com",
+        prazoMedio: "5 dias",
+        status: "ok",
+    },
+    {
+        id: 5,
+        razaoSocial: "Fornecedor E Ltda.",
+        nomeFantasia: "Fornecedor E",
+        cnpj: "00.000.005/0001-00",
+        contato: "contato@fornecedore.com",
+        prazoMedio: "10 dias",
+        status: "ok",
+    },
 ];
 </script>
 
@@ -52,9 +83,9 @@ const fornecedores: Fornecedor[] = [
                 <tr v-for="f in fornecedores" :key="f.id" class="linha">
                     <td class="col-td font-medium">{{ f.razaoSocial }}</td>
                     <td class="col-td">{{ f.nomeFantasia }}</td>
-                    <td class="col-td col-mono">{{ f.cnpj }}</td>
+                    <td class="col-td text-tx-mid">{{ f.cnpj }}</td>
                     <td class="col-td text-tx-mid">{{ f.contato }}</td>
-                    <td class="col-td col-mono">{{ f.prazoMedio }}</td>
+                    <td class="col-td">{{ f.prazoMedio }}</td>
                     <td class="col-td">
                         <Etiqueta :status="f.status" :rotulo="f.status === 'ok' ? 'Ativo' : 'Inativo'" />
                     </td>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { StatusEstoque } from "~/types";
+
 const props = defineProps<{
-    status: "ok" | "alerta" | "critico" | "info" | "inativo";
+    status: StatusEstoque;
     rotulo?: string;
 }>();
 

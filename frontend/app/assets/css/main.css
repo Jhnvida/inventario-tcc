@@ -72,11 +72,11 @@ body {
 }
 
 .botao-primario {
-    @apply bg-blue text-white border-blue;
+    @apply bg-tx text-white border-tx;
 }
 
 .botao-primario:hover {
-    background: #1835a0;
+    background: #333333;
 }
 
 .botao-secundario {
@@ -162,4 +162,9 @@ body {
 
 .pag-info {
     @apply text-[11.5px] text-tx-soft;
+}
+
+.filtro-sel {
+    @apply bg-bg border border-line px-[9px] py-[5px] text-[13px] text-tx-mid outline-none cursor-pointer;
+    font-family: inherit;
 }

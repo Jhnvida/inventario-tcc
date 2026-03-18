@@ -3,7 +3,6 @@ defineProps<{
     rotulo: string;
     valor: string;
     icone: string;
-    corValor?: string;
 }>();
 </script>
 
@@ -14,7 +13,7 @@ defineProps<{
             <Icon :name="icone" class="stat-icone" />
         </div>
 
-        <div class="stat-valor" :class="corValor">{{ valor }}</div>
+        <div class="stat-valor">{{ valor }}</div>
     </div>
 </template>
 
@@ -24,7 +23,7 @@ defineProps<{
 }
 
 .stat-valor {
-    @apply text-[25px] font-semibold font-mono leading-none tracking-tight;
+    @apply text-[25px] font-semibold leading-none tracking-tight;
 }
 
 .stat-icone {

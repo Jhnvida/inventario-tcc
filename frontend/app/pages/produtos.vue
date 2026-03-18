@@ -1,18 +1,97 @@
 <script setup lang="ts">
+import type { Produto } from "~/types";
 definePageMeta({ titulo: "Produtos" });
 
-const baseProdutos = [
-    { id: 1, nome: "Produto A", sku: "PRD-001", categoria: "Categoria 1", local: "Local A", estoque: 42, minimo: 10, preco: "R$100,00" },
-    { id: 2, nome: "Produto B", sku: "PRD-002", categoria: "Categoria 2", local: "Local B", estoque: 4, minimo: 20, preco: "R$200,00" },
-    { id: 3, nome: "Produto C", sku: "PRD-003", categoria: "Categoria 1", local: "Local C", estoque: 7, minimo: 15, preco: "R$300,00" },
-    { id: 4, nome: "Produto D", sku: "PRD-004", categoria: "Categoria 1", local: "Local A", estoque: 2, minimo: 10, preco: "R$400,00" },
-    { id: 5, nome: "Produto E", sku: "PRD-005", categoria: "Categoria 3", local: "Local B", estoque: 1, minimo: 12, preco: "R$500,00" },
-    { id: 6, nome: "Produto F", sku: "PRD-006", categoria: "Categoria 1", local: "Local C", estoque: 31, minimo: 8, preco: "R$600,00" },
-    { id: 7, nome: "Produto G", sku: "PRD-007", categoria: "Categoria 2", local: "Local B", estoque: 18, minimo: 5, preco: "R$700,00" },
-    { id: 8, nome: "Produto H", sku: "PRD-008", categoria: "Categoria 4", local: "Local A", estoque: 55, minimo: 10, preco: "R$800,00" },
+const produtos: Produto[] = [
+    {
+        id: 1,
+        nome: "Produto A",
+        sku: "PRD-001",
+        categoria: "Categoria 1",
+        local: "Local A",
+        estoque: 42,
+        minimo: 10,
+        preco: "R$100,00",
+        status: statusEstoque(42, 10),
+    },
+    {
+        id: 2,
+        nome: "Produto B",
+        sku: "PRD-002",
+        categoria: "Categoria 2",
+        local: "Local B",
+        estoque: 4,
+        minimo: 20,
+        preco: "R$200,00",
+        status: statusEstoque(4, 20),
+    },
+    {
+        id: 3,
+        nome: "Produto C",
+        sku: "PRD-003",
+        categoria: "Categoria 1",
+        local: "Local C",
+        estoque: 7,
+        minimo: 15,
+        preco: "R$300,00",
+        status: statusEstoque(7, 15),
+    },
+    {
+        id: 4,
+        nome: "Produto D",
+        sku: "PRD-004",
+        categoria: "Categoria 1",
+        local: "Local A",
+        estoque: 2,
+        minimo: 10,
+        preco: "R$400,00",
+        status: statusEstoque(2, 10),
+    },
+    {
+        id: 5,
+        nome: "Produto E",
+        sku: "PRD-005",
+        categoria: "Categoria 3",
+        local: "Local B",
+        estoque: 1,
+        minimo: 12,
+        preco: "R$500,00",
+        status: statusEstoque(1, 12),
+    },
+    {
+        id: 6,
+        nome: "Produto F",
+        sku: "PRD-006",
+        categoria: "Categoria 1",
+        local: "Local C",
+        estoque: 31,
+        minimo: 8,
+        preco: "R$600,00",
+        status: statusEstoque(31, 8),
+    },
+    {
+        id: 7,
+        nome: "Produto G",
+        sku: "PRD-007",
+        categoria: "Categoria 2",
+        local: "Local B",
+        estoque: 18,
+        minimo: 5,
+        preco: "R$700,00",
+        status: statusEstoque(18, 5),
+    },
+    {
+        id: 8,
+        nome: "Produto H",
+        sku: "PRD-008",
+        categoria: "Categoria 4",
+        local: "Local A",
+        estoque: 55,
+        minimo: 10,
+        preco: "R$800,00",
+        status: statusEstoque(55, 10),
+    },
 ];
-
-const produtos = baseProdutos.map((p) => ({ ...p, status: statusEstoque(p.estoque, p.minimo) }));
 
 const categorias = ["Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4"];
 const locais = ["Local A", "Local B", "Local C"];
@@ -61,14 +140,12 @@ const locais = ["Local A", "Local B", "Local C"];
             <tbody>
                 <tr v-for="p in produtos" :key="p.id" class="linha">
                     <td class="col-td font-medium">{{ p.nome }}</td>
-                    <td class="col-td col-mono">{{ p.sku }}</td>
+                    <td class="col-td text-tx-mid">{{ p.sku }}</td>
                     <td class="col-td">{{ p.categoria }}</td>
                     <td class="col-td text-tx-mid">{{ p.local }}</td>
-                    <td class="col-td">
-                        <span :class="{ 'estoque-baixo': p.status !== 'ok' }">{{ p.estoque }}</span>
-                    </td>
+                    <td class="col-td">{{ p.estoque }}</td>
                     <td class="col-td text-tx-mid">{{ p.minimo }}</td>
-                    <td class="col-td col-mono">{{ p.preco }}</td>
+                    <td class="col-td">{{ p.preco }}</td>
                     <td class="col-td"><Etiqueta :status="p.status" /></td>
                 </tr>
             </tbody>
@@ -79,14 +156,3 @@ const locais = ["Local A", "Local B", "Local C"];
         </div>
     </div>
 </template>
-
-<style scoped>
-.filtro-sel {
-    @apply bg-bg border border-line px-[9px] py-[5px] text-[13px] text-tx-mid outline-none cursor-pointer;
-    font-family: inherit;
-}
-
-.estoque-baixo {
-    @apply text-amber font-medium;
-}
-</style>

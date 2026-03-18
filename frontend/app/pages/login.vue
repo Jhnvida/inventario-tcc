@@ -1,15 +1,5 @@
 <script setup lang="ts">
 definePageMeta({ layout: "auth" });
-
-const baseItens = [
-    { nome: "Produto E", estoque: 1, minimo: 12 },
-    { nome: "Produto D", estoque: 2, minimo: 10 },
-    { nome: "Produto C", estoque: 7, minimo: 15 },
-    { nome: "Produto B", estoque: 4, minimo: 20 },
-    { nome: "Produto F", estoque: 3, minimo: 8 },
-];
-
-const itens = baseItens.map((i) => ({ ...i, status: statusEstoque(i.estoque, i.minimo) }));
 </script>
 
 <template>
@@ -67,20 +57,6 @@ const itens = baseItens.map((i) => ({ ...i, status: statusEstoque(i.estoque, i.m
                     <div class="stat-card">
                         <div class="stat-rotulo">Pedidos</div>
                         <div class="stat-valor">8</div>
-                    </div>
-                </div>
-
-                <div class="preview-estoque">
-                    <div class="preview-cabecalho">
-                        <span class="preview-titulo">Estoque Crítico</span>
-                        <span class="preview-badge">5 itens</span>
-                    </div>
-
-                    <div v-for="item in itens" :key="item.nome" class="preview-linha">
-                        <div class="ponto" :class="`ponto-${item.status}`" />
-                        <div class="item-nome">{{ item.nome }}</div>
-                        <div class="item-qtd" :class="`qtd-${item.status}`">{{ item.estoque }} un</div>
-                        <div class="item-min">mín {{ item.minimo }}</div>
                     </div>
                 </div>
             </div>
@@ -270,72 +246,5 @@ const itens = baseItens.map((i) => ({ ...i, status: statusEstoque(i.estoque, i.m
 
 .stat-alerta .stat-valor {
     color: #92400e;
-}
-
-.preview-estoque {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    width: 100%;
-    max-width: 420px;
-    overflow: hidden;
-}
-
-.preview-cabecalho {
-    padding: 10px 14px;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.preview-titulo {
-    font-size: 11.5px;
-    font-weight: 600;
-}
-
-.preview-badge {
-    font-size: 10px;
-    font-weight: 600;
-    background: #fef2f2;
-    color: #991b1b;
-    padding: 2px 7px;
-}
-
-.preview-linha {
-    display: flex;
-    align-items: center;
-    padding: 8px 14px;
-    gap: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 12.5px;
-}
-
-.preview-linha:last-child {
-    border-bottom: none;
-}
-
-.item-nome {
-    font-weight: 500;
-    flex: 1;
-}
-
-.item-qtd {
-    font-family: ui-monospace, monospace;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.qtd-critico {
-    color: #991b1b;
-}
-
-.qtd-alerta {
-    color: #92400e;
-}
-
-.item-min {
-    font-family: ui-monospace, monospace;
-    font-size: 11px;
-    color: #9a9a9a;
 }
 </style>

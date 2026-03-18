@@ -71,7 +71,7 @@ const titulo = computed(() => route.meta.titulo as string);
                 </button>
             </header>
 
-            <main class="flex-1 h-screen overflow-y-auto p-10">
+            <main class="flex-1 h-screen overflow-y-auto p-8">
                 <slot />
             </main>
         </div>

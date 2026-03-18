@@ -1,13 +1,15 @@
 <script setup lang="ts">
 definePageMeta({ layout: "auth" });
 
-const itensAlerta = [
-    { nome: "Headset USB HX100", estoque: 1, minimo: 12 },
-    { nome: "Mouse Sem Fio M320", estoque: 2, minimo: 10 },
-    { nome: "Teclado Mecânico TK200", estoque: 7, minimo: 15 },
-    { nome: "Cabo HDMI 2.0 2m", estoque: 4, minimo: 20 },
-    { nome: 'Monitor 24" Full HD', estoque: 3, minimo: 8 },
+const baseItens = [
+    { nome: "Produto E", estoque: 1, minimo: 12 },
+    { nome: "Produto D", estoque: 2, minimo: 10 },
+    { nome: "Produto C", estoque: 7, minimo: 15 },
+    { nome: "Produto B", estoque: 4, minimo: 20 },
+    { nome: "Produto F", estoque: 3, minimo: 8 },
 ];
+
+const itens = baseItens.map((i) => ({ ...i, status: statusEstoque(i.estoque, i.minimo) }));
 </script>
 
 <template>
@@ -50,25 +52,21 @@ const itensAlerta = [
                     <div class="stat-card">
                         <div class="stat-rotulo">Valor Total</div>
                         <div class="stat-valor">R$487k</div>
-                        <div class="stat-sub">↑ 4,2% este mês</div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-rotulo">Produtos</div>
                         <div class="stat-valor">1.248</div>
-                        <div class="stat-sub">Em 14 categorias</div>
                     </div>
 
                     <div class="stat-card stat-alerta">
                         <div class="stat-rotulo">Em Alerta</div>
                         <div class="stat-valor">23</div>
-                        <div class="stat-sub">Abaixo do mínimo</div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-rotulo">Pedidos</div>
                         <div class="stat-valor">8</div>
-                        <div class="stat-sub">3 entregando hoje</div>
                     </div>
                 </div>
 
@@ -78,10 +76,10 @@ const itensAlerta = [
                         <span class="preview-badge">5 itens</span>
                     </div>
 
-                    <div v-for="item in itensAlerta" :key="item.nome" class="preview-linha">
-                        <div class="ponto" :class="`ponto-${statusEstoque(item.estoque, item.minimo)}`" />
+                    <div v-for="item in itens" :key="item.nome" class="preview-linha">
+                        <div class="ponto" :class="`ponto-${item.status}`" />
                         <div class="item-nome">{{ item.nome }}</div>
-                        <div class="item-qtd" :class="`qtd-${statusEstoque(item.estoque, item.minimo)}`">{{ item.estoque }} un</div>
+                        <div class="item-qtd" :class="`qtd-${item.status}`">{{ item.estoque }} un</div>
                         <div class="item-min">mín {{ item.minimo }}</div>
                     </div>
                 </div>
@@ -268,12 +266,6 @@ const itensAlerta = [
     font-weight: 600;
     letter-spacing: -0.8px;
     font-family: ui-monospace, monospace;
-}
-
-.stat-sub {
-    font-size: 11px;
-    color: #9a9a9a;
-    margin-top: 3px;
 }
 
 .stat-alerta .stat-valor {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
     status: "ok" | "alerta" | "critico" | "info" | "inativo";
+    rotulo?: string;
 }>();
 
 const rotulos = {
@@ -10,11 +11,13 @@ const rotulos = {
     info: "Info",
     inativo: "Inativo",
 };
+
+const texto = computed(() => props.rotulo ?? rotulos[props.status]);
 </script>
 
 <template>
     <span class="etiqueta" :class="`etiqueta-${status}`">
         <span class="ponto" :class="`ponto-${status}`"></span>
-        {{ rotulos[status] }}
+        {{ texto }}
     </span>
 </template>

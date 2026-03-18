@@ -1,12 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ titulo: "Dashboard" });
 
-const itensAlertas = [
-    { nome: "Cabo HDMI 2.0 2m", sku: "CBL-HDMI-002", estoque: 4, minimo: 20 },
-    { nome: "Teclado Mecânico TK200", sku: "TEC-MEC-200", estoque: 7, minimo: 15 },
-    { nome: "Mouse Sem Fio M320", sku: "MOU-WLS-320", estoque: 2, minimo: 10 },
-    { nome: 'Monitor 24" Full HD', sku: "MON-FHD-240", estoque: 3, minimo: 8 },
-    { nome: "Headset USB HX100", sku: "HDS-USB-100", estoque: 1, minimo: 12 },
+const itens = [
+    { nome: "Produto B", sku: "PRD-002", estoque: 4, minimo: 20 },
+    { nome: "Produto C", sku: "PRD-003", estoque: 7, minimo: 15 },
+    { nome: "Produto D", sku: "PRD-004", estoque: 2, minimo: 10 },
+    { nome: "Produto E", sku: "PRD-005", estoque: 3, minimo: 8 },
+    { nome: "Produto F", sku: "PRD-006", estoque: 1, minimo: 12 },
 ];
 </script>
 
@@ -38,7 +38,7 @@ const itensAlertas = [
 
                     <tbody>
                         <tr
-                            v-for="item in itensAlertas"
+                            v-for="item in itens"
                             :key="item.sku"
                             class="border-b border-line last:border-0 hover:bg-surface2 transition-colors duration-75"
                         >
@@ -54,13 +54,3 @@ const itensAlertas = [
         </div>
     </div>
 </template>
-
-<style scoped>
-.col-th {
-    @apply px-[13px] py-2 text-[10.5px] font-semibold text-tx-soft uppercase tracking-[0.06em] text-left border-b border-line bg-surface2;
-}
-
-.col-td {
-    @apply px-[13px] py-[9px] text-[13px];
-}
-</style>

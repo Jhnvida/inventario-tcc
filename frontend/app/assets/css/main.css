@@ -106,3 +106,60 @@ body {
 .subtitulo-secao {
     @apply text-[11.5px] text-tx-soft;
 }
+
+.tbl-wrap {
+    @apply bg-surface border border-line;
+}
+
+.toolbar {
+    @apply flex items-center gap-2 px-[14px] py-[10px] border-b border-line;
+}
+
+.busca {
+    @apply flex items-center gap-[7px] border border-line bg-bg px-[11px] py-[5px] w-[185px];
+}
+
+.busca input {
+    @apply border-none bg-transparent outline-none text-[13px] text-tx w-full;
+    font-family: inherit;
+}
+
+.busca input::placeholder {
+    @apply text-tx-soft;
+}
+
+.col-th {
+    @apply px-[13px] py-2 text-[10.5px] font-semibold text-tx-soft uppercase tracking-[0.06em] text-left border-b border-line bg-surface2;
+}
+
+.col-td {
+    @apply px-[13px] py-[9px] text-[13px] align-middle;
+}
+
+.col-mono {
+    @apply font-mono text-[11.5px] text-tx-mid;
+}
+
+.linha {
+    @apply border-b border-line last:border-0 transition-colors duration-75;
+}
+
+.linha:hover {
+    background: #fafafa;
+}
+
+.linha:nth-child(even) {
+    background: #fbfbfb;
+}
+
+.linha:nth-child(even):hover {
+    background: #f5f5f5;
+}
+
+.paginacao {
+    @apply flex items-center px-[13px] py-[8px] border-t border-line;
+}
+
+.pag-info {
+    @apply text-[11.5px] text-tx-soft;
+}

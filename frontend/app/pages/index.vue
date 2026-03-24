@@ -2,7 +2,7 @@
 import type { Produto, Movimentacao } from "~/types";
 definePageMeta({ titulo: "Dashboard" });
 
-const itens: Produto[] = [
+const itens: Pick<Produto, "nome" | "sku" | "estoque" | "minimo">[] = [
     { nome: "Produto B", sku: "PRD-002", estoque: 4, minimo: 20 },
     { nome: "Produto C", sku: "PRD-003", estoque: 7, minimo: 15 },
     { nome: "Produto D", sku: "PRD-004", estoque: 2, minimo: 10 },
@@ -11,12 +11,12 @@ const itens: Produto[] = [
 ];
 
 const movimentacoes: Movimentacao[] = [
-    { tipo: "entrada", produto: "Cabo HDMI 2.0", sku: "PRD-011", quantidade: 50, responsavel: "Carlos M.", data: "hoje, 09:14" },
-    { tipo: "saida", produto: "Teclado TK200", sku: "PRD-003", quantidade: 12, responsavel: "Ana S.", data: "hoje, 08:30" },
-    { tipo: "saida", produto: 'Monitor 24" Full HD', sku: "PRD-007", quantidade: 3, responsavel: "Carlos M.", data: "hoje, 07:55" },
-    { tipo: "entrada", produto: "Headset HX100", sku: "PRD-009", quantidade: 20, responsavel: "Rafael T.", data: "ontem, 17:40" },
-    { tipo: "saida", produto: "Mouse M320", sku: "PRD-005", quantidade: 8, responsavel: "Ana S.", data: "ontem, 15:22" },
-    { tipo: "entrada", produto: "Webcam WC100 HD", sku: "PRD-014", quantidade: 15, responsavel: "Rafael T.", data: "ontem, 11:05" },
+    { id: 1, tipo: "entrada", produto: "Cabo HDMI 2.0", sku: "PRD-011", quantidade: 50, responsavel: "Carlos M.", data: "23/03/2026 09:14" },
+    { id: 2, tipo: "saida", produto: "Teclado TK200", sku: "PRD-003", quantidade: 12, responsavel: "Ana S.", data: "23/03/2026 08:30" },
+    { id: 3, tipo: "saida", produto: 'Monitor 24" Full HD', sku: "PRD-007", quantidade: 3, responsavel: "Carlos M.", data: "23/03/2026 07:55" },
+    { id: 4, tipo: "entrada", produto: "Headset HX100", sku: "PRD-009", quantidade: 20, responsavel: "Rafael T.", data: "22/03/2026 17:40" },
+    { id: 5, tipo: "saida", produto: "Mouse M320", sku: "PRD-005", quantidade: 8, responsavel: "Ana S.", data: "22/03/2026 15:22" },
+    { id: 6, tipo: "entrada", produto: "Webcam WC100 HD", sku: "PRD-014", quantidade: 15, responsavel: "Rafael T.", data: "22/03/2026 11:05" },
 ];
 </script>
 
@@ -73,12 +73,12 @@ const movimentacoes: Movimentacao[] = [
                             <th class="col-th">SKU</th>
                             <th class="col-th">Qtd</th>
                             <th class="col-th">Responsável</th>
-                            <th class="col-th">Data</th>
+                            <th class="col-th">Criado em</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <tr v-for="(m, i) in movimentacoes" :key="i" class="linha">
+                        <tr v-for="m in movimentacoes" :key="m.id" class="linha">
                             <td class="col-td">
                                 <Etiqueta
                                     :status="m.tipo === 'entrada' ? 'ok' : 'info'"
@@ -87,7 +87,7 @@ const movimentacoes: Movimentacao[] = [
                             </td>
                             <td class="col-td font-medium">{{ m.produto }}</td>
                             <td class="col-td text-tx-mid">{{ m.sku }}</td>
-                            <td class="col-td font-medium">{{ m.tipo === "entrada" ? "+" : "-" }}{{ m.quantidade }}</td>
+                            <td class="col-td font-medium">{{ m.quantidade }}</td>
                             <td class="col-td text-tx-mid">{{ m.responsavel }}</td>
                             <td class="col-td text-tx-soft">{{ m.data }}</td>
                         </tr>

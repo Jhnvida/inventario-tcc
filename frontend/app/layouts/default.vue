@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const titulo = computed(() => route.meta.titulo as string);
+const { abrirPainel } = usePainel();
 </script>
 
 <template>
@@ -47,7 +48,7 @@ const titulo = computed(() => route.meta.titulo as string);
                 <div>
                     <div class="nav-rotulo">Ferramentas</div>
 
-                    <div class="item-nav cursor-pointer">
+                    <div class="item-nav cursor-pointer" @click="abrirPainel">
                         <Icon name="lucide:sparkles" class="w-[14px] h-[14px] flex-shrink-0" />
                         Agente IA
                     </div>
@@ -58,10 +59,14 @@ const titulo = computed(() => route.meta.titulo as string);
                 <div class="usuario">
                     <div class="avatar">A</div>
 
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <div class="usuario-nome">Admin</div>
                         <div class="usuario-cargo">Administrador</div>
                     </div>
+
+                    <NuxtLink to="/login" class="botao-sair" title="Sair">
+                        <Icon name="lucide:log-out" class="w-[13px] h-[13px]" />
+                    </NuxtLink>
                 </div>
             </div>
         </aside>
@@ -70,7 +75,7 @@ const titulo = computed(() => route.meta.titulo as string);
             <header class="h-[52px] bg-surface border-b border-line flex items-center px-[30px] gap-2.5 flex-shrink-0">
                 <span class="text-[14.5px] font-semibold flex-1 tracking-[-0.2px]">{{ titulo }}</span>
 
-                <button class="botao botao-ghost text-[13px]">
+                <button class="botao botao-ghost text-[13px]" @click="abrirPainel">
                     <Icon name="lucide:sparkles" class="w-[13px] h-[13px]" />
                     Agente IA
                 </button>
@@ -81,6 +86,8 @@ const titulo = computed(() => route.meta.titulo as string);
             </main>
         </div>
     </div>
+
+    <Painel />
 </template>
 
 <style scoped>
@@ -115,5 +122,13 @@ const titulo = computed(() => route.meta.titulo as string);
 
 .usuario-cargo {
     @apply text-[11px] text-tx-soft;
+}
+
+.botao-sair {
+    @apply flex items-center justify-center w-[26px] h-[26px] text-tx-soft flex-shrink-0 transition-colors duration-75;
+}
+
+.botao-sair:hover {
+    @apply text-tx;
 }
 </style>

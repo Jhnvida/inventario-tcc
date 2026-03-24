@@ -32,6 +32,7 @@ export interface Pedido {
   itens: number;
   valor: string;
   status: StatusPedido;
+  previsao: string;
   data: string;
 }
 
@@ -42,6 +43,6 @@ export interface Movimentacao {
   sku: string;
   quantidade: number;
   responsavel: string;
-  observacao: string;
+  observacao?: string;
   data: string;
 }

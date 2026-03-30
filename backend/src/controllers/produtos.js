@@ -3,7 +3,12 @@ const db = require("../config/db");
 async function listar(req, res) {
   try {
     const resultado = await db.query(
-      `SELECT p.*, c.nome categoria_nome
+      `SELECT
+         p.id, p.nome, p.sku,
+         c.nome AS categoria,
+         p.localizacao AS local,
+         p.estoque, p.minimo, p.preco,
+         p.criado_em, p.atualizado_em
        FROM produtos p
        LEFT JOIN categorias c ON c.id = p.categoria_id
        ORDER BY p.nome ASC`,
@@ -18,7 +23,12 @@ async function listar(req, res) {
 async function detalhar(req, res) {
   try {
     const resultado = await db.query(
-      `SELECT p.*, c.nome categoria_nome
+      `SELECT
+         p.id, p.nome, p.sku,
+         c.nome AS categoria,
+         p.localizacao AS local,
+         p.estoque, p.minimo, p.preco,
+         p.criado_em, p.atualizado_em
        FROM produtos p
        LEFT JOIN categorias c ON c.id = p.categoria_id
        WHERE p.id = $1`,

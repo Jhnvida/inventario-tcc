@@ -4,10 +4,14 @@ async function listar(req, res) {
   try {
     const resultado = await db.query(
       `SELECT
-        p.*,
-        f.razao_social fornecedor_nome,
-        f.nome_fantasia fornecedor_fantasia,
-        COUNT(ip.id) total_itens
+         p.id,
+         p.numero,
+         COALESCE(f.nome_fantasia, f.razao_social) AS fornecedor,
+         p.status,
+         p.previsao,
+         p.criado_em AS data,
+         COUNT(ip.id) AS itens,
+         COALESCE(SUM(ip.quantidade * ip.preco_unitario), 0) AS valor
        FROM pedidos p
        LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
        LEFT JOIN itens_pedido ip ON ip.pedido_id = p.id
@@ -25,9 +29,14 @@ async function detalhar(req, res) {
   try {
     const resultadoPedido = await db.query(
       `SELECT
-         p.*,
-         f.razao_social fornecedor_nome,
-         f.nome_fantasia fornecedor_fantasia
+         p.id,
+         p.numero,
+         COALESCE(f.nome_fantasia, f.razao_social) AS fornecedor,
+         p.status,
+         p.previsao,
+         p.criado_em AS data,
+         p.observacoes,
+         p.recebido_em
        FROM pedidos p
        LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
        WHERE p.id = $1`,
@@ -38,9 +47,11 @@ async function detalhar(req, res) {
 
     const resultadoItens = await db.query(
       `SELECT
-         ip.*,
-         pr.nome produto_nome,
-         pr.sku produto_sku
+         ip.id,
+         ip.quantidade,
+         ip.preco_unitario,
+         pr.nome AS produto,
+         pr.sku
        FROM itens_pedido ip
        LEFT JOIN produtos pr ON pr.id = ip.produto_id
        WHERE ip.pedido_id = $1`,

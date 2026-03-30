@@ -11,7 +11,7 @@ const produtos: Produto[] = [
         local: "Local A",
         estoque: 42,
         minimo: 10,
-        preco: "R$100,00",
+        preco: 100,
         status: statusEstoque(42, 10),
     },
     {
@@ -22,7 +22,7 @@ const produtos: Produto[] = [
         local: "Local B",
         estoque: 4,
         minimo: 20,
-        preco: "R$200,00",
+        preco: 200,
         status: statusEstoque(4, 20),
     },
     {
@@ -33,7 +33,7 @@ const produtos: Produto[] = [
         local: "Local C",
         estoque: 7,
         minimo: 15,
-        preco: "R$300,00",
+        preco: 300,
         status: statusEstoque(7, 15),
     },
     {
@@ -44,7 +44,7 @@ const produtos: Produto[] = [
         local: "Local A",
         estoque: 2,
         minimo: 10,
-        preco: "R$400,00",
+        preco: 400,
         status: statusEstoque(2, 10),
     },
     {
@@ -55,7 +55,7 @@ const produtos: Produto[] = [
         local: "Local B",
         estoque: 3,
         minimo: 8,
-        preco: "R$500,00",
+        preco: 500,
         status: statusEstoque(3, 8),
     },
     {
@@ -66,7 +66,7 @@ const produtos: Produto[] = [
         local: "Local C",
         estoque: 1,
         minimo: 12,
-        preco: "R$600,00",
+        preco: 600,
         status: statusEstoque(1, 12),
     },
     {
@@ -77,7 +77,7 @@ const produtos: Produto[] = [
         local: "Local B",
         estoque: 18,
         minimo: 5,
-        preco: "R$700,00",
+        preco: 700,
         status: statusEstoque(18, 5),
     },
     {
@@ -88,7 +88,7 @@ const produtos: Produto[] = [
         local: "Local A",
         estoque: 55,
         minimo: 10,
-        preco: "R$800,00",
+        preco: 800,
         status: statusEstoque(55, 10),
     },
 ];
@@ -145,7 +145,7 @@ const locais = ["Local A", "Local B", "Local C"];
                     <td class="col-td text-tx-mid">{{ p.local }}</td>
                     <td class="col-td">{{ p.estoque }}</td>
                     <td class="col-td text-tx-mid">{{ p.minimo }}</td>
-                    <td class="col-td">{{ p.preco }}</td>
+                    <td class="col-td">{{ formatarMoeda(p.preco) }}</td>
                     <td class="col-td"><Etiqueta :status="p.status" /></td>
                 </tr>
             </tbody>

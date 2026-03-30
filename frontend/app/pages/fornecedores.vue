@@ -2,6 +2,8 @@
 import type { Fornecedor } from "~/types";
 definePageMeta({ titulo: "Fornecedores" });
 
+const formatarPrazo = (dias: number) => `${dias} ${dias === 1 ? "dia" : "dias"}`;
+
 const fornecedores: Fornecedor[] = [
     {
         id: 1,
@@ -9,7 +11,7 @@ const fornecedores: Fornecedor[] = [
         nomeFantasia: "Fornecedor A",
         cnpj: "00.000.001/0001-00",
         contato: "contato@fornecedora.com",
-        prazoMedio: "7 dias",
+        prazoMedio: 7,
         status: "ok",
     },
     {
@@ -18,7 +20,7 @@ const fornecedores: Fornecedor[] = [
         nomeFantasia: "Fornecedor B",
         cnpj: "00.000.002/0001-00",
         contato: "contato@fornecedorb.com",
-        prazoMedio: "12 dias",
+        prazoMedio: 12,
         status: "ok",
     },
     {
@@ -27,7 +29,7 @@ const fornecedores: Fornecedor[] = [
         nomeFantasia: "Fornecedor C",
         cnpj: "00.000.003/0001-00",
         contato: "contato@fornecedorc.com",
-        prazoMedio: "21 dias",
+        prazoMedio: 21,
         status: "inativo",
     },
     {
@@ -36,7 +38,7 @@ const fornecedores: Fornecedor[] = [
         nomeFantasia: "Fornecedor D",
         cnpj: "00.000.004/0001-00",
         contato: "contato@fornecedord.com",
-        prazoMedio: "5 dias",
+        prazoMedio: 5,
         status: "ok",
     },
     {
@@ -45,7 +47,7 @@ const fornecedores: Fornecedor[] = [
         nomeFantasia: "Fornecedor E",
         cnpj: "00.000.005/0001-00",
         contato: "contato@fornecedore.com",
-        prazoMedio: "10 dias",
+        prazoMedio: 10,
         status: "ok",
     },
 ];
@@ -85,7 +87,7 @@ const fornecedores: Fornecedor[] = [
                     <td class="col-td">{{ f.nomeFantasia }}</td>
                     <td class="col-td text-tx-mid">{{ f.cnpj }}</td>
                     <td class="col-td text-tx-mid">{{ f.contato }}</td>
-                    <td class="col-td">{{ f.prazoMedio }}</td>
+                    <td class="col-td">{{ formatarPrazo(f.prazoMedio) }}</td>
                     <td class="col-td">
                         <Etiqueta :status="f.status" :rotulo="f.status === 'ok' ? 'Ativo' : 'Inativo'" />
                     </td>

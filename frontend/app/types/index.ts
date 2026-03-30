@@ -1,6 +1,6 @@
 export type StatusEstoque = "ok" | "alerta" | "critico" | "info" | "inativo";
 export type StatusFornecedor = "ok" | "inativo";
-export type StatusPedido = "aberto" | "parcial" | "concluido" | "cancelado";
+export type StatusPedido = "rascunho" | "aberto" | "parcial" | "concluido" | "cancelado";
 export type TipoMovimentacao = "entrada" | "saida";
 
 export interface Produto {
@@ -11,7 +11,7 @@ export interface Produto {
   local: string;
   estoque: number;
   minimo: number;
-  preco: string;
+  preco: number;
   status: StatusEstoque;
 }
 
@@ -21,7 +21,7 @@ export interface Fornecedor {
   nomeFantasia: string;
   cnpj: string;
   contato: string;
-  prazoMedio: string;
+  prazoMedio: number;
   status: StatusFornecedor;
 }
 
@@ -30,7 +30,7 @@ export interface Pedido {
   numero: string;
   fornecedor: string;
   itens: number;
-  valor: string;
+  valor: number;
   status: StatusPedido;
   previsao: string;
   data: string;

@@ -11,7 +11,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 50,
         responsavel: "Carlos M.",
         observacao: "Reposição de estoque",
-        data: "23/03/2026 09:14",
+        data: "2026-03-23T09:14:00",
     },
     {
         id: 2,
@@ -21,7 +21,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 12,
         responsavel: "Ana S.",
         observacao: "Requisição depto. TI",
-        data: "23/03/2026 08:30",
+        data: "2026-03-23T08:30:00",
     },
     {
         id: 3,
@@ -31,7 +31,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 3,
         responsavel: "Carlos M.",
         observacao: "Requisição depto. RH",
-        data: "23/03/2026 07:55",
+        data: "2026-03-23T07:55:00",
     },
     {
         id: 4,
@@ -41,7 +41,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 20,
         responsavel: "Rafael T.",
         observacao: "Reposição de estoque",
-        data: "22/03/2026 17:40",
+        data: "2026-03-22T17:40:00",
     },
     {
         id: 5,
@@ -51,7 +51,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 8,
         responsavel: "Ana S.",
         observacao: "Substituição por defeito",
-        data: "22/03/2026 15:22",
+        data: "2026-03-22T15:22:00",
     },
     {
         id: 6,
@@ -61,7 +61,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 15,
         responsavel: "Rafael T.",
         observacao: "Compra inicial",
-        data: "22/03/2026 11:05",
+        data: "2026-03-22T11:05:00",
     },
     {
         id: 7,
@@ -71,7 +71,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 5,
         responsavel: "Carlos M.",
         observacao: "Requisição sala de reunião",
-        data: "21/03/2026 14:20",
+        data: "2026-03-21T14:20:00",
     },
     {
         id: 8,
@@ -81,7 +81,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 30,
         responsavel: "Ana S.",
         observacao: "Reposição de estoque",
-        data: "20/03/2026 10:00",
+        data: "2026-03-20T10:00:00",
     },
     {
         id: 9,
@@ -91,7 +91,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 4,
         responsavel: "Rafael T.",
         observacao: "Requisição depto. suporte",
-        data: "19/03/2026 16:45",
+        data: "2026-03-19T16:45:00",
     },
     {
         id: 10,
@@ -101,7 +101,7 @@ const movimentacoes: Movimentacao[] = [
         quantidade: 25,
         responsavel: "Carlos M.",
         observacao: "Reposição de estoque",
-        data: "18/03/2026 09:30",
+        data: "2026-03-18T09:30:00",
     },
 ];
 </script>
@@ -149,7 +149,7 @@ const movimentacoes: Movimentacao[] = [
                     <td class="col-td text-tx-mid">{{ m.sku }}</td>
                     <td class="col-td font-medium">{{ m.quantidade }}</td>
                     <td class="col-td text-tx-mid">{{ m.responsavel }}</td>
-                    <td class="col-td text-tx-soft">{{ m.data }}</td>
+                    <td class="col-td text-tx-soft">{{ formatarDataHora(m.data) }}</td>
                 </tr>
             </tbody>
         </table>

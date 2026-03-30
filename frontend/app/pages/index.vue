@@ -11,12 +11,60 @@ const itens: Pick<Produto, "nome" | "sku" | "estoque" | "minimo">[] = [
 ];
 
 const movimentacoes: Movimentacao[] = [
-    { id: 1, tipo: "entrada", produto: "Cabo HDMI 2.0", sku: "PRD-011", quantidade: 50, responsavel: "Carlos M.", data: "23/03/2026 09:14" },
-    { id: 2, tipo: "saida", produto: "Teclado TK200", sku: "PRD-003", quantidade: 12, responsavel: "Ana S.", data: "23/03/2026 08:30" },
-    { id: 3, tipo: "saida", produto: 'Monitor 24" Full HD', sku: "PRD-007", quantidade: 3, responsavel: "Carlos M.", data: "23/03/2026 07:55" },
-    { id: 4, tipo: "entrada", produto: "Headset HX100", sku: "PRD-009", quantidade: 20, responsavel: "Rafael T.", data: "22/03/2026 17:40" },
-    { id: 5, tipo: "saida", produto: "Mouse M320", sku: "PRD-005", quantidade: 8, responsavel: "Ana S.", data: "22/03/2026 15:22" },
-    { id: 6, tipo: "entrada", produto: "Webcam WC100 HD", sku: "PRD-014", quantidade: 15, responsavel: "Rafael T.", data: "22/03/2026 11:05" },
+    {
+        id: 1,
+        tipo: "entrada",
+        produto: "Cabo HDMI 2.0",
+        sku: "PRD-011",
+        quantidade: 50,
+        responsavel: "Carlos M.",
+        data: "2026-03-23T09:14:00",
+    },
+    {
+        id: 2,
+        tipo: "saida",
+        produto: "Teclado TK200",
+        sku: "PRD-003",
+        quantidade: 12,
+        responsavel: "Ana S.",
+        data: "2026-03-23T08:30:00",
+    },
+    {
+        id: 3,
+        tipo: "saida",
+        produto: 'Monitor 24" Full HD',
+        sku: "PRD-007",
+        quantidade: 3,
+        responsavel: "Carlos M.",
+        data: "2026-03-23T07:55:00",
+    },
+    {
+        id: 4,
+        tipo: "entrada",
+        produto: "Headset HX100",
+        sku: "PRD-009",
+        quantidade: 20,
+        responsavel: "Rafael T.",
+        data: "2026-03-22T17:40:00",
+    },
+    {
+        id: 5,
+        tipo: "saida",
+        produto: "Mouse M320",
+        sku: "PRD-005",
+        quantidade: 8,
+        responsavel: "Ana S.",
+        data: "2026-03-22T15:22:00",
+    },
+    {
+        id: 6,
+        tipo: "entrada",
+        produto: "Webcam WC100 HD",
+        sku: "PRD-014",
+        quantidade: 15,
+        responsavel: "Rafael T.",
+        data: "2026-03-22T11:05:00",
+    },
 ];
 </script>
 
@@ -89,7 +137,7 @@ const movimentacoes: Movimentacao[] = [
                             <td class="col-td text-tx-mid">{{ m.sku }}</td>
                             <td class="col-td font-medium">{{ m.quantidade }}</td>
                             <td class="col-td text-tx-mid">{{ m.responsavel }}</td>
-                            <td class="col-td text-tx-soft">{{ m.data }}</td>
+                            <td class="col-td text-tx-soft">{{ formatarDataHora(m.data) }}</td>
                         </tr>
                     </tbody>
                 </table>

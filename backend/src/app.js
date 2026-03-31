@@ -9,6 +9,7 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/dashboard", require("./routes/dashboard"));
 app.use("/categorias", require("./routes/categorias"));
 app.use("/fornecedores", require("./routes/fornecedores"));
 app.use("/produtos", require("./routes/produtos"));

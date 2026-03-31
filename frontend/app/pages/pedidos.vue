@@ -63,7 +63,7 @@ const rotulos: Record<StatusPedido, string> = {
     cancelado: "Cancelado",
 };
 
-const statusEtiqueta: Record<StatusPedido, string> = {
+const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
     rascunho: "inativo",
     aberto: "info",
     parcial: "alerta",

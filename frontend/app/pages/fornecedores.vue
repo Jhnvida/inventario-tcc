@@ -2,8 +2,6 @@
 import type { Fornecedor } from "~/types";
 definePageMeta({ titulo: "Fornecedores" });
 
-const formatarPrazo = (dias: number) => `${dias} ${dias === 1 ? "dia" : "dias"}`;
-
 const fornecedores: Fornecedor[] = [
     {
         id: 1,

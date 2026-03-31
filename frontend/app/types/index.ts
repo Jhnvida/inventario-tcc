@@ -36,6 +36,15 @@ export interface Pedido {
   data: string;
 }
 
+export interface ResumoDashboard {
+  total_produtos: number;
+  valor_total: number;
+  em_alerta: number;
+  pedidos_abertos: number;
+  estoque_critico: Pick<Produto, "nome" | "sku" | "estoque" | "minimo">[];
+  movimentacoes_recentes: Pick<Movimentacao, "id" | "tipo" | "produto" | "sku" | "quantidade" | "responsavel" | "data">[];
+}
+
 export interface Movimentacao {
   id: number;
   tipo: TipoMovimentacao;

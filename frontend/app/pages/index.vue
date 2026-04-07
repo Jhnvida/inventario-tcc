@@ -2,7 +2,9 @@
 import type { ResumoDashboard } from "~/types";
 definePageMeta({ titulo: "Dashboard" });
 
-const { data, pending, error } = await useFetch<ResumoDashboard>("/api/dashboard");
+const { data, pending, error } = useFetch<ResumoDashboard>("/api/dashboard", {
+    lazy: true,
+});
 </script>
 
 <template>
@@ -12,7 +14,11 @@ const { data, pending, error } = await useFetch<ResumoDashboard>("/api/dashboard
 
         <template v-else-if="data">
             <div class="grid grid-cols-4 gap-px bg-line border border-line">
-                <Cartao rotulo="Valor Total" :valor="formatarMoeda(Number(data.valor_total))" icone="lucide:circle-dollar-sign" />
+                <Cartao
+                    rotulo="Valor Total"
+                    :valor="formatarMoeda(Number(data.valor_total))"
+                    icone="lucide:circle-dollar-sign"
+                />
                 <Cartao rotulo="Produtos" :valor="String(data.total_produtos)" icone="lucide:package" />
                 <Cartao rotulo="Em Alerta" :valor="String(data.em_alerta)" icone="lucide:triangle-alert" />
                 <Cartao rotulo="Pedidos Abertos" :valor="String(data.pedidos_abertos)" icone="lucide:clipboard-check" />
@@ -41,7 +47,9 @@ const { data, pending, error } = await useFetch<ResumoDashboard>("/api/dashboard
                                 <td class="col-td text-tx-mid">{{ i.sku }}</td>
                                 <td class="col-td font-medium">{{ i.estoque }}</td>
                                 <td class="col-td text-tx-mid">{{ i.minimo }}</td>
-                                <td class="col-td"><Etiqueta :status="statusEstoque(i.estoque, i.minimo)" /></td>
+                                <td class="col-td">
+                                    <Etiqueta :status="statusEstoque(i.estoque, i.minimo)" />
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -77,7 +85,9 @@ const { data, pending, error } = await useFetch<ResumoDashboard>("/api/dashboard
                                 <td class="col-td text-tx-mid">{{ m.sku }}</td>
                                 <td class="col-td font-medium">{{ m.quantidade }}</td>
                                 <td class="col-td text-tx-mid">{{ m.responsavel }}</td>
-                                <td class="col-td text-tx-soft">{{ formatarDataHora(m.data) }}</td>
+                                <td class="col-td text-tx-soft">
+                                    {{ formatarDataHora(m.data) }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

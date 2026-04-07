@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import type { ResumoDashboard } from "~/types";
 definePageMeta({ layout: "auth" });
+
+const { data } = useFetch<ResumoDashboard>("/api/dashboard");
 </script>
 
 <template>
@@ -11,7 +14,7 @@ definePageMeta({ layout: "auth" });
 
             <div class="area-formulario">
                 <h1 class="titulo-login">Bem-vindo de volta</h1>
-                <p class="subtitulo-login">Entre com sua conta para acessar o painel.</p>
+                <h2 class="subtitulo-login">Entre com sua conta para acessar o painel.</h2>
 
                 <form @submit.prevent>
                     <div class="campo">
@@ -38,25 +41,25 @@ definePageMeta({ layout: "auth" });
                     <strong>Precisão em cada operação.</strong>
                 </p>
 
-                <div class="grid-stats">
+                <div v-if="data" class="grid-stats">
                     <div class="stat-card">
                         <div class="stat-rotulo">Valor Total</div>
-                        <div class="stat-valor">R$487k</div>
+                        <div class="stat-valor">{{ formatarMoeda(Number(data.valor_total)) }}</div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-rotulo">Produtos</div>
-                        <div class="stat-valor">1.248</div>
+                        <div class="stat-valor">{{ data.total_produtos }}</div>
                     </div>
 
-                    <div class="stat-card stat-alerta">
+                    <div class="stat-card" :class="{ 'stat-alerta': data.em_alerta > 0 }">
                         <div class="stat-rotulo">Em Alerta</div>
-                        <div class="stat-valor">23</div>
+                        <div class="stat-valor">{{ data.em_alerta }}</div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-rotulo">Pedidos</div>
-                        <div class="stat-valor">8</div>
+                        <div class="stat-valor">{{ data.pedidos_abertos }}</div>
                     </div>
                 </div>
             </div>

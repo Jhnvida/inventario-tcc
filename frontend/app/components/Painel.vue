@@ -19,8 +19,8 @@ const { aberto, fecharPainel } = usePainel();
                         <div class="painel-msgs">
                             <div class="msg msg-bot">
                                 <div class="bubble">
-                                    Olá! Sou o agente de IA do Inventário. Posso ajudar com análises de estoque, sugestões de reposição e
-                                    muito mais. O que você precisa?
+                                    Olá! Sou o agente de IA do Inventário. Posso ajudar com análises de estoque,
+                                    sugestões de reposição e muito mais. O que você precisa?
                                 </div>
                                 <div class="msg-hora">agora</div>
                             </div>

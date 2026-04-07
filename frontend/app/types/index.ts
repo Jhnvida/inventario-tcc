@@ -4,54 +4,57 @@ export type StatusPedido = "rascunho" | "aberto" | "parcial" | "concluido" | "ca
 export type TipoMovimentacao = "entrada" | "saida";
 
 export interface Produto {
-  id: number;
-  nome: string;
-  sku: string;
-  categoria: string;
-  local: string;
-  estoque: number;
-  minimo: number;
-  preco: number;
-  status: StatusEstoque;
+    id: number;
+    nome: string;
+    sku: string;
+    categoria: string;
+    local: string;
+    estoque: number;
+    minimo: number;
+    preco: number;
+    status: StatusEstoque;
 }
 
 export interface Fornecedor {
-  id: number;
-  razaoSocial: string;
-  nomeFantasia: string;
-  cnpj: string;
-  contato: string;
-  prazoMedio: number;
-  status: StatusFornecedor;
+    id: number;
+    razaoSocial: string;
+    nomeFantasia: string;
+    cnpj: string;
+    contato: string;
+    prazoMedio: number;
+    status: StatusFornecedor;
 }
 
 export interface Pedido {
-  id: number;
-  numero: string;
-  fornecedor: string;
-  itens: number;
-  valor: number;
-  status: StatusPedido;
-  previsao: string;
-  data: string;
+    id: number;
+    numero: string;
+    fornecedor: string;
+    itens: number;
+    valor: number;
+    status: StatusPedido;
+    previsao: string;
+    data: string;
 }
 
 export interface ResumoDashboard {
-  total_produtos: number;
-  valor_total: number;
-  em_alerta: number;
-  pedidos_abertos: number;
-  estoque_critico: Pick<Produto, "nome" | "sku" | "estoque" | "minimo">[];
-  movimentacoes_recentes: Pick<Movimentacao, "id" | "tipo" | "produto" | "sku" | "quantidade" | "responsavel" | "data">[];
+    total_produtos: number;
+    valor_total: number;
+    em_alerta: number;
+    pedidos_abertos: number;
+    estoque_critico: Pick<Produto, "nome" | "sku" | "estoque" | "minimo">[];
+    movimentacoes_recentes: Pick<
+        Movimentacao,
+        "id" | "tipo" | "produto" | "sku" | "quantidade" | "responsavel" | "data"
+    >[];
 }
 
 export interface Movimentacao {
-  id: number;
-  tipo: TipoMovimentacao;
-  produto: string;
-  sku: string;
-  quantidade: number;
-  responsavel: string;
-  observacao?: string;
-  data: string;
+    id: number;
+    tipo: TipoMovimentacao;
+    produto: string;
+    sku: string;
+    quantidade: number;
+    responsavel: string;
+    observacao?: string;
+    data: string;
 }

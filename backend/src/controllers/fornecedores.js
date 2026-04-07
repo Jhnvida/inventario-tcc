@@ -1,9 +1,9 @@
 const db = require("../config/db");
 
 async function listar(req, res) {
-  try {
-    const resultado = await db.query(
-      `SELECT
+    try {
+        const resultado = await db.query(
+            `SELECT
          id,
          razao_social AS "razaoSocial",
          nome_fantasia AS "nomeFantasia",
@@ -15,11 +15,14 @@ async function listar(req, res) {
          criado_em
        FROM fornecedores
        ORDER BY razao_social ASC`,
-    );
-    res.json(resultado.rows);
-  } catch (erro) {
-    res.status(500).json({ erro: "Erro ao listar fornecedores", detalhe: erro.message });
-  }
+        );
+        res.json(resultado.rows);
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao listar fornecedores",
+            detalhe: process.env.NODE_ENV === "development" ? erro.message : "Erro interno no servidor",
+        });
+    }
 }
 
 module.exports = { listar };

@@ -1,13 +1,22 @@
-const aberto = ref(false);
+const painelAberto = ref(false);
 
 export const usePainel = () => {
     const abrirPainel = () => {
-        aberto.value = true;
+        painelAberto.value = true;
     };
 
     const fecharPainel = () => {
-        aberto.value = false;
+        painelAberto.value = false;
     };
 
-    return { aberto, abrirPainel, fecharPainel };
+    const alternarPainel = () => {
+        painelAberto.value = !painelAberto.value;
+    };
+
+    return {
+        painelAberto,
+        abrirPainel,
+        fecharPainel,
+        alternarPainel,
+    };
 };

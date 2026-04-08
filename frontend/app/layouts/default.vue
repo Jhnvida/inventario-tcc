@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const titulo = computed(() => route.meta.titulo as string);
-const { abrirPainel } = usePainel();
+const { abrirPainel, painelAberto } = usePainel();
 </script>
 
 <template>
@@ -87,7 +87,9 @@ const { abrirPainel } = usePainel();
         </div>
     </div>
 
-    <Painel />
+    <Painel v-model:aberto="painelAberto" titulo="Agente IA">
+        <FormAgente />
+    </Painel>
 </template>
 
 <style scoped>

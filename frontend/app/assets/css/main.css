@@ -44,7 +44,7 @@ body {
 }
 
 .ponto {
-    @apply w-[5px] h-[5px] rounded-full flex-shrink-0;
+    @apply w-[5px] h-[5px] flex-shrink-0;
 }
 
 .ponto-ok {
@@ -167,4 +167,30 @@ body {
 .filtro-sel {
     @apply bg-bg border border-line px-[9px] py-[5px] text-[13px] text-tx-mid outline-none cursor-pointer;
     font-family: inherit;
+}
+
+/* Formulários Padronizados */
+.campo {
+    @apply flex flex-col gap-[5px];
+}
+
+.label-form {
+    @apply text-[10px] font-semibold text-tx-soft uppercase tracking-[0.06em];
+}
+
+.input-base {
+    @apply bg-bg border border-line px-[11px] py-[7px] text-[13px] text-tx outline-none transition-all duration-75 w-full;
+    font-family: inherit;
+}
+
+.input-base:focus {
+    @apply border-tx-soft bg-surface shadow-sm;
+}
+
+.input-base::placeholder {
+    @apply text-tx-soft opacity-50;
+}
+
+.form-secao {
+    @apply flex flex-col gap-4;
 }

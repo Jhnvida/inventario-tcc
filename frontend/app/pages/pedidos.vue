@@ -19,6 +19,8 @@ const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
     concluido: "ok",
     cancelado: "critico",
 };
+
+const exibindoForm = ref(false);
 </script>
 
 <template>
@@ -43,7 +45,7 @@ const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
 
                 <span class="flex-1" />
 
-                <button class="botao botao-primario text-[13px]">
+                <button @click="exibindoForm = true" class="botao botao-primario text-[13px]">
                     <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
                     Novo Pedido
                 </button>
@@ -81,5 +83,9 @@ const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
                 <span class="pag-info">{{ pedidos.length }} pedidos</span>
             </div>
         </div>
+
+        <Painel v-model:aberto="exibindoForm" titulo="Novo Pedido">
+            <FormPedido @cancelar="exibindoForm = false" />
+        </Painel>
     </div>
 </template>

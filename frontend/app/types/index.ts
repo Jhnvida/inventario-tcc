@@ -7,8 +7,9 @@ export interface Produto {
     id: number;
     nome: string;
     sku: string;
-    categoria: string;
-    local: string;
+    categoriaId?: number | null;
+    categoria: string | null;
+    local: string | null;
     estoque: number;
     minimo: number;
     preco: number;
@@ -18,10 +19,12 @@ export interface Produto {
 export interface Fornecedor {
     id: number;
     razaoSocial: string;
-    nomeFantasia: string;
-    cnpj: string;
-    contato: string;
+    nomeFantasia: string | null;
+    cnpj: string | null;
+    contato: string | null;
+    telefone?: string | null;
     prazoMedio: number;
+    ativo?: boolean;
     status: StatusFornecedor;
 }
 

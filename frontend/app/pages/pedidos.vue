@@ -2,7 +2,7 @@
 import type { Pedido, StatusPedido, StatusEstoque } from "~/types";
 definePageMeta({ titulo: "Pedidos" });
 
-const { data: pedidos, pending, error } = useLazyFetch<Pedido[]>("/api/pedidos");
+const { data: pedidos, pending, error, refresh } = useLazyFetch<Pedido[]>("/api/pedidos");
 
 const rotulos: Record<StatusPedido, string> = {
     rascunho: "Rascunho",
@@ -12,7 +12,7 @@ const rotulos: Record<StatusPedido, string> = {
     cancelado: "Cancelado",
 };
 
-const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
+const statusTag: Record<StatusPedido, StatusEstoque> = {
     rascunho: "inativo",
     aberto: "info",
     parcial: "alerta",
@@ -20,7 +20,56 @@ const statusEtiqueta: Record<StatusPedido, StatusEstoque> = {
     cancelado: "critico",
 };
 
-const exibindoForm = ref(false);
+const abrir = ref(false);
+const salvando = ref(false);
+const erro = ref("");
+const busca = ref("");
+const status = ref("");
+
+const lista = computed(() => {
+    const termo = busca.value.trim().toLowerCase();
+    return (pedidos.value || []).filter((p) => {
+        const correspondeBusca =
+            !termo || p.numero.toLowerCase().includes(termo) || p.fornecedor.toLowerCase().includes(termo);
+        const correspondeStatus = !status.value || p.status === status.value;
+        return correspondeBusca && correspondeStatus;
+    });
+});
+
+async function salvarPedido(payload: {
+    fornecedorId: number;
+    previsao: string | null;
+    observacoes: string | null;
+    itens: Array<{ produtoId: number; quantidade: number; precoUnitario: number }>;
+}) {
+    erro.value = "";
+
+    if (!payload.fornecedorId || payload.itens.length === 0) {
+        erro.value = "Preencha fornecedor e itens.";
+        return;
+    }
+    if (payload.itens.some((item) => !item.produtoId || item.quantidade <= 0 || item.precoUnitario < 0)) {
+        erro.value = "Revise os itens informados.";
+        return;
+    }
+
+    salvando.value = true;
+    try {
+        await $fetch("/api/pedidos", {
+            method: "POST",
+            body: {
+                ...payload,
+                criadoPor: 1,
+            },
+        });
+        await refresh();
+        abrir.value = false;
+    } catch {
+        erro.value = "Nao foi possivel salvar o pedido.";
+    } finally {
+        salvando.value = false;
+    }
+}
 </script>
 
 <template>
@@ -32,10 +81,10 @@ const exibindoForm = ref(false);
             <div class="toolbar">
                 <div class="busca">
                     <Icon name="lucide:search" class="w-[13px] h-[13px] text-tx-soft flex-shrink-0" />
-                    <input type="text" placeholder="Buscar pedidos..." />
+                    <input v-model="busca" type="text" placeholder="Buscar pedidos..." />
                 </div>
 
-                <select class="filtro-sel">
+                <select v-model="status" class="filtro-sel">
                     <option value="">Todos os status</option>
                     <option value="aberto">Em andamento</option>
                     <option value="parcial">Enviado</option>
@@ -45,7 +94,7 @@ const exibindoForm = ref(false);
 
                 <span class="flex-1" />
 
-                <button @click="exibindoForm = true" class="botao botao-primario text-[13px]">
+                <button @click="abrir = true" class="botao botao-primario text-[13px]">
                     <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
                     Novo Pedido
                 </button>
@@ -65,11 +114,11 @@ const exibindoForm = ref(false);
                 </thead>
 
                 <tbody>
-                    <tr v-for="p in pedidos" :key="p.id" class="linha">
+                    <tr v-for="p in lista" :key="p.id" class="linha">
                         <td class="col-td font-medium">{{ p.numero }}</td>
                         <td class="col-td">{{ p.fornecedor }}</td>
                         <td class="col-td">
-                            <Etiqueta :status="statusEtiqueta[p.status]" :rotulo="rotulos[p.status]" />
+                            <Etiqueta :status="statusTag[p.status]" :rotulo="rotulos[p.status]" />
                         </td>
                         <td class="col-td text-tx-mid">{{ p.itens }}</td>
                         <td class="col-td font-medium">{{ formatarMoeda(p.valor) }}</td>
@@ -80,12 +129,12 @@ const exibindoForm = ref(false);
             </table>
 
             <div class="paginacao">
-                <span class="pag-info">{{ pedidos.length }} pedidos</span>
+                <span class="pag-info">{{ lista.length }} pedidos</span>
             </div>
         </div>
 
-        <Painel v-model:aberto="exibindoForm" titulo="Novo Pedido">
-            <FormPedido @cancelar="exibindoForm = false" />
+        <Painel v-model:aberto="abrir" titulo="Novo Pedido">
+            <FormPedido :erro="erro" :salvando="salvando" @cancelar="abrir = false" @salvar="salvarPedido" />
         </Painel>
     </div>
 </template>

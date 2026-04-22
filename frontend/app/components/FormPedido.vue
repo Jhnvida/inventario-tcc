@@ -1,7 +1,34 @@
 <script setup lang="ts">
 import type { Produto, Fornecedor } from "~/types";
 
-const emit = defineEmits(["cancelar", "sucesso"]);
+interface ItemPedidoPayload {
+    produtoId: number;
+    quantidade: number;
+    precoUnitario: number;
+}
+
+interface PedidoPayload {
+    fornecedorId: number;
+    previsao: string | null;
+    observacoes: string | null;
+    itens: ItemPedidoPayload[];
+}
+
+const props = defineProps<{
+    initial?: {
+        fornecedorId?: number | null;
+        previsao?: string | null;
+        observacoes?: string | null;
+        itens?: ItemPedidoPayload[];
+    };
+    erro?: string;
+    salvando?: boolean;
+}>();
+
+const emit = defineEmits<{
+    salvar: [payload: PedidoPayload];
+    cancelar: [];
+}>();
 
 const { data: fornecedores } = useFetch<Fornecedor[]>("/api/fornecedores");
 const { data: produtos } = useFetch<Produto[]>("/api/produtos");
@@ -12,6 +39,27 @@ const form = ref({
     observacoes: "",
     itens: [] as Array<{ produtoId: string; quantidade: number; precoUnitario: number }>,
 });
+
+watch(
+    () => props.initial,
+    (valor) => {
+        const itens = valor?.itens?.length
+            ? valor.itens.map((item) => ({
+                  produtoId: String(item.produtoId),
+                  quantidade: Number(item.quantidade || 1),
+                  precoUnitario: Number(item.precoUnitario || 0),
+              }))
+            : [{ produtoId: "", quantidade: 1, precoUnitario: 0 }];
+
+        form.value = {
+            fornecedorId: valor?.fornecedorId ? String(valor.fornecedorId) : "",
+            previsao: valor?.previsao || "",
+            observacoes: valor?.observacoes || "",
+            itens,
+        };
+    },
+    { immediate: true },
+);
 
 function adicionarItem() {
     form.value.itens.push({
@@ -41,9 +89,18 @@ const totalPedido = computed(() => {
     }, 0);
 });
 
-onMounted(() => {
-    adicionarItem();
-});
+function enviar() {
+    emit("salvar", {
+        fornecedorId: Number(form.value.fornecedorId),
+        previsao: form.value.previsao || null,
+        observacoes: form.value.observacoes.trim() || null,
+        itens: form.value.itens.map((item) => ({
+            produtoId: Number(item.produtoId),
+            quantidade: Number(item.quantidade),
+            precoUnitario: Number(item.precoUnitario),
+        })),
+    });
+}
 </script>
 
 <template>
@@ -150,9 +207,13 @@ onMounted(() => {
         </div>
 
         <div class="flex items-center gap-3 pt-4">
-            <button class="botao botao-primario flex-1 justify-center py-2.5">Salvar Pedido</button>
-            <button @click="$emit('cancelar')" class="botao botao-secundario px-6 py-2.5">Cancelar</button>
+            <button @click="enviar" :disabled="salvando" class="botao botao-primario flex-1 justify-center py-2.5">
+                {{ salvando ? "Salvando..." : "Salvar Pedido" }}
+            </button>
+            <button @click="emit('cancelar')" class="botao botao-secundario px-6 py-2.5">Cancelar</button>
         </div>
+
+        <p v-if="erro" class="text-[12px] text-red">{{ erro }}</p>
     </div>
 </template>
 

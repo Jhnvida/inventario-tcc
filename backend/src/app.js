@@ -18,12 +18,21 @@ app.use("/movimentacoes", require("./routes/movimentacoes"));
 app.use("/usuarios", require("./routes/usuarios"));
 
 app.get("/", (req, res) => {
-  res.json({ message: "API funcionando!" });
+    res.json({ message: "API funcionando!" });
+});
+
+app.use((req, res) => {
+    res.status(404).json({ erro: "Rota nao encontrada" });
+});
+
+app.use((erro, req, res, next) => {
+    console.error(erro);
+    res.status(500).json({ erro: "Erro inesperado" });
 });
 
 const PORTA = process.env.PORT || 3001;
 app.listen(PORTA, () => {
-  console.log(`Servidor rodando na porta ${PORTA}`);
+    console.log(`Servidor rodando na porta ${PORTA}`);
 });
 
 module.exports = app;

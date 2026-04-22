@@ -7,10 +7,7 @@ async function listar(req, res) {
         );
         res.json(resultado.rows);
     } catch (erro) {
-        res.status(500).json({
-            erro: "Erro ao listar usuários",
-            detalhe: process.env.NODE_ENV === "development" ? erro.message : "Erro interno no servidor",
-        });
+        res.status(500).json({ erro: "Erro ao listar usuarios" });
     }
 }
 

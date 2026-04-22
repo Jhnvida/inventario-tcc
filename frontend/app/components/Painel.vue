@@ -3,8 +3,6 @@ const aberto = defineModel<boolean>("aberto", { default: false });
 defineProps<{
     titulo: string;
 }>();
-
-defineEmits(["fechar"]);
 </script>
 
 <template>

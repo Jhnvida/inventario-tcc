@@ -4,5 +4,6 @@ const controlador = require("../controllers/movimentacoes");
 const roteador = Router();
 
 roteador.get("/", controlador.listar);
+roteador.post("/", controlador.criar);
 
 module.exports = roteador;

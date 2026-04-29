@@ -1,13 +1,15 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
+const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+
+if (!connectionString) {
+    throw new Error("Defina DATABASE_URL (ou SUPABASE_DB_URL) no arquivo .env do backend.");
+}
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: { rejectUnauthorized: false },
 });
 
-async function query(consulta, parametros) {
-    return pool.query(consulta, parametros);
-}
-
-module.exports = { query, pool };
+module.exports = { pool };

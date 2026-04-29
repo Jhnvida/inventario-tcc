@@ -1,38 +1,35 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
-require("dotenv").config();
+const dashboardRoutes = require("./routes/dashboard");
+const produtosRoutes = require("./routes/produtos");
+const fornecedoresRoutes = require("./routes/fornecedores");
+const pedidosRoutes = require("./routes/pedidos");
+const movimentacoesRoutes = require("./routes/movimentacoes");
+const metaRoutes = require("./routes/meta");
 
 const app = express();
-
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors());
 app.use(express.json());
-app.use(cookieParser());
 
-app.use("/dashboard", require("./routes/dashboard"));
-app.use("/categorias", require("./routes/categorias"));
-app.use("/fornecedores", require("./routes/fornecedores"));
-app.use("/produtos", require("./routes/produtos"));
-app.use("/pedidos", require("./routes/pedidos"));
-app.use("/movimentacoes", require("./routes/movimentacoes"));
-app.use("/usuarios", require("./routes/usuarios"));
+const PORT = Number(process.env.PORT || 3001);
 
-app.get("/", (req, res) => {
-    res.json({ message: "API funcionando!" });
+app.get("/health", (_req, res) => {
+    res.json({ ok: true });
 });
 
-app.use((req, res) => {
-    res.status(404).json({ erro: "Rota nao encontrada" });
+app.use("/dashboard", dashboardRoutes);
+app.use("/produtos", produtosRoutes);
+app.use("/fornecedores", fornecedoresRoutes);
+app.use("/pedidos", pedidosRoutes);
+app.use("/movimentacoes", movimentacoesRoutes);
+app.use("/", metaRoutes);
+
+app.use((err, _req, res, _next) => {
+    console.error(err);
+    res.status(500).json({ message: "Erro interno.", detail: err.message });
 });
 
-app.use((erro, req, res, next) => {
-    console.error(erro);
-    res.status(500).json({ erro: "Erro inesperado" });
+app.listen(PORT, () => {
+    console.log(`API rodando em http://localhost:${PORT}`);
 });
-
-const PORTA = process.env.PORT || 3001;
-app.listen(PORTA, () => {
-    console.log(`Servidor rodando na porta ${PORTA}`);
-});
-
-module.exports = app;

@@ -1,24 +1,26 @@
 # Inventario TCC
 
-Sistema de gerenciamento de estoque desenvolvido como TCC, com frontend em Nuxt e backend em Express.
+Sistema de gerenciamento de estoque para TCC com frontend em Nuxt e backend em Express conectado ao Postgres do Supabase.
 
 ## Visao geral
 
 - Dashboard com resumo de produtos, alertas e movimentacoes recentes.
 - Gestao de produtos e fornecedores com CRUD.
-- Pedidos de compra com itens e consulta por ID.
-- Movimentacoes de estoque para entrada e saida.
+- Pedidos de compra com itens, edicao e exclusao.
+- Movimentacoes de estoque com ajuste de saldo e historico.
+- Navegacao por paginas dedicadas (sem painel lateral de formulario).
 
 ## Stack
 
 - `Frontend`: Nuxt 4, Vue 3, TypeScript, Tailwind CSS
 - `Backend`: Express, PostgreSQL (`pg`)
-- `Outros`: `dotenv`, `cors`, `cookie-parser`
+- `Banco`: Supabase (Postgres)
+- `Outros`: `dotenv`, `cors`
 
 ## Requisitos
 
 - Node.js 20+ (recomendado)
-- PostgreSQL em execucao
+- Projeto Supabase com banco Postgres ativo
 - npm (ou outro gerenciador compativel)
 
 ## Instalacao
@@ -27,11 +29,24 @@ Sistema de gerenciamento de estoque desenvolvido como TCC, com frontend em Nuxt 
 # Backend
 cd backend
 npm install
+cp .env.example .env
+# edite DATABASE_URL no .env com sua credencial Supabase
 
 # Frontend
 cd frontend
 npm install
 ```
+
+## Banco (Supabase)
+
+Configure `DATABASE_URL` em `backend/.env` e aplique o esquema:
+
+```bash
+cd backend
+npm run db:setup
+```
+
+O esquema usado esta em `backend/sql/esquema.sql` (espelho de `/home/john/Downloads/esquema.sql`).
 
 ## Desenvolvimento
 
@@ -70,12 +85,34 @@ cd frontend
 npm run generate
 ```
 
-## Endpoints principais (backend)
+## Scripts disponiveis
 
+### Backend
+
+- `npm run dev`: API em desenvolvimento com watch
+- `npm run start`: API em modo normal
+- `npm run db:setup`: aplica schema e seed inicial
+
+### Frontend
+
+- `npm run dev`: ambiente de desenvolvimento
+- `npm run build`: build de producao
+- `npm run preview`: preview da build
+- `npm run generate`: geracao estatica
+
+## Endpoints principais
+
+- `GET /health`
 - `GET /dashboard`
 - `GET /categorias`
 - `GET /usuarios`
-- `GET /movimentacoes`, `POST /movimentacoes`
-- `GET /pedidos`, `GET /pedidos/:id`, `POST /pedidos`
-- `GET /produtos`, `GET /produtos/:id`, `POST /produtos`, `PUT /produtos/:id`, `DELETE /produtos/:id`
-- `GET /fornecedores`, `GET /fornecedores/:id`, `POST /fornecedores`, `PUT /fornecedores/:id`, `DELETE /fornecedores/:id`
+- `GET /movimentacoes`, `GET /movimentacoes/:id`, `POST /movimentacoes`, `PUT /movimentacoes/:id`, `DELETE /movimentacoes/:id`
+- `GET /pedidos`, `GET /pedidos/:id`, `POST /pedidos`, `PUT /pedidos/:id`, `DELETE /pedidos/:id`
+- `GET /produtos`, `POST /produtos`, `PUT /produtos/:id`, `DELETE /produtos/:id`
+- `GET /fornecedores`, `POST /fornecedores`, `PUT /fornecedores/:id`, `DELETE /fornecedores/:id`
+
+## Observacoes
+
+- As operacoes de movimentacao atualizam estoque automaticamente.
+- Ao editar/excluir movimentacoes, o saldo do produto e recalculado com validacao.
+- A autenticacao ainda esta em fluxo simplificado para foco no TCC.

@@ -30,7 +30,6 @@ Sistema de gerenciamento de estoque para TCC com frontend em Nuxt e backend em E
 cd backend
 npm install
 cp .env.example .env
-# edite DATABASE_URL no .env com sua credencial Supabase
 
 # Frontend
 cd frontend
@@ -39,14 +38,7 @@ npm install
 
 ## Banco (Supabase)
 
-Configure `DATABASE_URL` em `backend/.env` e aplique o esquema:
-
-```bash
-cd backend
-npm run db:setup
-```
-
-O esquema usado esta em `backend/sql/esquema.sql` (espelho de `/home/john/Downloads/esquema.sql`).
+Configure `DATABASE_URL` em `backend/.env`.
 
 ## Desenvolvimento
 
@@ -91,7 +83,6 @@ npm run generate
 
 - `npm run dev`: API em desenvolvimento com watch
 - `npm run start`: API em modo normal
-- `npm run db:setup`: aplica schema e seed inicial
 
 ### Frontend
 

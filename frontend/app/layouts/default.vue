@@ -1,9 +1,3 @@
-<script setup lang="ts">
-const route = useRoute();
-const titulo = computed(() => route.meta.titulo as string);
-const { abrirPainel, painelAberto } = usePainel();
-</script>
-
 <template>
     <div class="flex h-screen">
         <aside class="w-[220px] bg-surface border-r border-line flex flex-col flex-shrink-0">
@@ -48,10 +42,10 @@ const { abrirPainel, painelAberto } = usePainel();
                 <div>
                     <div class="nav-rotulo">Ferramentas</div>
 
-                    <div class="item-nav cursor-pointer" @click="abrirPainel">
+                    <NuxtLink to="/agente" active-class="ativo" class="item-nav">
                         <Icon name="lucide:sparkles" class="w-[14px] h-[14px] flex-shrink-0" />
                         Agente IA
-                    </div>
+                    </NuxtLink>
                 </div>
             </nav>
 
@@ -72,24 +66,11 @@ const { abrirPainel, painelAberto } = usePainel();
         </aside>
 
         <div class="flex-1 flex flex-col min-w-0">
-            <header class="h-[52px] bg-surface border-b border-line flex items-center px-[30px] gap-2.5 flex-shrink-0">
-                <span class="text-[14.5px] font-semibold flex-1 tracking-[-0.2px]">{{ titulo }}</span>
-
-                <button class="botao botao-ghost text-[13px]" @click="abrirPainel">
-                    <Icon name="lucide:sparkles" class="w-[13px] h-[13px]" />
-                    Agente IA
-                </button>
-            </header>
-
             <main class="flex-1 h-screen overflow-y-auto p-8">
                 <slot />
             </main>
         </div>
     </div>
-
-    <Painel v-model:aberto="painelAberto" titulo="Agente IA">
-        <FormAgente />
-    </Painel>
 </template>
 
 <style scoped>

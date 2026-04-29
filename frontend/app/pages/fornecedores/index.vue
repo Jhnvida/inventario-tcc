@@ -4,16 +4,11 @@ import type { Fornecedor } from "~/types";
 definePageMeta({ titulo: "Fornecedores" });
 
 const { data: fornecedores, pending, error, refresh } = useLazyFetch<Fornecedor[]>("/api/fornecedores");
-
 const busca = ref("");
-const abrir = ref(false);
-const salvando = ref(false);
-const erro = ref("");
-const editId = ref<number | null>(null);
-const ini = ref<Record<string, unknown>>({});
 
 const lista = computed(() => {
     const termo = busca.value.trim().toLowerCase();
+
     return (fornecedores.value || []).filter((fornecedor) => {
         if (!termo) return true;
         return (
@@ -23,64 +18,6 @@ const lista = computed(() => {
         );
     });
 });
-
-function abrirNovoFornecedor() {
-    erro.value = "";
-    editId.value = null;
-    ini.value = {};
-    abrir.value = true;
-}
-
-function abrirEditarFornecedor(fornecedor: Fornecedor) {
-    erro.value = "";
-    editId.value = fornecedor.id;
-    ini.value = {
-        razaoSocial: fornecedor.razaoSocial || "",
-        nomeFantasia: fornecedor.nomeFantasia || "",
-        cnpj: fornecedor.cnpj || "",
-        contato: fornecedor.contato || "",
-        telefone: fornecedor.telefone || "",
-        prazoMedio: Number(fornecedor.prazoMedio || 0),
-        ativo: fornecedor.ativo ?? fornecedor.status === "ok",
-    };
-    abrir.value = true;
-}
-
-async function salvarFornecedor(payload: {
-    razaoSocial: string;
-    nomeFantasia: string | null;
-    cnpj: string | null;
-    contato: string | null;
-    telefone: string | null;
-    prazoMedio: number;
-    ativo: boolean;
-}) {
-    erro.value = "";
-    if (!payload.razaoSocial.trim()) {
-        erro.value = "Preencha a razao social.";
-        return;
-    }
-
-    if (payload.prazoMedio < 0) {
-        erro.value = "Prazo medio deve ser >= 0.";
-        return;
-    }
-
-    salvando.value = true;
-    try {
-        if (editId.value) {
-            await $fetch(`/api/fornecedores/${editId.value}`, { method: "PUT", body: payload });
-        } else {
-            await $fetch("/api/fornecedores", { method: "POST", body: payload });
-        }
-        await refresh();
-        abrir.value = false;
-    } catch {
-        erro.value = "Nao foi possivel salvar o fornecedor.";
-    } finally {
-        salvando.value = false;
-    }
-}
 
 async function excluirFornecedor(id: number) {
     if (!confirm("Deseja remover este fornecedor?")) return;
@@ -95,9 +32,16 @@ async function excluirFornecedor(id: number) {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <div v-if="pending" class="text-tx-soft text-[13px] px-4">Carregando fornecedores...</div>
-        <div v-else-if="error" class="text-tx-soft text-[13px] px-4">Erro ao carregar fornecedores.</div>
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <Cabecalho titulo="Fornecedores" subtitulo="Mantenha os fornecedores atualizados">
+            <NuxtLink to="/fornecedores/novo" class="botao botao-primario text-[12px]">
+                <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
+                Novo Fornecedor
+            </NuxtLink>
+        </Cabecalho>
+
+        <div v-if="pending" class="text-[13px] text-tx-soft">Carregando fornecedores...</div>
+        <div v-else-if="error" class="text-[13px] text-tx-soft">Erro ao carregar fornecedores.</div>
 
         <div v-else-if="fornecedores" class="tbl-wrap">
             <div class="toolbar">
@@ -107,11 +51,6 @@ async function excluirFornecedor(id: number) {
                 </div>
 
                 <span class="flex-1" />
-
-                <button @click="abrirNovoFornecedor" class="botao botao-primario text-[13px]">
-                    <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
-                    Novo Fornecedor
-                </button>
             </div>
 
             <table class="w-full border-collapse">
@@ -139,9 +78,9 @@ async function excluirFornecedor(id: number) {
                         </td>
                         <td class="col-td">
                             <div class="flex items-center gap-2">
-                                <button @click="abrirEditarFornecedor(f)" class="botao botao-ghost !py-1 !px-2">
+                                <NuxtLink :to="`/fornecedores/${f.id}`" class="botao botao-ghost !py-1 !px-2">
                                     Editar
-                                </button>
+                                </NuxtLink>
                                 <button @click="excluirFornecedor(f.id)" class="botao botao-ghost !py-1 !px-2 text-red">
                                     Excluir
                                 </button>
@@ -155,15 +94,5 @@ async function excluirFornecedor(id: number) {
                 <span class="pag-info">{{ lista.length }} fornecedores</span>
             </div>
         </div>
-
-        <Painel v-model:aberto="abrir" :titulo="editId ? 'Editar Fornecedor' : 'Novo Fornecedor'">
-            <FormFornecedor
-                :initial="ini"
-                :erro="erro"
-                :salvando="salvando"
-                @cancelar="abrir = false"
-                @salvar="salvarFornecedor"
-            />
-        </Painel>
     </div>
 </template>

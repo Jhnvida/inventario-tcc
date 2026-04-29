@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Pedido, StatusPedido, StatusEstoque } from "~/types";
+import type { Pedido, StatusEstoque, StatusPedido } from "~/types";
+
 definePageMeta({ titulo: "Pedidos" });
 
 const { data: pedidos, pending, error, refresh } = useLazyFetch<Pedido[]>("/api/pedidos");
@@ -20,9 +21,6 @@ const statusTag: Record<StatusPedido, StatusEstoque> = {
     cancelado: "critico",
 };
 
-const abrir = ref(false);
-const salvando = ref(false);
-const erro = ref("");
 const busca = ref("");
 const status = ref("");
 
@@ -36,46 +34,28 @@ const lista = computed(() => {
     });
 });
 
-async function salvarPedido(payload: {
-    fornecedorId: number;
-    previsao: string | null;
-    observacoes: string | null;
-    itens: Array<{ produtoId: number; quantidade: number; precoUnitario: number }>;
-}) {
-    erro.value = "";
-
-    if (!payload.fornecedorId || payload.itens.length === 0) {
-        erro.value = "Preencha fornecedor e itens.";
-        return;
-    }
-    if (payload.itens.some((item) => !item.produtoId || item.quantidade <= 0 || item.precoUnitario < 0)) {
-        erro.value = "Revise os itens informados.";
-        return;
-    }
-
-    salvando.value = true;
+async function excluirPedido(id: number) {
+    if (!confirm("Deseja remover este pedido?")) return;
     try {
-        await $fetch("/api/pedidos", {
-            method: "POST",
-            body: {
-                ...payload,
-                criadoPor: 1,
-            },
-        });
+        await $fetch(`/api/pedidos/${id}`, { method: "DELETE" });
         await refresh();
-        abrir.value = false;
     } catch {
-        erro.value = "Nao foi possivel salvar o pedido.";
-    } finally {
-        salvando.value = false;
+        alert("Nao foi possivel remover o pedido.");
     }
 }
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <div v-if="pending" class="text-tx-soft text-[13px] px-4">Carregando pedidos...</div>
-        <div v-else-if="error" class="text-tx-soft text-[13px] px-4">Erro ao carregar pedidos.</div>
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <Cabecalho titulo="Pedidos" subtitulo="Acompanhe e gerencie pedidos de compra">
+            <NuxtLink to="/pedidos/novo" class="botao botao-primario text-[12px]">
+                <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
+                Novo Pedido
+            </NuxtLink>
+        </Cabecalho>
+
+        <div v-if="pending" class="text-[13px] text-tx-soft">Carregando pedidos...</div>
+        <div v-else-if="error" class="text-[13px] text-tx-soft">Erro ao carregar pedidos.</div>
 
         <div v-else-if="pedidos" class="tbl-wrap">
             <div class="toolbar">
@@ -93,11 +73,6 @@ async function salvarPedido(payload: {
                 </select>
 
                 <span class="flex-1" />
-
-                <button @click="abrir = true" class="botao botao-primario text-[13px]">
-                    <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
-                    Novo Pedido
-                </button>
             </div>
 
             <table class="w-full border-collapse">
@@ -110,6 +85,7 @@ async function salvarPedido(payload: {
                         <th class="col-th">Valor</th>
                         <th class="col-th">Previsão</th>
                         <th class="col-th">Criado em</th>
+                        <th class="col-th">Ações</th>
                     </tr>
                 </thead>
 
@@ -124,6 +100,16 @@ async function salvarPedido(payload: {
                         <td class="col-td font-medium">{{ formatarMoeda(p.valor) }}</td>
                         <td class="col-td text-tx-mid">{{ formatarData(p.previsao) }}</td>
                         <td class="col-td text-tx-soft">{{ formatarData(p.data) }}</td>
+                        <td class="col-td">
+                            <div class="flex items-center gap-2">
+                                <NuxtLink :to="`/pedidos/${p.id}`" class="botao botao-ghost !py-1 !px-2"
+                                    >Editar</NuxtLink
+                                >
+                                <button @click="excluirPedido(p.id)" class="botao botao-ghost !py-1 !px-2 text-red">
+                                    Excluir
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -132,9 +118,5 @@ async function salvarPedido(payload: {
                 <span class="pag-info">{{ lista.length }} pedidos</span>
             </div>
         </div>
-
-        <Painel v-model:aberto="abrir" titulo="Novo Pedido">
-            <FormPedido :erro="erro" :salvando="salvando" @cancelar="abrir = false" @salvar="salvarPedido" />
-        </Painel>
     </div>
 </template>

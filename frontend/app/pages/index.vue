@@ -8,7 +8,9 @@ const { data, pending, error } = useFetch<ResumoDashboard>("/api/dashboard", {
 </script>
 
 <template>
-    <div class="flex flex-col gap-6">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <Cabecalho titulo="Dashboard" subtitulo="Visão geral do estoque, alertas e movimentações recentes" />
+
         <div v-if="pending" class="text-tx-soft text-[13px]">Carregando...</div>
         <div v-else-if="error" class="text-tx-soft text-[13px]">Erro ao carregar dashboard.</div>
 

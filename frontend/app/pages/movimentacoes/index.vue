@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import type { Movimentacao } from "~/types";
+
 definePageMeta({ titulo: "Movimentações" });
 
 const { data: movs, pending, error, refresh } = useLazyFetch<Movimentacao[]>("/api/movimentacoes");
-
-const abrir = ref(false);
-const salvando = ref(false);
-const erro = ref("");
 const busca = ref("");
 const tipo = ref("");
 
 const lista = computed(() => {
     const termo = busca.value.trim().toLowerCase();
+
     return (movs.value || []).filter((m) => {
         const correspondeBusca =
             !termo ||
@@ -23,40 +21,28 @@ const lista = computed(() => {
     });
 });
 
-async function salvar(payload: {
-    produtoId: number;
-    tipo: "entrada" | "saida";
-    quantidade: number;
-    observacao: string | null;
-    responsavelId: number;
-    pedidoId: number | null;
-}) {
-    erro.value = "";
-    if (!payload.produtoId || !payload.responsavelId || payload.quantidade <= 0) {
-        erro.value = "Preencha produto, responsavel e quantidade.";
-        return;
-    }
-
-    salvando.value = true;
+async function excluirMovimentacao(id: number) {
+    if (!confirm("Deseja remover esta movimentacao?")) return;
     try {
-        await $fetch("/api/movimentacoes", {
-            method: "POST",
-            body: payload,
-        });
+        await $fetch(`/api/movimentacoes/${id}`, { method: "DELETE" });
         await refresh();
-        abrir.value = false;
     } catch {
-        erro.value = "Nao foi possivel salvar a movimentacao.";
-    } finally {
-        salvando.value = false;
+        alert("Nao foi possivel remover a movimentacao.");
     }
 }
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <div v-if="pending" class="text-tx-soft text-[13px] px-4">Carregando movimentações...</div>
-        <div v-else-if="error" class="text-tx-soft text-[13px] px-4">Erro ao carregar movimentações.</div>
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <Cabecalho titulo="Movimentações" subtitulo="Registre e audite entradas e saídas de estoque">
+            <NuxtLink to="/movimentacoes/nova" class="botao botao-primario text-[12px]">
+                <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
+                Nova Movimentação
+            </NuxtLink>
+        </Cabecalho>
+
+        <div v-if="pending" class="text-[13px] text-tx-soft">Carregando movimentações...</div>
+        <div v-else-if="error" class="text-[13px] text-tx-soft">Erro ao carregar movimentações.</div>
 
         <div v-else-if="movs" class="tbl-wrap">
             <div class="toolbar">
@@ -72,11 +58,6 @@ async function salvar(payload: {
                 </select>
 
                 <span class="flex-1" />
-
-                <button @click="abrir = true" class="botao botao-primario text-[13px]">
-                    <Icon name="lucide:plus" class="w-[13px] h-[13px]" />
-                    Nova Movimentação
-                </button>
             </div>
 
             <table class="w-full border-collapse">
@@ -88,6 +69,7 @@ async function salvar(payload: {
                         <th class="col-th">Qtd</th>
                         <th class="col-th">Responsável</th>
                         <th class="col-th">Criado em</th>
+                        <th class="col-th">Ações</th>
                     </tr>
                 </thead>
 
@@ -104,6 +86,19 @@ async function salvar(payload: {
                         <td class="col-td font-medium">{{ m.quantidade }}</td>
                         <td class="col-td text-tx-mid">{{ m.responsavel }}</td>
                         <td class="col-td text-tx-soft">{{ formatarDataHora(m.data) }}</td>
+                        <td class="col-td">
+                            <div class="flex items-center gap-2">
+                                <NuxtLink :to="`/movimentacoes/${m.id}`" class="botao botao-ghost !py-1 !px-2"
+                                    >Editar</NuxtLink
+                                >
+                                <button
+                                    @click="excluirMovimentacao(m.id)"
+                                    class="botao botao-ghost !py-1 !px-2 text-red"
+                                >
+                                    Excluir
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -112,9 +107,5 @@ async function salvar(payload: {
                 <span class="pag-info">{{ lista.length }} movimentações</span>
             </div>
         </div>
-
-        <Painel v-model:aberto="abrir" titulo="Nova Movimentacao">
-            <FormMovimentacao :erro="erro" :salvando="salvando" @cancelar="abrir = false" @salvar="salvar" />
-        </Painel>
     </div>
 </template>

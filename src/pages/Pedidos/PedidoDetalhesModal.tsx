@@ -41,7 +41,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
             title={`Detalhes do Pedido - ${pedido.id.split("-")[0]}`}
             width="large"
         >
-            <div className={styles.detalhesContainer}>
+            <div className={styles.detalhes_container}>
                 {error && (
                     <div
                         style={{
@@ -55,17 +55,17 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     </div>
                 )}
 
-                <div className={styles.detalhesHeader}>
+                <div className={styles.detalhes_header}>
                     <div>
-                        <p className={styles.detalheLabel}>Fornecedor</p>
-                        <p className={styles.detalheValor}>{pedido.fornecedores?.razao_social || "Desconhecido"}</p>
+                        <p className={styles.detalhe_label}>Fornecedor</p>
+                        <p className={styles.detalhe_valor}>{pedido.fornecedores?.razao_social || "Desconhecido"}</p>
                     </div>
                     <div>
-                        <p className={styles.detalheLabel}>Data do Pedido</p>
-                        <p className={styles.detalheValor}>{formatDate(pedido.criado_em)}</p>
+                        <p className={styles.detalhe_label}>Data do Pedido</p>
+                        <p className={styles.detalhe_valor}>{formatDate(pedido.criado_em)}</p>
                     </div>
                     <div>
-                        <p className={styles.detalheLabel}>Status</p>
+                        <p className={styles.detalhe_label}>Status</p>
                         <Badge
                             variant={
                                 pedido.status === "concluido"
@@ -79,31 +79,31 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                         </Badge>
                     </div>
                     <div>
-                        <p className={styles.detalheLabel}>Valor Total</p>
-                        <p className={styles.detalheValor}>{formatCurrency(pedido.valor_total)}</p>
+                        <p className={styles.detalhe_label}>Valor Total</p>
+                        <p className={styles.detalhe_valor}>{formatCurrency(pedido.valor_total)}</p>
                     </div>
                 </div>
 
-                <div className={styles.tableContainer} style={{ marginTop: "2rem" }}>
-                    <h3 style={{ fontSize: "1rem", marginBottom: "1rem" }}>Itens do Pedido</h3>
+                <div className={`${styles.table_container} ${styles.mt8}`}>
+                    <h3 className={styles.modal_subtitle}>Itens do Pedido</h3>
                     <table className={styles.table}>
                         <thead>
                             <tr>
                                 <th>Produto</th>
                                 <th>SKU</th>
-                                <th style={{ textAlign: "right" }}>Quantidade</th>
-                                <th style={{ textAlign: "right" }}>Preço Unitário</th>
-                                <th style={{ textAlign: "right" }}>Subtotal</th>
+                                <th className={styles.text_right}>Quantidade</th>
+                                <th className={styles.text_right}>Preço Unitário</th>
+                                <th className={styles.text_right}>Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pedido.itens_pedido?.map((item) => (
                                 <tr key={item.id}>
                                     <td className={styles.fw500}>{item.produtos?.nome}</td>
-                                    <td className={styles.textSecondary}>{item.produtos?.sku}</td>
-                                    <td style={{ textAlign: "right", fontWeight: 500 }}>{item.quantidade}</td>
-                                    <td style={{ textAlign: "right" }}>{formatCurrency(item.preco_unitario)}</td>
-                                    <td style={{ textAlign: "right", fontWeight: 600 }}>
+                                    <td className={styles.text_secondary}>{item.produtos?.sku}</td>
+                                    <td className={`${styles.text_right} ${styles.fw500}`}>{item.quantidade}</td>
+                                    <td className={styles.text_right}>{formatCurrency(item.preco_unitario)}</td>
+                                    <td className={`${styles.text_right} ${styles.fw600}`}>
                                         {formatCurrency(item.quantidade * item.preco_unitario)}
                                     </td>
                                 </tr>
@@ -112,13 +112,13 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     </table>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "2rem" }}>
+                <div className={styles.form_actions_lg}>
                     <Button type="button" variant="ghost" onClick={onClose}>
                         Fechar
                     </Button>
                     {isRecebivel && (
                         <Button type="button" variant="primary" onClick={handleReceber} disabled={loading}>
-                            <CheckCircle size={18} style={{ marginRight: "0.5rem" }} />
+                            <CheckCircle size={18} className={styles.mr2} />
                             {loading ? "Processando..." : "Receber Pedido"}
                         </Button>
                     )}

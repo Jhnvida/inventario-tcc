@@ -60,6 +60,57 @@ export function usePedidos() {
         }
     };
 
+    const salvarPedido = async (
+        pedidoData: {
+            fornecedor_id: string;
+            status: "rascunho" | "enviado" | "concluido" | "cancelado";
+            valor_total: number;
+        },
+        itens: { produto_id: string; quantidade: number; preco_unitario: number }[],
+        pedidoId?: string,
+    ) => {
+        try {
+            let pid = pedidoId;
+
+            // 1. Inserir ou atualizar pedido
+            if (pid) {
+                const { error: errorPedido } = await supabase
+                    .from("pedidos")
+                    .update({ ...pedidoData, atualizado_em: new Date().toISOString() })
+                    .eq("id", pid);
+                if (errorPedido) throw errorPedido;
+
+                // Apagar itens antigos
+                const { error: errorDelete } = await supabase.from("itens_pedido").delete().eq("pedido_id", pid);
+                if (errorDelete) throw errorDelete;
+            } else {
+                const { data: newPedido, error: errorPedido } = await supabase
+                    .from("pedidos")
+                    .insert([pedidoData])
+                    .select()
+                    .single();
+                if (errorPedido) throw errorPedido;
+                pid = newPedido.id;
+            }
+
+            // 2. Inserir itens
+            if (itens.length > 0) {
+                const itensParaInserir = itens.map((item) => ({
+                    ...item,
+                    pedido_id: pid,
+                }));
+                const { error: errorItens } = await supabase.from("itens_pedido").insert(itensParaInserir);
+                if (errorItens) throw errorItens;
+            }
+
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao salvar pedido:", error);
+            return { success: false, error: error.message };
+        }
+    };
+
     return {
         pedidos: pedidosFiltrados,
         loading,
@@ -69,5 +120,6 @@ export function usePedidos() {
         setStatusFiltro,
         recarregar: fetchDados,
         receberPedido,
+        salvarPedido,
     };
 }

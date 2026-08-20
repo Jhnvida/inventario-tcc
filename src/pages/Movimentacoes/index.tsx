@@ -1,8 +1,6 @@
 import { Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
-import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
@@ -35,8 +33,8 @@ export function Movimentacoes() {
         <div className={styles.container}>
             <header className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>Movimentações de Estoque</h1>
-                    <p className={styles.subtitle}>Histórico completo de entradas e saídas.</p>
+                    <h1 className={styles.title}>Histórico de Movimentações</h1>
+                    <p className={styles.subtitle}>Auditoria de entradas e saídas de estoque.</p>
                 </div>
                 <Button onClick={() => setIsModalOpen(true)}>
                     <Plus size={18} />
@@ -44,80 +42,87 @@ export function Movimentacoes() {
                 </Button>
             </header>
 
-            <Card className={styles.filterCard}>
-                <div className={styles.filterGrid}>
-                    <div className={styles.searchWrapper}>
-                        <Search className={styles.searchIcon} size={18} />
-                        <Input
-                            placeholder="Buscar por produto ou SKU..."
-                            value={busca}
-                            onChange={(e) => setBusca(e.target.value)}
-                            className={styles.searchInput}
-                        />
-                    </div>
-                    <div>
-                        <Select value={produtoFiltro} onChange={(e) => setProdutoFiltro(e.target.value)}>
-                            <option value="">Todos os produtos</option>
-                            {produtos.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.nome}
-                                </option>
-                            ))}
-                        </Select>
-                    </div>
-                    <div>
-                        <Select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)}>
-                            <option value="">Todos os tipos</option>
-                            <option value="entrada">Entradas</option>
-                            <option value="saida">Saídas</option>
-                        </Select>
-                    </div>
+            <div className={styles.filter_grid}>
+                <div className={styles.search_wrapper}>
+                    <Search size={18} className={styles.search_icon} />
+                    <Input
+                        placeholder="Buscar por produto ou SKU..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        className={styles.search_input}
+                    />
                 </div>
-            </Card>
+                <div>
+                    <Select value={produtoFiltro} onChange={(e) => setProdutoFiltro(e.target.value)}>
+                        <option value="">Todos os produtos</option>
+                        {produtos.map((p) => (
+                            <option key={p.id} value={p.id}>
+                                {p.nome}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+                <div>
+                    <Select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)}>
+                        <option value="">Todos os tipos</option>
+                        <option value="entrada">Entradas</option>
+                        <option value="saida">Saídas</option>
+                    </Select>
+                </div>
+            </div>
 
-            <Card padding="none" className={styles.tableCard}>
-                <div className={styles.tableContainer}>
-                    {loading ? (
-                        <div className={styles.emptyState}>Carregando histórico...</div>
-                    ) : movimentacoes.length === 0 ? (
-                        <div className={styles.emptyState}>Nenhuma movimentação encontrada.</div>
-                    ) : (
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Data / Hora</th>
-                                    <th>Produto</th>
-                                    <th>SKU</th>
-                                    <th>Tipo</th>
-                                    <th style={{ textAlign: "right" }}>Quantidade</th>
-                                    <th>Responsável</th>
-                                    <th>Motivo</th>
+            <div className={styles.table_container}>
+                {loading ? (
+                    <div className={styles.loading_state}>Carregando histórico...</div>
+                ) : movimentacoes.length === 0 ? (
+                    <div className={styles.empty_state}>Nenhuma movimentação encontrada.</div>
+                ) : (
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Produto</th>
+                                <th className={styles.text_right}>Qtd.</th>
+                                <th>Responsável</th>
+                                <th>Motivo</th>
+                                <th>Data e Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {movimentacoes.map((mov) => (
+                                <tr key={mov.id}>
+                                    <td>
+                                        <div className={styles.flex_center_gap8}>
+                                            <div
+                                                style={{
+                                                    width: "8px",
+                                                    height: "8px",
+                                                    borderRadius: "50%",
+                                                    backgroundColor:
+                                                        mov.tipo === "entrada"
+                                                            ? "var(--color-success-text)"
+                                                            : "var(--color-danger-text)",
+                                                }}
+                                            ></div>
+                                            <span className={styles.text_capitalize_fw500}>{mov.tipo}</span>
+                                        </div>
+                                    </td>
+                                    <td className={styles.fw500}>{mov.produtos?.nome || "-"}</td>
+                                    <td
+                                        className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} ${styles.text_right} ${styles.fw600}`}
+                                    >
+                                        {mov.tipo === "entrada" ? "+" : "-"}
+                                        {mov.quantidade}
+                                    </td>
+                                    <td>{mov.responsavel}</td>
+                                    <td className={styles.text_secondary}>{mov.motivo || "-"}</td>
+                                    <td className={styles.text_secondary}>{formatDate(mov.criada_em)}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {movimentacoes.map((mov) => (
-                                    <tr key={mov.id}>
-                                        <td className={styles.textSecondary}>{formatDate(mov.criada_em)}</td>
-                                        <td className={styles.fw500}>{mov.produtos?.nome || "-"}</td>
-                                        <td className={styles.textSecondary}>{mov.produtos?.sku || "-"}</td>
-                                        <td>
-                                            <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
-                                                {mov.tipo}
-                                            </Badge>
-                                        </td>
-                                        <td style={{ textAlign: "right", fontWeight: 600 }}>
-                                            {mov.tipo === "entrada" ? "+" : "-"}
-                                            {mov.quantidade}
-                                        </td>
-                                        <td className={styles.textSecondary}>{mov.responsavel}</td>
-                                        <td className={styles.textSecondary}>{mov.motivo || "-"}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
-            </Card>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
 
             <MovimentacaoFormModal
                 isOpen={isModalOpen}

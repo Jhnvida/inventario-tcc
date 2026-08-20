@@ -10,21 +10,26 @@
 }
 
 .success {
-    background-color: var(--status-success-bg);
-    color: var(--status-success-text);
+    background-color: var(--color-success-bg);
+    color: var(--color-success-text);
 }
 
 .critical {
-    background-color: var(--status-critical-bg);
-    color: var(--status-critical-text);
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-text);
+}
+
+.warning {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .draft {
-    background-color: var(--status-draft-bg);
-    color: var(--status-draft-text);
+    background-color: var(--color-neutral-bg);
+    color: var(--color-neutral-text);
 }
 
 .neutral {
-    background-color: #f1f5f9;
-    color: #64748b;
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-secondary);
 }

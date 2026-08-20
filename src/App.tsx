@@ -1,24 +1,34 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { PrivateRoute } from "./components/PrivateRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 import { Fornecedores } from "./pages/Fornecedores";
+import { Login } from "./pages/Login";
 import { Movimentacoes } from "./pages/Movimentacoes";
 import { Pedidos } from "./pages/Pedidos";
 import { Produtos } from "./pages/Produtos";
 
 export function App() {
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="produtos" element={<Produtos />} />
-                    <Route path="movimentacoes" element={<Movimentacoes />} />
-                    <Route path="pedidos" element={<Pedidos />} />
-                    <Route path="fornecedores" element={<Fornecedores />} />
+        <AuthProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+
+                    <Route element={<PrivateRoute />}>
+                        <Route path="/" element={<Layout />}>
+                            <Route index element={<Dashboard />} />
+                            <Route path="produtos" element={<Produtos />} />
+                            <Route path="movimentacoes" element={<Movimentacoes />} />
+                            <Route path="pedidos" element={<Pedidos />} />
+                            <Route path="fornecedores" element={<Fornecedores />} />
+                        </Route>
+                    </Route>
+
                     <Route path="*" element={<Navigate to="/" replace />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
     );
 }

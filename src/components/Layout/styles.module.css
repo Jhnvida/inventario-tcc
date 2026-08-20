@@ -1,103 +1,180 @@
-.layoutContainer {
+.app_layout {
     display: flex;
-    min-height: 100vh;
-    background-color: var(--bg-app);
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--color-background);
+    overflow: hidden;
 }
 
 .sidebar {
     width: 260px;
-    background-color: var(--bg-card);
-    border-right: 1px solid var(--border-color);
+    background-color: var(--color-surface);
+    border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 }
 
-.logo {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+.sidebar_header {
+    padding: 24px 20px;
 }
 
-.logo h2 {
-    font-size: 1.25rem;
+.sidebarHeader h2 {
+    font-size: 18px;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin: 0;
 }
 
-.nav {
-    padding: 1.5rem 1rem;
+.sidebar_nav {
+    flex: 1;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 8px;
+    overflow-y: auto;
 }
 
-.navItem {
+.nav_item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius);
-    color: var(--text-secondary);
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    text-decoration: none;
     font-weight: 500;
+    font-size: 14px;
     transition: var(--transition);
 }
 
-.navItem:hover {
-    background-color: #f1f5f9;
-    color: var(--text-primary);
+.nav_item:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-primary);
 }
 
-.active {
-    background-color: #e0e7ff;
-    color: var(--primary-color);
+.nav_item_active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
 }
 
-.active:hover {
-    background-color: #e0e7ff;
+.nav_item_active:hover {
+    background-color: var(--color-primary-light);
 }
 
-.mainContent {
+.sidebar_footer {
+    padding: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+.main_content {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-.header {
+.topbar {
     height: 64px;
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    padding: 0 2rem;
+    justify-content: space-between;
+    padding: 0 32px;
+    flex-shrink: 0;
 }
 
-.userInfo {
+.content_area {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+}
+
+.flex {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
 }
 
-.avatar {
-    width: 32px;
-    height: 32px;
-    background-color: var(--primary-color);
-    color: #fff;
-    border-radius: 50%;
+.items_center {
+    align-items: center;
+}
+
+.gap2 {
+    gap: 8px;
+}
+
+.gap4 {
+    gap: 16px;
+}
+
+.text_secondary {
+    color: var(--color-text-secondary);
+}
+
+.search_input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 300px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+
+.search_input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.icon_button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    padding: 8px;
+    border-radius: 50%;
+    transition: var(--transition);
 }
 
-.userName {
+.icon_button:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+
+.user_info_container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.user_avatar {
+    background: var(--color-surface-hover);
+    padding: 8px;
+    border-radius: var(--radius-md);
+}
+
+.user_details {
+    overflow: hidden;
+}
+
+.user_name {
+    font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: var(--color-text-primary);
 }
 
-.pageContent {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
+.user_email {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

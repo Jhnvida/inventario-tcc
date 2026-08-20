@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
 import { supabase } from "../../lib/supabase";
 import type { Categoria, Produto } from "../../types";
+import styles from "./styles.module.css";
 
 interface ProdutoFormModalProps {
     isOpen: boolean;
@@ -54,7 +55,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
         setError("");
     }, [produtoToEdit, isOpen]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -62,7 +63,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -129,7 +130,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Editar Produto" : "Novo Produto"} width="large">
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <form onSubmit={handleSubmit} className={styles.form_container}>
                 {error && (
                     <div
                         style={{
@@ -143,7 +144,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     </div>
                 )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className={styles.grid2}>
                     <Input label="Nome do Produto" name="nome" value={formData.nome} onChange={handleChange} required />
                     <Input
                         label="SKU (Código Único)"
@@ -154,7 +155,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className={styles.grid2}>
                     <Select label="Categoria" name="categoria_id" value={formData.categoria_id} onChange={handleChange}>
                         <option value="">Selecione uma categoria...</option>
                         {categorias.map((cat) => (
@@ -172,7 +173,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+                <div className={styles.grid3}>
                     <Input
                         label="Qtd. Atual"
                         name="quantidade"
@@ -204,7 +205,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     />
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+                <div className={styles.form_actions}>
                     <Button type="button" variant="ghost" onClick={onClose}>
                         Cancelar
                     </Button>

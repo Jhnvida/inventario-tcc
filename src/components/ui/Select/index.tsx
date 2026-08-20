@@ -13,12 +13,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                 {label && <label className={styles.label}>{label}</label>}
                 <select
                     ref={ref}
-                    className={`${styles.select} ${error ? styles.selectError : ""} ${className}`}
+                    className={`${styles.select} ${error ? styles.select_error : ""} ${className}`}
                     {...props}
                 >
                     {children}
                 </select>
-                {error && <span className={styles.errorMessage}>{error}</span>}
+                {error && <span className={styles.error_message}>{error}</span>}
             </div>
         );
     },

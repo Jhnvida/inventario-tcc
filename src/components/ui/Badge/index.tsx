@@ -3,7 +3,7 @@ import styles from "./styles.module.css";
 
 interface BadgeProps {
     children: ReactNode;
-    variant?: "success" | "critical" | "draft" | "neutral";
+    variant?: "success" | "critical" | "draft" | "neutral" | "warning";
     className?: string;
 }
 

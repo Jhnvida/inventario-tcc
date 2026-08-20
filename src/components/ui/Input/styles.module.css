@@ -8,45 +8,45 @@
 .label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .input {
     width: 100%;
     padding: 0.625rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    background-color: var(--bg-card);
-    color: var(--text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
     font-size: 0.875rem;
     transition: var(--transition);
     outline: none;
 }
 
 .input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
 }
 
 .input::placeholder {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .input:disabled {
-    background-color: #f8fafc;
-    color: var(--text-secondary);
+    background-color: var(--color-bg);
+    color: var(--color-text-secondary);
     cursor: not-allowed;
 }
 
-.inputError {
-    border-color: var(--status-critical-text);
+.input_error {
+    border-color: var(--color-danger-text);
 }
 
-.inputError:focus {
+.input_error:focus {
     box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
 }
 
-.errorMessage {
+.error_message {
     font-size: 0.75rem;
-    color: var(--status-critical-text);
+    color: var(--color-danger-text);
 }

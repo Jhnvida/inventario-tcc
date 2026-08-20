@@ -2,7 +2,6 @@ import { Edit2, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
-import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { useProdutos, type ProdutoComCategoria } from "../../hooks/useProdutos";
@@ -46,87 +45,79 @@ export function Produtos() {
                 </Button>
             </header>
 
-            <Card className={styles.filterCard}>
-                <div className={styles.filterGrid}>
-                    <div className={styles.searchWrapper}>
-                        <Search className={styles.searchIcon} size={18} />
-                        <Input
-                            placeholder="Buscar por nome ou SKU..."
-                            value={busca}
-                            onChange={(e) => setBusca(e.target.value)}
-                            className={styles.searchInput}
-                        />
-                    </div>
-                    <div>
-                        <Select value={categoriaFiltro} onChange={(e) => setCategoriaFiltro(e.target.value)}>
-                            <option value="">Todas as categorias</option>
-                            {categorias.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.nome}
-                                </option>
-                            ))}
-                        </Select>
-                    </div>
+            <div className={styles.filter_grid}>
+                <div className={styles.search_wrapper}>
+                    <Search size={18} className={styles.search_icon} />
+                    <Input
+                        placeholder="Buscar por nome ou SKU..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        className={styles.search_input}
+                    />
                 </div>
-            </Card>
+                <div>
+                    <Select value={categoriaFiltro} onChange={(e) => setCategoriaFiltro(e.target.value)}>
+                        <option value="">Todas as categorias</option>
+                        {categorias.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.nome}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+            </div>
 
-            <Card padding="none" className={styles.tableCard}>
-                <div className={styles.tableContainer}>
-                    {loading ? (
-                        <div className={styles.emptyState}>Carregando produtos...</div>
-                    ) : produtos.length === 0 ? (
-                        <div className={styles.emptyState}>Nenhum produto encontrado.</div>
-                    ) : (
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Nome do Produto</th>
-                                    <th>SKU</th>
-                                    <th>Categoria</th>
-                                    <th>Preço</th>
-                                    <th style={{ textAlign: "right" }}>Estoque</th>
-                                    <th>Status</th>
-                                    <th style={{ textAlign: "center" }}>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {produtos.map((produto) => {
-                                    const isCritico = produto.quantidade <= produto.estoque_minimo;
-                                    return (
-                                        <tr key={produto.id}>
-                                            <td className={styles.fw500}>{produto.nome}</td>
-                                            <td className={styles.textSecondary}>{produto.sku}</td>
-                                            <td>
-                                                <Badge variant="neutral">
-                                                    {produto.categorias?.nome || "Sem Categoria"}
-                                                </Badge>
-                                            </td>
-                                            <td>{formatCurrency(produto.preco)}</td>
-                                            <td style={{ textAlign: "right", fontWeight: 600 }}>
-                                                {produto.quantidade}
-                                            </td>
-                                            <td>
-                                                <Badge variant={isCritico ? "critical" : "success"}>
-                                                    {isCritico ? "Crítico" : "Normal"}
-                                                </Badge>
-                                            </td>
-                                            <td style={{ textAlign: "center" }}>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => handleOpenEdit(produto)}
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
-            </Card>
+            <div className={styles.table_container}>
+                {loading ? (
+                    <div className={styles.loading_state}>Carregando produtos...</div>
+                ) : produtos.length === 0 ? (
+                    <div className={styles.empty_state}>Nenhum produto encontrado.</div>
+                ) : (
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>SKU</th>
+                                <th>Categoria</th>
+                                <th>Preço Un.</th>
+                                <th className={styles.text_right}>Estoque</th>
+                                <th className={styles.text_center}>Status</th>
+                                <th className={styles.text_center}>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {produtos.map((produto) => {
+                                const isCritico = produto.quantidade <= produto.estoque_minimo;
+                                return (
+                                    <tr key={produto.id}>
+                                        <td className={styles.fw500}>{produto.nome}</td>
+                                        <td className={styles.text_monospace}>{produto.sku}</td>
+                                        <td className={styles.text_secondary}>
+                                            {produto.categorias?.nome || "Sem Categoria"}
+                                        </td>
+                                        <td>{formatCurrency(produto.preco)}</td>
+                                        <td className={`${styles.text_right} ${styles.fw600}`}>{produto.quantidade}</td>
+                                        <td className={styles.text_center}>
+                                            <Badge variant={isCritico ? "critical" : "success"}>
+                                                {isCritico ? "Crítico" : "Normal"}
+                                            </Badge>
+                                        </td>
+                                        <td className={styles.text_center}>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleOpenEdit(produto)}
+                                                title="Editar"
+                                            >
+                                                <Edit2 size={16} />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                )}
+            </div>
 
             <ProdutoFormModal
                 isOpen={isModalOpen}

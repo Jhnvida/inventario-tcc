@@ -1,7 +1,24 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { Dashboard } from "./pages/Dashboard";
+import { Fornecedores } from "./pages/Fornecedores";
+import { Movimentacoes } from "./pages/Movimentacoes";
+import { Pedidos } from "./pages/Pedidos";
+import { Produtos } from "./pages/Produtos";
+
 export function App() {
     return (
-        <>
-            <h1>Olá, mundo!</h1>
-        </>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="produtos" element={<Produtos />} />
+                    <Route path="movimentacoes" element={<Movimentacoes />} />
+                    <Route path="pedidos" element={<Pedidos />} />
+                    <Route path="fornecedores" element={<Fornecedores />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
     );
 }

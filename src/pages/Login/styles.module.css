@@ -21,7 +21,7 @@
 
     color: white;
 
-    background: linear-gradient(135deg, var(--color-primary), #334155);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-border-focus));
 }
 
 .login_left_content {
@@ -43,7 +43,7 @@
 .loginLeft p {
     font-size: 18px;
     line-height: 1.6;
-    color: #cbd5e1;
+    color: var(--color-text-muted);
 }
 
 .circle1 {
@@ -55,7 +55,7 @@
     height: 400px;
     border-radius: 50%;
 
-    background: rgb(255 255 255 / 3%);
+    background: rgb(255 255 255 / 5%);
 }
 
 .circle2 {
@@ -67,7 +67,7 @@
     height: 200px;
     border-radius: 50%;
 
-    background: rgb(255 255 255 / 4%);
+    background: rgb(255 255 255 / 8%);
 }
 
 .login_right {

@@ -1,6 +1,6 @@
 import {
     ArrowLeftRight,
-    Bell,
+    Brain,
     LayoutDashboard,
     LogOut,
     Package,
@@ -9,15 +9,40 @@ import {
     UserCog,
     Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
+import { ChatSidebar } from "../ChatSidebar";
 import styles from "./styles.module.css";
 
 export function Layout() {
     const { user, signOut } = useAuth();
     const [userName, setUserName] = useState<string>(user?.user_metadata?.nome || "Usuário Logado");
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const navSections = [
+        {
+            title: "Visão Geral",
+            items: [{ path: "/", label: "Dashboard", icon: LayoutDashboard }],
+        },
+        {
+            title: "Gestão",
+            items: [
+                { path: "/produtos", label: "Produtos", icon: Package },
+                { path: "/movimentacoes", label: "Movimentações", icon: ArrowLeftRight },
+                { path: "/pedidos", label: "Pedidos", icon: ShoppingCart },
+            ],
+        },
+        {
+            title: "Cadastros",
+            items: [
+                { path: "/fornecedores", label: "Fornecedores", icon: Users },
+                { path: "/categorias", label: "Categorias", icon: Tags },
+                { path: "/usuarios", label: "Usuários", icon: UserCog },
+            ],
+        },
+    ];
 
     useEffect(() => {
         async function fetchUserName() {
@@ -48,61 +73,32 @@ export function Layout() {
                 </div>
 
                 <nav className={styles.sidebar_nav}>
-                    <NavLink
-                        to="/"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <LayoutDashboard size={18} />
-                        Dashboard
-                    </NavLink>
+                    {navSections.map((section) => (
+                        <Fragment key={section.title}>
+                            <div className={styles.nav_section}>{section.title}</div>
+                            {section.items.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    className={({ isActive }) =>
+                                        `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`
+                                    }
+                                >
+                                    <item.icon size={18} />
+                                    {item.label}
+                                </NavLink>
+                            ))}
+                        </Fragment>
+                    ))}
 
-                    <NavLink
-                        to="/produtos"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
+                    <div className={styles.nav_section}>Ferramentas</div>
+                    <button
+                        className={`${styles.nav_item} ${styles.sidebar_btn} ${isChatOpen ? styles.nav_item_active : ""}`}
+                        onClick={() => setIsChatOpen(!isChatOpen)}
                     >
-                        <Package size={18} />
-                        Produtos
-                    </NavLink>
-
-                    <NavLink
-                        to="/movimentacoes"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <ArrowLeftRight size={18} />
-                        Movimentações
-                    </NavLink>
-
-                    <NavLink
-                        to="/pedidos"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <ShoppingCart size={18} />
-                        Pedidos
-                    </NavLink>
-
-                    <NavLink
-                        to="/fornecedores"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <Users size={18} />
-                        Fornecedores
-                    </NavLink>
-
-                    <NavLink
-                        to="/categorias"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <Tags size={18} />
-                        Categorias
-                    </NavLink>
-
-                    <NavLink
-                        to="/usuarios"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
-                    >
-                        <UserCog size={18} />
-                        Usuários
-                    </NavLink>
+                        <Brain size={18} />
+                        Assistente IA
+                    </button>
                 </nav>
 
                 <div className={styles.sidebar_footer}>
@@ -112,33 +108,22 @@ export function Layout() {
                             <div className={styles.user_email}>{user?.email}</div>
                         </div>
                     </div>
-                    <button
-                        className={styles.nav_item}
-                        style={{ width: "100%", background: "transparent", border: "none" }}
-                        onClick={signOut}
-                    >
-                        <LogOut size={18} />
-                        Sair
-                    </button>
+                    <div className={styles.footer_actions}>
+                        <button className={`${styles.nav_item} ${styles.sidebar_btn}`} onClick={signOut}>
+                            <LogOut size={18} />
+                            Sair
+                        </button>
+                    </div>
                 </div>
             </aside>
 
             <main className={styles.main_content}>
-                <header className={styles.topbar}>
-                    <div className={`${styles.flex} ${styles.items_center} ${styles.gap2} ${styles.text_secondary}`}>
-                        {/* Removida a barra de busca a pedido do usuário */}
-                    </div>
-                    <div className={`${styles.flex} ${styles.items_center} ${styles.gap4}`}>
-                        <button className={styles.icon_button}>
-                            <Bell size={20} />
-                        </button>
-                    </div>
-                </header>
-
                 <div className={styles.content_area}>
                     <Outlet />
                 </div>
             </main>
+
+            <ChatSidebar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
     );
 }

@@ -21,11 +21,11 @@
 }
 
 .edit_icon {
-    color: var(--color-primary, #2563eb);
+    color: var(--color-primary);
 }
 
 .action_btn:hover .edit_icon {
-    color: var(--color-primary, #2563eb);
+    color: var(--color-primary);
 }
 
 .form {
@@ -54,7 +54,7 @@
 
 .error_message {
     font-size: 14px;
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger-text);
 }
 
 .form_actions {

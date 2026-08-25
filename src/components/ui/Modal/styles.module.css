@@ -1,17 +1,15 @@
 .overlay {
     position: fixed;
     z-index: 1000;
-    top: 0;
-    left: 0;
+    inset: 0;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    width: 100vw;
-    height: 100vh;
+    padding: 16px;
 
-    background-color: rgb(15 23 42 / 40%);
+    background-color: var(--color-overlay);
     backdrop-filter: blur(4px);
 }
 
@@ -69,7 +67,7 @@
 
 .close_btn:hover {
     color: var(--color-text-primary);
-    background-color: #f1f5f9;
+    background-color: var(--color-surface-hover);
 }
 
 .content {

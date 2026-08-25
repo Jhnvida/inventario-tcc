@@ -28,7 +28,7 @@
 
 .input:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgb(15 23 42 / 10%);
+    box-shadow: var(--shadow-focus);
 }
 
 .input::placeholder {
@@ -46,7 +46,7 @@
 }
 
 .input_error:focus {
-    box-shadow: 0 0 0 3px rgb(185 28 28 / 10%);
+    box-shadow: var(--shadow-focus-danger);
 }
 
 .error_message {

@@ -23,11 +23,11 @@
 }
 
 .danger_icon {
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger-text);
 }
 
 .action_btn:hover .danger_icon {
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger-text);
 }
 
 .form {

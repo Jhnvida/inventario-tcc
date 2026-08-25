@@ -1,15 +1,15 @@
 :root {
     --font-family-base: "Inter", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, helvetica, arial, sans-serif;
-    --color-bg: #f8fafc;
-    --color-surface: #fff;
-    --color-surface-hover: #f1f5f9;
-    --color-border: #e2e8f0;
-    --color-border-focus: #0f172a;
-    --color-text-primary: #0f172a;
+    --color-bg: #e2e8f0;
+    --color-surface: #f1f5f9;
+    --color-surface-hover: #e2e8f0;
+    --color-border: #cbd5e1;
+    --color-border-focus: #475569;
+    --color-text-primary: #334155;
     --color-text-secondary: #64748b;
     --color-text-muted: #94a3b8;
-    --color-primary: #0f172a;
-    --color-primary-hover: #1e293b;
+    --color-primary: #334155;
+    --color-primary-hover: #475569;
     --color-primary-text: #fff;
     --color-success-bg: #dcfce7;
     --color-success-text: #15803d;
@@ -19,14 +19,17 @@
     --color-warning-text: #b45309;
     --color-neutral-bg: #f1f5f9;
     --color-neutral-text: #475569;
+    --color-overlay: rgb(51 65 85 / 40%);
+    --shadow-focus: 0 0 0 3px rgb(51 65 85 / 15%);
+    --shadow-focus-danger: 0 0 0 3px rgb(185 28 28 / 15%);
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
 
     /* Premium UI Extras */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 5%);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 8%), 0 2px 4px -2px rgb(0 0 0 / 8%);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 8%), 0 4px 6px -4px rgb(0 0 0 / 8%);
     --transition: none;
 }
 
@@ -78,11 +81,11 @@ ul {
 
 ::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background: #cbd5e1;
+    background: var(--color-border);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--color-text-muted);
 }
 
 /* Page Global Layout */

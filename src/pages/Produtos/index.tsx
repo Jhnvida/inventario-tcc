@@ -1,4 +1,5 @@
 import { Edit2, Plus, Search } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -81,11 +82,24 @@ export function Produtos() {
                                 <th className="text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <motion.tbody
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+                            }}
+                        >
                             {produtos.map((produto) => {
                                 const isCritico = produto.quantidade <= produto.estoque_minimo;
                                 return (
-                                    <tr key={produto.id}>
+                                    <motion.tr
+                                        key={produto.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
+                                    >
                                         <td className="fw500">{produto.nome}</td>
                                         <td className="text-monospace">{produto.sku}</td>
                                         <td className="text-secondary">
@@ -107,10 +121,10 @@ export function Produtos() {
                                                 <Edit2 size={16} />
                                             </Button>
                                         </td>
-                                    </tr>
+                                    </motion.tr>
                                 );
                             })}
-                        </tbody>
+                        </motion.tbody>
                     </table>
                 )}
             </div>

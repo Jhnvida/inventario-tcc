@@ -1,5 +1,7 @@
 import { Plus, Search } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
+import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -85,24 +87,29 @@ export function Movimentacoes() {
                                 <th>Data e Hora</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <motion.tbody
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: {
+                                    opacity: 1,
+                                    transition: { staggerChildren: 0.05 },
+                                },
+                            }}
+                        >
                             {movimentacoes.map((mov) => (
-                                <tr key={mov.id}>
+                                <motion.tr
+                                    key={mov.id}
+                                    variants={{
+                                        hidden: { opacity: 0, x: -10 },
+                                        visible: { opacity: 1, x: 0 },
+                                    }}
+                                >
                                     <td>
-                                        <div className={styles.flex_center_gap8}>
-                                            <div
-                                                style={{
-                                                    width: "8px",
-                                                    height: "8px",
-                                                    borderRadius: "50%",
-                                                    backgroundColor:
-                                                        mov.tipo === "entrada"
-                                                            ? "var(--color-success-text)"
-                                                            : "var(--color-danger-text)",
-                                                }}
-                                            ></div>
-                                            <span className={styles.text_capitalize_fw500}>{mov.tipo}</span>
-                                        </div>
+                                        <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
+                                            {mov.tipo === "entrada" ? "Entrada" : "Saída"}
+                                        </Badge>
                                     </td>
                                     <td className="fw500">{mov.produtos?.nome || "-"}</td>
                                     <td
@@ -114,9 +121,9 @@ export function Movimentacoes() {
                                     <td>{mov.responsavel}</td>
                                     <td className="text-secondary">{mov.motivo || "-"}</td>
                                     <td className="text-secondary">{formatDate(mov.criada_em)}</td>
-                                </tr>
+                                </motion.tr>
                             ))}
-                        </tbody>
+                        </motion.tbody>
                     </table>
                 )}
             </div>

@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { motion } from "motion/react";
+import { useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
@@ -15,7 +16,7 @@ export function Categorias() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleCreate = async (e: SubmitEvent) => {
         e.preventDefault();
         if (!novaCategoria.trim()) {
             setError("O nome da categoria é obrigatório.");
@@ -81,9 +82,25 @@ export function Categorias() {
                                 <th style={{ textAlign: "right" }}>Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <motion.tbody
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: {
+                                    opacity: 1,
+                                    transition: { staggerChildren: 0.05 },
+                                },
+                            }}
+                        >
                             {categorias.map((cat) => (
-                                <tr key={cat.id}>
+                                <motion.tr
+                                    key={cat.id}
+                                    variants={{
+                                        hidden: { opacity: 0, x: -10 },
+                                        visible: { opacity: 1, x: 0 },
+                                    }}
+                                >
                                     <td className="fw500">{cat.nome}</td>
                                     <td>{new Date(cat.criado_em).toLocaleDateString()}</td>
                                     <td style={{ textAlign: "right" }}>
@@ -95,9 +112,9 @@ export function Categorias() {
                                             <Trash2 size={18} className={styles.danger_icon} />
                                         </button>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ))}
-                        </tbody>
+                        </motion.tbody>
                     </table>
                 )}
             </div>

@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
 interface PageHeaderProps {
@@ -8,12 +9,17 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
     return (
-        <header className="page-header">
+        <motion.header
+            className="page-header"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+        >
             <div>
                 <h1 className="page-title">{title}</h1>
                 {subtitle && <p className="page-subtitle">{subtitle}</p>}
             </div>
             {children && <div className="page-header-actions">{children}</div>}
-        </header>
+        </motion.header>
     );
 }

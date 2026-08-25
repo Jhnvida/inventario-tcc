@@ -1,4 +1,5 @@
 import { Edit2, Plus, Search } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -68,9 +69,25 @@ export function Fornecedores() {
                                 <th className={styles.text_center}>Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <motion.tbody
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: {
+                                    opacity: 1,
+                                    transition: { staggerChildren: 0.05 },
+                                },
+                            }}
+                        >
                             {fornecedores.map((fornecedor) => (
-                                <tr key={fornecedor.id}>
+                                <motion.tr
+                                    key={fornecedor.id}
+                                    variants={{
+                                        hidden: { opacity: 0, x: -10 },
+                                        visible: { opacity: 1, x: 0 },
+                                    }}
+                                >
                                     <td className="fw500">{fornecedor.razao_social}</td>
                                     <td className="text-secondary">{fornecedor.nome_fantasia || "-"}</td>
                                     <td>{fornecedor.cnpj}</td>
@@ -89,9 +106,9 @@ export function Fornecedores() {
                                             <Edit2 size={16} />
                                         </Button>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ))}
-                        </tbody>
+                        </motion.tbody>
                     </table>
                 )}
             </div>

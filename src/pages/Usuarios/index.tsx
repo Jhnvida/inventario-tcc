@@ -1,5 +1,6 @@
 import { Edit2 } from "lucide-react";
-import { useState } from "react";
+import { motion } from "motion/react";
+import { useState, type SubmitEvent } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -32,7 +33,7 @@ export function Usuarios() {
         setIsModalOpen(true);
     };
 
-    const handleUpdate = async (e: React.FormEvent) => {
+    const handleUpdate = async (e: SubmitEvent) => {
         e.preventDefault();
         if (!selectedUser) return;
 
@@ -77,9 +78,25 @@ export function Usuarios() {
                                 <th style={{ textAlign: "right" }}>Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <motion.tbody
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: {
+                                    opacity: 1,
+                                    transition: { staggerChildren: 0.05 },
+                                },
+                            }}
+                        >
                             {usuarios.map((user) => (
-                                <tr key={user.id}>
+                                <motion.tr
+                                    key={user.id}
+                                    variants={{
+                                        hidden: { opacity: 0, x: -10 },
+                                        visible: { opacity: 1, x: 0 },
+                                    }}
+                                >
                                     <td className="fw500">{user.nome}</td>
                                     <td>{user.email}</td>
                                     <td>
@@ -102,9 +119,9 @@ export function Usuarios() {
                                             <Edit2 size={18} className={styles.edit_icon} />
                                         </button>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ))}
-                        </tbody>
+                        </motion.tbody>
                     </table>
                 )}
             </div>

@@ -1,4 +1,4 @@
-import { Edit2 } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type SubmitEvent } from "react";
 import { Badge } from "../../components/ui/Badge";
@@ -11,7 +11,7 @@ import { useUsuarios, type Usuario } from "../../hooks/useUsuarios";
 import styles from "./styles.module.css";
 
 export function Usuarios() {
-    const { usuarios, loading, updateUsuario } = useUsuarios();
+    const { usuarios, loading, updateUsuario, deleteUsuario } = useUsuarios();
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,6 +31,15 @@ export function Usuarios() {
         setAtivo(user.ativo);
         setError(null);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: string, nome: string) => {
+        if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nome}"? Essa ação é irreversível.`)) return;
+
+        const res = await deleteUsuario(id);
+        if (!res.success) {
+            alert("Erro ao excluir usuário. Ele pode estar vinculado a registros no banco.");
+        }
     };
 
     const handleUpdate = async (e: SubmitEvent) => {
@@ -117,6 +126,13 @@ export function Usuarios() {
                                             title="Editar Acessos"
                                         >
                                             <Edit2 size={18} className={styles.edit_icon} />
+                                        </button>
+                                        <button
+                                            className={styles.action_btn}
+                                            onClick={() => handleDelete(user.id, user.nome)}
+                                            title="Excluir Usuário"
+                                        >
+                                            <Trash2 size={18} className={styles.danger_icon} />
                                         </button>
                                     </td>
                                 </motion.tr>

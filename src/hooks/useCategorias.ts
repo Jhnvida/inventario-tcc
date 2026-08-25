@@ -53,5 +53,17 @@ export function useCategorias() {
         }
     }
 
-    return { categorias, loading, recarregar: fetchCategorias, deleteCategoria, createCategoria };
+    async function updateCategoria(id: string, nome: string) {
+        try {
+            const { error } = await supabase.from("categorias").update({ nome: nome.trim() }).eq("id", id);
+            if (error) throw error;
+            await fetchCategorias();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao atualizar categoria:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    return { categorias, loading, recarregar: fetchCategorias, deleteCategoria, createCategoria, updateCategoria };
 }

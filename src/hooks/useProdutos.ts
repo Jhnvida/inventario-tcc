@@ -85,6 +85,18 @@ export function useProdutos() {
         }
     }
 
+    async function deleteProduto(id: string) {
+        try {
+            const { error } = await supabase.from("produtos").delete().eq("id", id);
+            if (error) throw error;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao excluir produto:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         produtos: produtosFiltrados,
         categorias,
@@ -96,5 +108,6 @@ export function useProdutos() {
         recarregar: fetchDados,
         createProduto,
         updateProduto,
+        deleteProduto,
     };
 }

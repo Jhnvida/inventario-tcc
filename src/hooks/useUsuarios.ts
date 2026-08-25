@@ -47,5 +47,17 @@ export function useUsuarios() {
         }
     }
 
-    return { usuarios, loading, recarregar: fetchUsuarios, updateUsuario };
+    async function deleteUsuario(id: string) {
+        try {
+            const { error } = await supabase.from("usuarios").delete().eq("id", id);
+            if (error) throw error;
+            await fetchUsuarios();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao excluir usuário:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    return { usuarios, loading, recarregar: fetchUsuarios, updateUsuario, deleteUsuario };
 }

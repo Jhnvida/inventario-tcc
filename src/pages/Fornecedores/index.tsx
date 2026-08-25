@@ -1,4 +1,4 @@
-import { Edit2, Plus, Search } from "lucide-react";
+import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
@@ -11,7 +11,7 @@ import { FornecedorFormModal } from "./FornecedorFormModal";
 import styles from "./styles.module.css";
 
 export function Fornecedores() {
-    const { fornecedores, loading, busca, setBusca, recarregar } = useFornecedores();
+    const { fornecedores, loading, busca, setBusca, recarregar, deleteFornecedor } = useFornecedores();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fornecedorToEdit, setFornecedorToEdit] = useState<Fornecedor | null>(null);
@@ -30,6 +30,15 @@ export function Fornecedores() {
         setIsModalOpen(false);
         recarregar();
     }
+
+    const handleDelete = async (id: string, razao: string) => {
+        if (!window.confirm(`Tem certeza que deseja excluir o fornecedor "${razao}"?`)) return;
+
+        const res = await deleteFornecedor(id);
+        if (!res.success) {
+            alert("Erro ao excluir fornecedor. Ele pode estar vinculado a produtos ou pedidos.");
+        }
+    };
 
     return (
         <div className="page-container">
@@ -97,13 +106,25 @@ export function Fornecedores() {
                                             {fornecedor.status}
                                         </Badge>
                                     </td>
-                                    <td className="text-center">
+                                    <td
+                                        className="text-center"
+                                        style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                    >
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenEdit(fornecedor)}
                                             title="Editar"
                                         >
                                             <Edit2 size={16} />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => handleDelete(fornecedor.id, fornecedor.razao_social)}
+                                            title="Excluir"
+                                            className={styles.danger_icon}
+                                            style={{ color: "var(--color-danger-text)" }}
+                                        >
+                                            <Trash2 size={16} />
                                         </Button>
                                     </td>
                                 </motion.tr>

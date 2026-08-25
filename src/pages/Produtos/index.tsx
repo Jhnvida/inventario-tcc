@@ -1,4 +1,4 @@
-import { Edit2, Plus, Search } from "lucide-react";
+import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
@@ -10,10 +10,20 @@ import { useProdutos, type ProdutoComCategoria } from "../../hooks/useProdutos";
 import type { Produto } from "../../types";
 import { formatCurrency } from "../../utils/formatters";
 import { ProdutoFormModal } from "./ProdutoFormModal";
+import styles from "./styles.module.css";
 
 export function Produtos() {
-    const { produtos, categorias, loading, busca, setBusca, categoriaFiltro, setCategoriaFiltro, recarregar } =
-        useProdutos();
+    const {
+        produtos,
+        categorias,
+        loading,
+        busca,
+        setBusca,
+        categoriaFiltro,
+        setCategoriaFiltro,
+        recarregar,
+        deleteProduto,
+    } = useProdutos();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [produtoToEdit, setProdutoToEdit] = useState<Produto | null>(null);
@@ -31,6 +41,15 @@ export function Produtos() {
     const handleSuccess = () => {
         setIsModalOpen(false);
         recarregar();
+    };
+
+    const handleDelete = async (id: string, nome: string) => {
+        if (!window.confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) return;
+
+        const res = await deleteProduto(id);
+        if (!res.success) {
+            alert("Erro ao excluir produto. Ele pode estar vinculado a movimentações ou pedidos.");
+        }
     };
 
     return (
@@ -112,13 +131,25 @@ export function Produtos() {
                                                 {isCritico ? "Crítico" : "Normal"}
                                             </Badge>
                                         </td>
-                                        <td className="text-center">
+                                        <td
+                                            className="text-center"
+                                            style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                        >
                                             <Button
                                                 variant="ghost"
                                                 onClick={() => handleOpenEdit(produto)}
                                                 title="Editar"
                                             >
                                                 <Edit2 size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleDelete(produto.id, produto.nome)}
+                                                title="Excluir"
+                                                className={styles.danger_icon}
+                                                style={{ color: "var(--color-danger-text)" }}
+                                            >
+                                                <Trash2 size={16} />
                                             </Button>
                                         </td>
                                     </motion.tr>

@@ -53,6 +53,18 @@ export function useFornecedores() {
         }
     }
 
+    async function deleteFornecedor(id: string) {
+        try {
+            const { error } = await supabase.from("fornecedores").delete().eq("id", id);
+            if (error) throw error;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao excluir fornecedor:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         fornecedores: fornecedoresFiltrados,
         loading,
@@ -61,5 +73,6 @@ export function useFornecedores() {
         recarregar: fetchDados,
         createFornecedor,
         updateFornecedor,
+        deleteFornecedor,
     };
 }

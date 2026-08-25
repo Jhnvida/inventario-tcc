@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Edit2, Plus, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
@@ -9,14 +9,15 @@ import { useCategorias } from "../../hooks/useCategorias";
 import styles from "./styles.module.css";
 
 export function Categorias() {
-    const { categorias, loading, deleteCategoria, createCategoria } = useCategorias();
+    const { categorias, loading, deleteCategoria, createCategoria, updateCategoria } = useCategorias();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [categoriaEditando, setCategoriaEditando] = useState<{ id: string; nome: string } | null>(null);
     const [novaCategoria, setNovaCategoria] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleCreate = async (e: SubmitEvent) => {
+    const handleSave = async (e: SubmitEvent) => {
         e.preventDefault();
         if (!novaCategoria.trim()) {
             setError("O nome da categoria é obrigatório.");
@@ -26,13 +27,23 @@ export function Categorias() {
         setIsSubmitting(true);
         setError(null);
 
-        const res = await createCategoria(novaCategoria.trim());
+        let res;
+        if (categoriaEditando) {
+            res = await updateCategoria(categoriaEditando.id, novaCategoria.trim());
+        } else {
+            res = await createCategoria(novaCategoria.trim());
+        }
 
         if (res.success) {
             setIsModalOpen(false);
             setNovaCategoria("");
+            setCategoriaEditando(null);
         } else {
-            setError("Erro ao criar categoria. Verifique se já não existe uma com este nome.");
+            setError(
+                categoriaEditando
+                    ? "Erro ao atualizar categoria."
+                    : "Erro ao criar categoria. Verifique se já não existe uma com este nome.",
+            );
         }
 
         setIsSubmitting(false);
@@ -58,6 +69,7 @@ export function Categorias() {
             <PageHeader title="Categorias" subtitle="Gerencie as categorias de produtos do sistema.">
                 <Button
                     onClick={() => {
+                        setCategoriaEditando(null);
                         setIsModalOpen(true);
                         setError(null);
                         setNovaCategoria("");
@@ -106,6 +118,18 @@ export function Categorias() {
                                     <td style={{ textAlign: "right" }}>
                                         <button
                                             className={styles.action_btn}
+                                            onClick={() => {
+                                                setCategoriaEditando({ id: cat.id, nome: cat.nome });
+                                                setNovaCategoria(cat.nome);
+                                                setIsModalOpen(true);
+                                                setError(null);
+                                            }}
+                                            title="Editar"
+                                        >
+                                            <Edit2 size={18} className={styles.edit_icon} />
+                                        </button>
+                                        <button
+                                            className={styles.action_btn}
                                             onClick={() => handleDelete(cat.id, cat.nome)}
                                             title="Excluir"
                                         >
@@ -122,10 +146,10 @@ export function Categorias() {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => !isSubmitting && setIsModalOpen(false)}
-                title="Nova Categoria"
+                title={categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
                 width="small"
             >
-                <form onSubmit={handleCreate} className={styles.form}>
+                <form onSubmit={handleSave} className={styles.form}>
                     <Input
                         label="Nome da Categoria"
                         value={novaCategoria}

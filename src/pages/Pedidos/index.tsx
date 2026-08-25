@@ -1,4 +1,4 @@
-import { Edit, Eye, Plus, Search } from "lucide-react";
+import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
@@ -12,8 +12,17 @@ import { PedidoDetalhesModal } from "./PedidoDetalhesModal";
 import { PedidoFormModal } from "./PedidoFormModal";
 
 export function Pedidos() {
-    const { pedidos, loading, busca, setBusca, statusFiltro, setStatusFiltro, receberPedido, salvarPedido } =
-        usePedidos();
+    const {
+        pedidos,
+        loading,
+        busca,
+        setBusca,
+        statusFiltro,
+        setStatusFiltro,
+        receberPedido,
+        salvarPedido,
+        deletePedido,
+    } = usePedidos();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pedidoSelecionado, setPedidoSelecionado] = useState<PedidoCompleto | null>(null);
@@ -29,6 +38,15 @@ export function Pedidos() {
         setPedidoSelecionado(pedido);
         setIsModalOpen(true);
     }
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("Tem certeza que deseja excluir este pedido? Ação irreversível.")) return;
+
+        const res = await deletePedido(id);
+        if (!res.success) {
+            alert("Erro ao excluir pedido. Pode haver restrições do banco de dados.");
+        }
+    };
 
     return (
         <div className="page-container">
@@ -115,7 +133,10 @@ export function Pedidos() {
                                             {pedido.status}
                                         </Badge>
                                     </td>
-                                    <td className="text-center">
+                                    <td
+                                        className="text-center"
+                                        style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                    >
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenDetails(pedido)}
@@ -129,6 +150,14 @@ export function Pedidos() {
                                             title="Editar Pedido"
                                         >
                                             <Edit size={16} />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => handleDelete(pedido.id)}
+                                            title="Excluir"
+                                            style={{ color: "var(--color-danger-text)" }}
+                                        >
+                                            <Trash2 size={16} />
                                         </Button>
                                     </td>
                                 </motion.tr>

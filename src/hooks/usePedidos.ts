@@ -111,6 +111,18 @@ export function usePedidos() {
         }
     }
 
+    async function deletePedido(id: string) {
+        try {
+            const { error } = await supabase.from("pedidos").delete().eq("id", id);
+            if (error) throw error;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao excluir pedido:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         pedidos: pedidosFiltrados,
         loading,
@@ -121,5 +133,6 @@ export function usePedidos() {
         recarregar: fetchDados,
         receberPedido,
         salvarPedido,
+        deletePedido,
     };
 }

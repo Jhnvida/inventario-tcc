@@ -67,13 +67,24 @@ export function useAssistente() {
         } catch (error: any) {
             console.error("Erro no chat:", error);
 
+            let errorMessage = "Desculpe, ocorreu um erro ao processar sua solicitação.";
+
+            if (error.message?.includes("API")) {
+                errorMessage = "Erro de configuração: Verifique a chave da API do Gemini.";
+            } else if (
+                error.message?.includes("503") ||
+                error.message?.includes("high demand") ||
+                error.message?.includes("UNAVAILABLE")
+            ) {
+                errorMessage =
+                    "O assistente está com alta demanda no momento. Por favor, aguarde alguns instantes e tente novamente.";
+            }
+
             setMessages((prev) => [
                 ...prev,
                 {
                     id: Date.now().toString(),
-                    text: error.message.includes("API")
-                        ? "Erro de configuração: Verifique a chave da API do Gemini."
-                        : "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                    text: errorMessage,
                     sender: "ai",
                 },
             ]);

@@ -189,12 +189,12 @@
 }
 
 .spinner {
-    animation: spin 1s linear infinite;
     color: var(--color-primary);
+    animation: spin 1s linear infinite;
 }
 
 .messageBubble p {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
 }
 
 .messageBubble p:last-child {
@@ -212,14 +212,19 @@
 }
 
 .messageBubble table {
-    width: 100%;
+    overflow-x: auto;
+    display: block;
     border-collapse: collapse;
+
+    width: 100%;
     margin: 8px 0;
+
+    white-space: nowrap;
 }
 
 .messageBubble th,
 .messageBubble td {
-    border: 1px solid var(--color-border);
     padding: 6px;
+    border: 1px solid var(--color-border);
     text-align: left;
 }

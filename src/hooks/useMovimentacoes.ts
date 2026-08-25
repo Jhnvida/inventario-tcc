@@ -48,6 +48,38 @@ export function useMovimentacoes() {
         return matchBusca && matchTipo && matchProduto;
     });
 
+    async function createMovimentacao(data: {
+        produto_id: string;
+        tipo: string;
+        quantidade: number;
+        motivo: string;
+        responsavel: string;
+    }) {
+        try {
+            if (data.quantidade <= 0) {
+                throw new Error("A quantidade deve ser maior que zero.");
+            }
+            if (!data.produto_id) {
+                throw new Error("Selecione um produto.");
+            }
+
+            const { error: rpcError } = await supabase.rpc("registrar_movimentacao", {
+                p_produto_id: data.produto_id,
+                p_tipo: data.tipo,
+                p_quantidade: data.quantidade,
+                p_responsavel: data.responsavel,
+                p_motivo: data.motivo,
+            });
+
+            if (rpcError) throw rpcError;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao registrar movimentação:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         movimentacoes: movimentacoesFiltradas,
         produtos,
@@ -59,5 +91,6 @@ export function useMovimentacoes() {
         produtoFiltro,
         setProdutoFiltro,
         recarregar: fetchDados,
+        createMovimentacao,
     };
 }

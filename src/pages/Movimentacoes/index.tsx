@@ -2,6 +2,7 @@ import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Select";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import { formatDate } from "../../utils/formatters";
@@ -30,26 +31,22 @@ export function Movimentacoes() {
     };
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Histórico de Movimentações</h1>
-                    <p className={styles.subtitle}>Auditoria de entradas e saídas de estoque.</p>
-                </div>
+        <div className="page-container">
+            <PageHeader title="Histórico de Movimentações" subtitle="Auditoria de entradas e saídas de estoque.">
                 <Button onClick={() => setIsModalOpen(true)}>
-                    <Plus size={18} />
+                    <Plus size={18} style={{ marginRight: 8 }} />
                     Nova Movimentação
                 </Button>
-            </header>
+            </PageHeader>
 
-            <div className={styles.filter_grid}>
-                <div className={styles.search_wrapper}>
-                    <Search size={18} className={styles.search_icon} />
+            <div className="filter-grid">
+                <div className="search-wrapper">
+                    <Search size={18} className="search-icon" />
                     <Input
                         placeholder="Buscar por produto ou SKU..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className={styles.search_input}
+                        className="search-input"
                     />
                 </div>
                 <div>
@@ -71,18 +68,18 @@ export function Movimentacoes() {
                 </div>
             </div>
 
-            <div className={styles.table_container}>
+            <div className="table-container">
                 {loading ? (
-                    <div className={styles.loading_state}>Carregando histórico...</div>
+                    <div className="loading-state">Carregando histórico...</div>
                 ) : movimentacoes.length === 0 ? (
-                    <div className={styles.empty_state}>Nenhuma movimentação encontrada.</div>
+                    <div className="empty-state">Nenhuma movimentação encontrada.</div>
                 ) : (
-                    <table className={styles.table}>
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
                                 <th>Produto</th>
-                                <th className={styles.text_right}>Qtd.</th>
+                                <th className="text-right">Qtd.</th>
                                 <th>Responsável</th>
                                 <th>Motivo</th>
                                 <th>Data e Hora</th>
@@ -107,16 +104,16 @@ export function Movimentacoes() {
                                             <span className={styles.text_capitalize_fw500}>{mov.tipo}</span>
                                         </div>
                                     </td>
-                                    <td className={styles.fw500}>{mov.produtos?.nome || "-"}</td>
+                                    <td className="fw500">{mov.produtos?.nome || "-"}</td>
                                     <td
-                                        className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} ${styles.text_right} ${styles.fw600}`}
+                                        className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
                                     >
                                         {mov.tipo === "entrada" ? "+" : "-"}
                                         {mov.quantidade}
                                     </td>
                                     <td>{mov.responsavel}</td>
-                                    <td className={styles.text_secondary}>{mov.motivo || "-"}</td>
-                                    <td className={styles.text_secondary}>{formatDate(mov.criada_em)}</td>
+                                    <td className="text-secondary">{mov.motivo || "-"}</td>
+                                    <td className="text-secondary">{formatDate(mov.criada_em)}</td>
                                 </tr>
                             ))}
                         </tbody>

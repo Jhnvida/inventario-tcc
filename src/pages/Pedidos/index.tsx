@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Select";
 import { usePedidos, type PedidoCompleto } from "../../hooks/usePedidos";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 import { PedidoDetalhesModal } from "./PedidoDetalhesModal";
 import { PedidoFormModal } from "./PedidoFormModal";
-import styles from "./styles.module.css";
 
 export function Pedidos() {
     const { pedidos, loading, busca, setBusca, statusFiltro, setStatusFiltro, receberPedido, salvarPedido } =
@@ -19,38 +19,33 @@ export function Pedidos() {
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [pedidoEditando, setPedidoEditando] = useState<PedidoCompleto | null>(null);
 
-    const handleOpenForm = (pedido?: PedidoCompleto) => {
+    function handleOpenForm(pedido?: PedidoCompleto) {
         setPedidoEditando(pedido || null);
         setIsFormModalOpen(true);
-    };
+    }
 
-    const handleOpenDetails = (pedido: PedidoCompleto) => {
+    function handleOpenDetails(pedido: PedidoCompleto) {
         setPedidoSelecionado(pedido);
         setIsModalOpen(true);
-    };
+    }
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Pedidos de Compra</h1>
-                    <p className={styles.subtitle}>
-                        Gerencie os pedidos junto aos fornecedores e controle os recebimentos.
-                    </p>
-                </div>
+        <div className="page-container">
+            <PageHeader title="Pedidos de Compra" subtitle="Gerencie os pedidos para reposição de estoque.">
                 <Button onClick={() => handleOpenForm()}>
-                    <Plus size={20} className={styles.mr2} /> Novo Pedido
+                    <Plus size={18} style={{ marginRight: 8 }} />
+                    Novo Pedido
                 </Button>
-            </header>
+            </PageHeader>
 
-            <div className={styles.filter_grid}>
-                <div className={styles.search_wrapper}>
-                    <Search size={18} className={styles.search_icon} />
+            <div className="filter-grid">
+                <div className="search-wrapper">
+                    <Search size={18} className="search-icon" />
                     <Input
-                        placeholder="Buscar por fornecedor..."
+                        placeholder="Buscar por número do pedido..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className={styles.search_input}
+                        className="search-input"
                     />
                 </div>
                 <div>
@@ -64,33 +59,31 @@ export function Pedidos() {
                 </div>
             </div>
 
-            <div className={styles.table_container}>
+            <div className="table-container">
                 {loading ? (
-                    <div className={styles.loading_state}>Carregando pedidos...</div>
+                    <div className="loading-state">Carregando pedidos...</div>
                 ) : pedidos.length === 0 ? (
-                    <div className={styles.empty_state}>Nenhum pedido encontrado.</div>
+                    <div className="empty-state">Nenhum pedido encontrado.</div>
                 ) : (
-                    <table className={styles.table}>
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>ID Pedido</th>
                                 <th>Fornecedor</th>
                                 <th>Data de Emissão</th>
-                                <th className={styles.text_right}>Valor Total</th>
-                                <th className={styles.text_center}>Status</th>
-                                <th className={styles.text_center}>Ações</th>
+                                <th className="text-right">Valor Total</th>
+                                <th className="text-center">Status</th>
+                                <th className="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pedidos.map((pedido) => (
                                 <tr key={pedido.id}>
-                                    <td className={styles.text_monospace}>#{pedido.id.substring(0, 8)}</td>
-                                    <td className={styles.fw500}>{pedido.fornecedores?.razao_social || "-"}</td>
-                                    <td className={styles.text_secondary}>{formatDate(pedido.criado_em)}</td>
-                                    <td className={`${styles.text_right} ${styles.fw600}`}>
-                                        {formatCurrency(pedido.valor_total)}
-                                    </td>
-                                    <td className={styles.text_center}>
+                                    <td className="text-monospace fw600">#{pedido.id.substring(0, 8)}</td>
+                                    <td className="fw500">{pedido.fornecedores?.razao_social || "-"}</td>
+                                    <td className="text-secondary">{formatDate(pedido.criado_em)}</td>
+                                    <td className="text-right fw600">{formatCurrency(pedido.valor_total)}</td>
+                                    <td className="text-center">
                                         <Badge
                                             variant={
                                                 pedido.status === "concluido"
@@ -105,7 +98,7 @@ export function Pedidos() {
                                             {pedido.status}
                                         </Badge>
                                     </td>
-                                    <td className={styles.text_center}>
+                                    <td className="text-center">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenDetails(pedido)}

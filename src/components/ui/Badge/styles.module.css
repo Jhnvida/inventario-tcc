@@ -1,8 +1,10 @@
 .badge {
     display: inline-flex;
     align-items: center;
+
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
+
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -10,26 +12,26 @@
 }
 
 .success {
-    background-color: var(--color-success-bg);
     color: var(--color-success-text);
+    background-color: var(--color-success-bg);
 }
 
 .critical {
-    background-color: var(--color-danger-bg);
     color: var(--color-danger-text);
+    background-color: var(--color-danger-bg);
 }
 
 .warning {
-    background-color: var(--color-warning-bg);
     color: var(--color-warning-text);
+    background-color: var(--color-warning-bg);
 }
 
 .draft {
-    background-color: var(--color-neutral-bg);
     color: var(--color-neutral-text);
+    background-color: var(--color-neutral-bg);
 }
 
 .neutral {
-    background-color: var(--color-surface-hover);
     color: var(--color-text-secondary);
+    background-color: var(--color-surface-hover);
 }

@@ -1,12 +1,13 @@
 import { AlertTriangle, DollarSign, Package, ShoppingCart } from "lucide-react";
 import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { useDashboard } from "../../hooks/useDashboard";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 import styles from "./styles.module.css";
 
 export function Dashboard() {
-    const { loading, metricas, itensCriticos, movimentacoesRecentes } = useDashboard();
+    const { loading, metricas, itensCriticos, movimentacoesRecentes, userName } = useDashboard();
 
     if (loading) {
         return (
@@ -18,13 +19,11 @@ export function Dashboard() {
     }
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Visão Geral</h1>
-                    <p className={styles.subtitle}>Resumo do seu inventário e movimentações recentes.</p>
-                </div>
-            </header>
+        <div className="page-container">
+            <PageHeader
+                title={`Olá, ${userName || "Usuário"}!`}
+                subtitle="Resumo do seu inventário e movimentações recentes."
+            />
 
             <div className={styles.metrics_grid}>
                 <Card className={styles.metric_card} padding="medium">
@@ -68,32 +67,30 @@ export function Dashboard() {
             <div className={styles.tables_grid}>
                 <div>
                     <h2 className={styles.section_title}>Itens em Nível Crítico</h2>
-                    <div className={styles.table_container}>
+                    <div className="table-container">
                         {itensCriticos.length === 0 ? (
-                            <div className={styles.empty_state}>Nenhum produto em nível crítico.</div>
+                            <div className="empty-state">Nenhum produto em nível crítico.</div>
                         ) : (
-                            <table className={styles.table}>
+                            <table className="data-table">
                                 <thead>
                                     <tr>
                                         <th>Produto / SKU</th>
-                                        <th className={styles.text_right}>Estoque</th>
-                                        <th className={styles.text_center}>Status</th>
+                                        <th className="text-right">Estoque</th>
+                                        <th className="text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {itensCriticos.map((item) => (
                                         <tr key={item.id}>
                                             <td>
-                                                <div className={styles.fw500}>{item.nome}</div>
-                                                <div className={styles.text_monospace}>{item.sku}</div>
+                                                <div className="fw500">{item.nome}</div>
+                                                <div className="text-monospace">{item.sku}</div>
                                             </td>
-                                            <td className={`${styles.text_right} ${styles.fw600}`}>
+                                            <td className="text-right fw600">
                                                 {item.quantidade}{" "}
-                                                <span className={`${styles.text_secondary} ${styles.fw400}`}>
-                                                    / {item.estoque_minimo}
-                                                </span>
+                                                <span className="text-secondary fw400">/ {item.estoque_minimo}</span>
                                             </td>
-                                            <td className={styles.text_center}>
+                                            <td className="text-center">
                                                 <Badge variant="critical">Crítico</Badge>
                                             </td>
                                         </tr>
@@ -106,16 +103,16 @@ export function Dashboard() {
 
                 <div>
                     <h2 className={styles.section_title}>Movimentações Recentes</h2>
-                    <div className={styles.table_container}>
+                    <div className="table-container">
                         {movimentacoesRecentes.length === 0 ? (
-                            <div className={styles.empty_state}>Nenhuma movimentação registrada.</div>
+                            <div className="empty-state">Nenhuma movimentação registrada.</div>
                         ) : (
-                            <table className={styles.table}>
+                            <table className="data-table">
                                 <thead>
                                     <tr>
                                         <th>Tipo</th>
                                         <th>Produto</th>
-                                        <th className={styles.text_right}>Qtd</th>
+                                        <th className="text-right">Qtd</th>
                                         <th>Data</th>
                                     </tr>
                                 </thead>
@@ -127,14 +124,14 @@ export function Dashboard() {
                                                     {mov.tipo}
                                                 </Badge>
                                             </td>
-                                            <td className={styles.fw500}>{mov.produtos?.nome || "Desconhecido"}</td>
+                                            <td className="fw500">{mov.produtos?.nome || "Desconhecido"}</td>
                                             <td
-                                                className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} ${styles.text_right} ${styles.fw600}`}
+                                                className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
                                             >
                                                 {mov.tipo === "entrada" ? "+" : "-"}
                                                 {mov.quantidade}
                                             </td>
-                                            <td className={styles.text_secondary}>
+                                            <td className="text-secondary">
                                                 {formatDate(mov.criada_em).split(" ")[0]}
                                             </td>
                                         </tr>

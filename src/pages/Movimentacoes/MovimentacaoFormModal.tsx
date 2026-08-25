@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
-import { supabase } from "../../lib/supabase";
+import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import type { Produto } from "../../types";
 import styles from "./styles.module.css";
 
@@ -15,6 +15,7 @@ interface MovimentacaoFormModalProps {
 }
 
 export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: MovimentacaoFormModalProps) {
+    const { createMovimentacao } = useMovimentacoes();
     const [formData, setFormData] = useState({
         produto_id: "",
         tipo: "entrada",
@@ -37,32 +38,22 @@ export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: 
         setLoading(true);
         setError("");
 
-        try {
-            if (formData.quantidade <= 0) {
-                throw new Error("A quantidade deve ser maior que zero.");
-            }
-            if (!formData.produto_id) {
-                throw new Error("Selecione um produto.");
-            }
+        const res = await createMovimentacao({
+            produto_id: formData.produto_id,
+            tipo: formData.tipo,
+            quantidade: formData.quantidade,
+            responsavel: "Administrador", // Simulação do usuário logado
+            motivo: formData.motivo,
+        });
 
-            // Chama a procedure no banco de dados para garantir transação ACID
-            const { error: rpcError } = await supabase.rpc("registrar_movimentacao", {
-                p_produto_id: formData.produto_id,
-                p_tipo: formData.tipo,
-                p_quantidade: formData.quantidade,
-                p_responsavel: "Administrador", // Simulação do usuário logado
-                p_motivo: formData.motivo,
-            });
-
-            if (rpcError) throw rpcError;
-
+        if (res.success) {
             onSuccess();
             setFormData({ produto_id: "", tipo: "entrada", quantidade: 0, motivo: "" });
-        } catch (err: any) {
-            setError(err.message || "Ocorreu um erro ao registrar a movimentação.");
-        } finally {
-            setLoading(false);
+        } else {
+            setError(res.error || "Ocorreu um erro ao registrar a movimentação.");
         }
+
+        setLoading(false);
     };
 
     return (

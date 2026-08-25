@@ -29,11 +29,37 @@ export function useFornecedores() {
         return text.includes(busca.toLowerCase());
     });
 
+    async function createFornecedor(fornecedor: Partial<Fornecedor>) {
+        try {
+            const { error } = await supabase.from("fornecedores").insert([fornecedor]);
+            if (error) throw error;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao criar fornecedor:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async function updateFornecedor(id: string, fornecedor: Partial<Fornecedor>) {
+        try {
+            const { error } = await supabase.from("fornecedores").update(fornecedor).eq("id", id);
+            if (error) throw error;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao atualizar fornecedor:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         fornecedores: fornecedoresFiltrados,
         loading,
         busca,
         setBusca,
         recarregar: fetchDados,
+        createFornecedor,
+        updateFornecedor,
     };
 }

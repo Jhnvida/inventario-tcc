@@ -12,10 +12,29 @@ export function useDashboard() {
     });
     const [itensCriticos, setItensCriticos] = useState<Produto[]>([]);
     const [movimentacoesRecentes, setMovimentacoesRecentes] = useState<Movimentacao[]>([]);
+    const [userName, setUserName] = useState<string>("");
 
     useEffect(() => {
         async function fetchDashboardData() {
             try {
+                // Obter usuário atual do Supabase Auth para pegar o ID e buscar o nome atualizado
+                const { data: authData } = await supabase.auth.getUser();
+                if (authData.user) {
+                    const { data: userData } = await supabase
+                        .from("usuarios")
+                        .select("nome")
+                        .eq("id", authData.user.id)
+                        .single();
+
+                    if (userData) {
+                        setUserName(userData.nome);
+                    } else {
+                        setUserName(authData.user.user_metadata?.nome || "Usuário");
+                    }
+                } else {
+                    setUserName("Usuário");
+                }
+
                 // 1. Busca produtos
                 const { data: produtos } = await supabase
                     .from("produtos")
@@ -70,5 +89,5 @@ export function useDashboard() {
         fetchDashboardData();
     }, []);
 
-    return { loading, metricas, itensCriticos, movimentacoesRecentes };
+    return { loading, metricas, itensCriticos, movimentacoesRecentes, userName };
 }

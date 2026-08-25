@@ -40,6 +40,51 @@ export function useProdutos() {
         return matchBusca && matchCategoria;
     });
 
+    async function createProduto(produto: Partial<Produto>) {
+        try {
+            const { data: newProd, error: insertError } = await supabase
+                .from("produtos")
+                .insert([produto])
+                .select("id")
+                .single();
+
+            if (insertError) throw insertError;
+
+            // Se houver saldo inicial, dispara a movimentação
+            if (newProd && produto.quantidade && produto.quantidade > 0) {
+                const { error: movError } = await supabase.rpc("registrar_movimentacao", {
+                    p_produto_id: newProd.id,
+                    p_tipo: "entrada",
+                    p_quantidade: produto.quantidade,
+                    p_responsavel: "Administrador",
+                    p_motivo: "Saldo inicial de cadastro",
+                });
+                if (movError) console.error("Erro ao registrar mov inicial:", movError);
+            }
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao criar produto:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async function updateProduto(id: string, produto: Partial<Produto>) {
+        try {
+            const { error: updateError } = await supabase
+                .from("produtos")
+                .update({ ...produto, atualizado_em: new Date().toISOString() })
+                .eq("id", id);
+
+            if (updateError) throw updateError;
+            await fetchDados();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Erro ao atualizar produto:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
     return {
         produtos: produtosFiltrados,
         categorias,
@@ -49,5 +94,7 @@ export function useProdutos() {
         categoriaFiltro,
         setCategoriaFiltro,
         recarregar: fetchDados,
+        createProduto,
+        updateProduto,
     };
 }

@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Select";
 import { useProdutos, type ProdutoComCategoria } from "../../hooks/useProdutos";
 import type { Produto } from "../../types";
 import { formatCurrency } from "../../utils/formatters";
 import { ProdutoFormModal } from "./ProdutoFormModal";
-import styles from "./styles.module.css";
 
 export function Produtos() {
     const { produtos, categorias, loading, busca, setBusca, categoriaFiltro, setCategoriaFiltro, recarregar } =
@@ -33,26 +33,22 @@ export function Produtos() {
     };
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Produtos</h1>
-                    <p className={styles.subtitle}>Gerencie o catálogo de produtos e seus níveis de estoque.</p>
-                </div>
+        <div className="page-container">
+            <PageHeader title="Produtos" subtitle="Gerencie o catálogo de produtos e seus níveis de estoque.">
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={18} style={{ marginRight: 8 }} />
                     Novo Produto
                 </Button>
-            </header>
+            </PageHeader>
 
-            <div className={styles.filter_grid}>
-                <div className={styles.search_wrapper}>
-                    <Search size={18} className={styles.search_icon} />
+            <div className="filter-grid">
+                <div className="search-wrapper">
+                    <Search size={18} className="search-icon" />
                     <Input
                         placeholder="Buscar por nome ou SKU..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className={styles.search_input}
+                        className="search-input"
                     />
                 </div>
                 <div>
@@ -67,22 +63,22 @@ export function Produtos() {
                 </div>
             </div>
 
-            <div className={styles.table_container}>
+            <div className="table-container">
                 {loading ? (
-                    <div className={styles.loading_state}>Carregando produtos...</div>
+                    <div className="loading-state">Carregando produtos...</div>
                 ) : produtos.length === 0 ? (
-                    <div className={styles.empty_state}>Nenhum produto encontrado.</div>
+                    <div className="empty-state">Nenhum produto encontrado.</div>
                 ) : (
-                    <table className={styles.table}>
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Produto</th>
                                 <th>SKU</th>
                                 <th>Categoria</th>
                                 <th>Preço Un.</th>
-                                <th className={styles.text_right}>Estoque</th>
-                                <th className={styles.text_center}>Status</th>
-                                <th className={styles.text_center}>Ações</th>
+                                <th className="text-right">Estoque</th>
+                                <th className="text-center">Status</th>
+                                <th className="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,19 +86,19 @@ export function Produtos() {
                                 const isCritico = produto.quantidade <= produto.estoque_minimo;
                                 return (
                                     <tr key={produto.id}>
-                                        <td className={styles.fw500}>{produto.nome}</td>
-                                        <td className={styles.text_monospace}>{produto.sku}</td>
-                                        <td className={styles.text_secondary}>
+                                        <td className="fw500">{produto.nome}</td>
+                                        <td className="text-monospace">{produto.sku}</td>
+                                        <td className="text-secondary">
                                             {produto.categorias?.nome || "Sem Categoria"}
                                         </td>
                                         <td>{formatCurrency(produto.preco)}</td>
-                                        <td className={`${styles.text_right} ${styles.fw600}`}>{produto.quantidade}</td>
-                                        <td className={styles.text_center}>
+                                        <td className="text-right fw600">{produto.quantidade}</td>
+                                        <td className="text-center">
                                             <Badge variant={isCritico ? "critical" : "success"}>
                                                 {isCritico ? "Crítico" : "Normal"}
                                             </Badge>
                                         </td>
-                                        <td className={styles.text_center}>
+                                        <td className="text-center">
                                             <Button
                                                 variant="ghost"
                                                 onClick={() => handleOpenEdit(produto)}

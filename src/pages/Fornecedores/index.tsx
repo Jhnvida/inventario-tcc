@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { useFornecedores } from "../../hooks/useFornecedores";
 import type { Fornecedor } from "../../types";
 import { FornecedorFormModal } from "./FornecedorFormModal";
@@ -14,53 +15,49 @@ export function Fornecedores() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fornecedorToEdit, setFornecedorToEdit] = useState<Fornecedor | null>(null);
 
-    const handleOpenCreate = () => {
+    function handleOpenCreate() {
         setFornecedorToEdit(null);
         setIsModalOpen(true);
-    };
+    }
 
-    const handleOpenEdit = (fornecedor: Fornecedor) => {
+    function handleOpenEdit(fornecedor: Fornecedor) {
         setFornecedorToEdit(fornecedor);
         setIsModalOpen(true);
-    };
+    }
 
-    const handleSuccess = () => {
+    function handleSuccess() {
         setIsModalOpen(false);
         recarregar();
-    };
+    }
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Fornecedores</h1>
-                    <p className={styles.subtitle}>Gerencie a base de parceiros comerciais e distribuidores.</p>
-                </div>
+        <div className="page-container">
+            <PageHeader title="Fornecedores" subtitle="Gerencie a base de parceiros comerciais e distribuidores.">
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={18} style={{ marginRight: 8 }} />
                     Novo Fornecedor
                 </Button>
-            </header>
+            </PageHeader>
 
-            <div className={styles.filter_grid}>
-                <div className={styles.search_wrapper}>
-                    <Search size={18} className={styles.search_icon} />
+            <div className="filter-grid">
+                <div className="search-wrapper">
+                    <Search size={18} className="search-icon" />
                     <Input
                         placeholder="Buscar por razão social, nome fantasia ou CNPJ..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className={styles.search_input}
+                        className="search-input"
                     />
                 </div>
             </div>
 
-            <div className={styles.table_container}>
+            <div className="table-container">
                 {loading ? (
-                    <div className={styles.loading_state}>Carregando fornecedores...</div>
+                    <div className="loading-state">Carregando fornecedores...</div>
                 ) : fornecedores.length === 0 ? (
-                    <div className={styles.empty_state}>Nenhum fornecedor encontrado.</div>
+                    <div className="empty-state">Nenhum fornecedor encontrado.</div>
                 ) : (
-                    <table className={styles.table}>
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Razão Social</th>
@@ -74,18 +71,16 @@ export function Fornecedores() {
                         <tbody>
                             {fornecedores.map((fornecedor) => (
                                 <tr key={fornecedor.id}>
-                                    <td className={styles.fw500}>{fornecedor.razao_social}</td>
-                                    <td className={styles.text_secondary}>{fornecedor.nome_fantasia || "-"}</td>
+                                    <td className="fw500">{fornecedor.razao_social}</td>
+                                    <td className="text-secondary">{fornecedor.nome_fantasia || "-"}</td>
                                     <td>{fornecedor.cnpj}</td>
-                                    <td className={styles.text_secondary}>
-                                        {fornecedor.email || fornecedor.telefone || "-"}
-                                    </td>
+                                    <td className="text-secondary">{fornecedor.email || fornecedor.telefone || "-"}</td>
                                     <td>
                                         <Badge variant={fornecedor.status === "ativo" ? "success" : "neutral"}>
                                             {fornecedor.status}
                                         </Badge>
                                     </td>
-                                    <td className={styles.text_center}>
+                                    <td className="text-center">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenEdit(fornecedor)}

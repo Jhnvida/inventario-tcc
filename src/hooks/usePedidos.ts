@@ -48,7 +48,7 @@ export function usePedidos() {
         return matchBusca && matchStatus;
     });
 
-    const receberPedido = async (pedidoId: string) => {
+    async function receberPedido(pedidoId: string) {
         try {
             const { error } = await supabase.rpc("receber_pedido", { p_pedido_id: pedidoId });
             if (error) throw error;
@@ -58,9 +58,9 @@ export function usePedidos() {
             console.error("Erro ao receber pedido:", error);
             return { success: false, error: error.message };
         }
-    };
+    }
 
-    const salvarPedido = async (
+    async function salvarPedido(
         pedidoData: {
             fornecedor_id: string;
             status: "rascunho" | "enviado" | "concluido" | "cancelado";
@@ -68,7 +68,7 @@ export function usePedidos() {
         },
         itens: { produto_id: string; quantidade: number; preco_unitario: number }[],
         pedidoId?: string,
-    ) => {
+    ) {
         try {
             let pid = pedidoId;
 
@@ -109,7 +109,7 @@ export function usePedidos() {
             console.error("Erro ao salvar pedido:", error);
             return { success: false, error: error.message };
         }
-    };
+    }
 
     return {
         pedidos: pedidosFiltrados,

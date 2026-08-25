@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
-import { supabase } from "../../lib/supabase";
+import { useProdutos } from "../../hooks/useProdutos";
 import type { Categoria, Produto } from "../../types";
 import styles from "./styles.module.css";
 
@@ -16,6 +16,7 @@ interface ProdutoFormModalProps {
 }
 
 export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, onSuccess }: ProdutoFormModalProps) {
+    const { createProduto, updateProduto } = useProdutos();
     const isEditing = !!produtoToEdit;
 
     const [formData, setFormData] = useState({
@@ -68,64 +69,36 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
         setLoading(true);
         setError("");
 
-        try {
-            if (isEditing) {
-                // Edição - saldo físico não pode ser alterado por aqui
-                const { error: updateError } = await supabase
-                    .from("produtos")
-                    .update({
-                        nome: formData.nome,
-                        sku: formData.sku,
-                        categoria_id: formData.categoria_id || null,
-                        localizacao: formData.localizacao,
-                        estoque_minimo: formData.estoque_minimo,
-                        preco: formData.preco,
-                        atualizado_em: new Date().toISOString(),
-                    })
-                    .eq("id", produtoToEdit.id);
+        let res;
 
-                if (updateError) throw updateError;
-            } else {
-                // Cadastro novo
-                const { data: newProd, error: insertError } = await supabase
-                    .from("produtos")
-                    .insert([
-                        {
-                            nome: formData.nome,
-                            sku: formData.sku,
-                            categoria_id: formData.categoria_id || null,
-                            localizacao: formData.localizacao,
-                            quantidade: formData.quantidade,
-                            estoque_minimo: formData.estoque_minimo,
-                            preco: formData.preco,
-                        },
-                    ])
-                    .select("id")
-                    .single();
-
-                if (insertError) throw insertError;
-
-                // Se houver saldo inicial, dispara a movimentação
-                if (newProd && formData.quantidade > 0) {
-                    const { error: movError } = await supabase.rpc("registrar_movimentacao", {
-                        p_produto_id: newProd.id,
-                        p_tipo: "entrada",
-                        p_quantidade: formData.quantidade,
-                        p_responsavel: "Administrador",
-                        p_motivo: "Saldo inicial de cadastro",
-                    });
-
-                    // Em caso de erro na movimentação (ex: trigger failed), ignoramos aqui pois o produto foi criado
-                    // Idealmente seria tudo numa transação, mas o Supabase RPC requer ser chamado de fora
-                    if (movError) console.error("Erro ao registrar mov inicial:", movError);
-                }
-            }
-            onSuccess();
-        } catch (err: any) {
-            setError(err.message || "Ocorreu um erro ao salvar o produto.");
-        } finally {
-            setLoading(false);
+        if (isEditing) {
+            res = await updateProduto(produtoToEdit.id, {
+                nome: formData.nome,
+                sku: formData.sku,
+                categoria_id: formData.categoria_id || null,
+                localizacao: formData.localizacao,
+                estoque_minimo: formData.estoque_minimo,
+                preco: formData.preco,
+            });
+        } else {
+            res = await createProduto({
+                nome: formData.nome,
+                sku: formData.sku,
+                categoria_id: formData.categoria_id || null,
+                localizacao: formData.localizacao,
+                quantidade: formData.quantidade,
+                estoque_minimo: formData.estoque_minimo,
+                preco: formData.preco,
+            });
         }
+
+        if (res.success) {
+            onSuccess();
+        } else {
+            setError(res.error || "Ocorreu um erro ao salvar o produto.");
+        }
+
+        setLoading(false);
     };
 
     return (

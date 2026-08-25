@@ -1,0 +1,44 @@
+/* Styles específicos para Categorias (vazio se apenas usar os globais) */
+
+.action_btn {
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+
+    color: var(--color-text-secondary);
+
+    background: transparent;
+
+    transition: background-color 0.2s;
+}
+
+.action_btn:hover {
+    background-color: var(--color-border);
+}
+
+.danger_icon {
+    color: var(--color-danger, #ef4444);
+}
+
+.action_btn:hover .danger_icon {
+    color: var(--color-danger, #ef4444);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form_actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}

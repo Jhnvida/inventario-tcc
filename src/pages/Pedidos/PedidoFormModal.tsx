@@ -62,15 +62,15 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         setError(null);
     }, [pedido, isOpen]);
 
-    const handleAdicionarItem = () => {
+    function handleAdicionarItem() {
         setItens([...itens, { produto_id: "", quantidade: 1, preco_unitario: 0 }]);
-    };
+    }
 
-    const handleRemoverItem = (index: number) => {
+    function handleRemoverItem(index: number) {
         setItens(itens.filter((_, i) => i !== index));
-    };
+    }
 
-    const handleItemChange = (index: number, field: keyof ItemPedidoForm, value: string | number) => {
+    function handleItemChange(index: number, field: keyof ItemPedidoForm, value: string | number) {
         const newItens = [...itens];
 
         if (field === "produto_id") {
@@ -85,11 +85,11 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         }
 
         setItens(newItens);
-    };
+    }
 
     const valorTotal = itens.reduce((acc, item) => acc + item.quantidade * item.preco_unitario, 0);
 
-    const handleSubmit = async (e: FormEvent) => {
+    async function handleSubmit(e: FormEvent) {
         e.preventDefault();
         setError(null);
 
@@ -118,7 +118,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         } else {
             setError(res.error || "Erro ao salvar o pedido.");
         }
-    };
+    }
 
     // Remove inline css because of strict rules
     return (

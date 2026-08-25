@@ -1,0 +1,65 @@
+.action_btn {
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+
+    color: var(--color-text-secondary);
+
+    background: transparent;
+
+    transition: background-color 0.2s;
+}
+
+.action_btn:hover {
+    background-color: var(--color-border);
+}
+
+.edit_icon {
+    color: var(--color-primary, #2563eb);
+}
+
+.action_btn:hover .edit_icon {
+    color: var(--color-primary, #2563eb);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.user_details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 16px;
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    background: var(--color-surface-hover);
+}
+
+.user_details p {
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.error_message {
+    font-size: 14px;
+    color: var(--color-danger, #ef4444);
+}
+
+.form_actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}

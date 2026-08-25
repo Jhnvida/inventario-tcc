@@ -1,0 +1,4 @@
+{
+    "extends": ["stylelint-config-standard", "stylelint-config-clean-order"],
+    "rules": { "selector-class-pattern": null, "keyframes-name-pattern": null }
+}

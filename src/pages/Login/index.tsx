@@ -27,8 +27,9 @@ export function Login() {
             }
 
             navigate("/");
-        } catch (err: any) {
-            setError(err.message || "Erro ao realizar login");
+        } catch (err) {
+            setError("Algo deu errado!");
+            console.log(err);
         } finally {
             setLoading(false);
         }

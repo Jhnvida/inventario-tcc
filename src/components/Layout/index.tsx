@@ -1,10 +1,44 @@
-import { ArrowLeftRight, Bell, LayoutDashboard, LogOut, Package, ShoppingCart, Users } from "lucide-react";
+import {
+    ArrowLeftRight,
+    Bell,
+    LayoutDashboard,
+    LogOut,
+    Package,
+    ShoppingCart,
+    Tags,
+    UserCog,
+    Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabase";
 import styles from "./styles.module.css";
 
 export function Layout() {
     const { user, signOut } = useAuth();
+    const [userName, setUserName] = useState<string>(user?.user_metadata?.nome || "Usuário Logado");
+
+    useEffect(() => {
+        async function fetchUserName() {
+            if (user) {
+                try {
+                    const { data: userData } = await supabase
+                        .from("usuarios")
+                        .select("nome")
+                        .eq("id", user.id)
+                        .single();
+
+                    if (userData) {
+                        setUserName(userData.nome);
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar nome do usuário:", error);
+                }
+            }
+        }
+        fetchUserName();
+    }, [user]);
 
     return (
         <div className={styles.app_layout}>
@@ -53,12 +87,28 @@ export function Layout() {
                         <Users size={18} />
                         Fornecedores
                     </NavLink>
+
+                    <NavLink
+                        to="/categorias"
+                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
+                    >
+                        <Tags size={18} />
+                        Categorias
+                    </NavLink>
+
+                    <NavLink
+                        to="/usuarios"
+                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
+                    >
+                        <UserCog size={18} />
+                        Usuários
+                    </NavLink>
                 </nav>
 
                 <div className={styles.sidebar_footer}>
                     <div className={styles.user_info_container}>
                         <div className={styles.user_details}>
-                            <div className={styles.user_name}>{user?.user_metadata?.nome || "Usuário Logado"}</div>
+                            <div className={styles.user_name}>{userName}</div>
                             <div className={styles.user_email}>{user?.email}</div>
                         </div>
                     </div>
@@ -68,7 +118,7 @@ export function Layout() {
                         onClick={signOut}
                     >
                         <LogOut size={18} />
-                        Sair do Sistema
+                        Sair
                     </button>
                 </div>
             </aside>

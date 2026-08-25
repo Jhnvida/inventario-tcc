@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
-import { supabase } from "../../lib/supabase";
+import { useFornecedores } from "../../hooks/useFornecedores";
 import type { Fornecedor } from "../../types";
 import styles from "./styles.module.css";
 
@@ -15,6 +15,7 @@ interface FornecedorFormModalProps {
 }
 
 export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSuccess }: FornecedorFormModalProps) {
+    const { createFornecedor, updateFornecedor } = useFornecedores();
     const isEditing = !!fornecedorToEdit;
 
     const [formData, setFormData] = useState({
@@ -51,36 +52,32 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         setError("");
     }, [fornecedorToEdit, isOpen]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-    };
+    }
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        try {
-            if (isEditing) {
-                const { error: updateError } = await supabase
-                    .from("fornecedores")
-                    .update(formData)
-                    .eq("id", fornecedorToEdit.id);
+        let res;
 
-                if (updateError) throw updateError;
-            } else {
-                const { error: insertError } = await supabase.from("fornecedores").insert([formData]);
-
-                if (insertError) throw insertError;
-            }
-            onSuccess();
-        } catch (err: any) {
-            setError(err.message || "Ocorreu um erro ao salvar o fornecedor.");
-        } finally {
-            setLoading(false);
+        if (isEditing) {
+            res = await updateFornecedor(fornecedorToEdit.id, formData);
+        } else {
+            res = await createFornecedor(formData);
         }
-    };
+
+        if (res.success) {
+            onSuccess();
+        } else {
+            setError(res.error || "Ocorreu um erro ao salvar o fornecedor.");
+        }
+
+        setLoading(false);
+    }
 
     return (
         <Modal

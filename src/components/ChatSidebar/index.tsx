@@ -1,5 +1,8 @@
-import { Brain, Send, X } from "lucide-react";
-import { useState, type SubmitEvent } from "react";
+import { Brain, Loader2, Send, X } from "lucide-react";
+import { useEffect, useRef, useState, type SubmitEvent } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useAssistente } from "../../hooks/useAssistente";
 import styles from "./styles.module.css";
 
 interface ChatSidebarProps {
@@ -8,23 +11,25 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<{ id: string; text: string; sender: "user" | "ai" }[]>([
-        {
-            id: "1",
-            text: "Olá! Sou seu Assistente Inteligente. Como posso ajudar com o seu inventário hoje?",
-            sender: "ai",
-        },
-    ]);
+    const [inputValue, setInputValue] = useState("");
+    const { messages, isLoading, sendMessage } = useAssistente();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const handleSend = (e: SubmitEvent) => {
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
+
+    const handleSend = async (e: SubmitEvent) => {
         e.preventDefault();
-        if (!message.trim()) return;
+        if (!inputValue.trim() || isLoading) return;
 
-        setMessages((prev) => [...prev, { id: Date.now().toString(), text: message, sender: "user" }]);
-        setMessage("");
-
-        // TODO: Adicionar integração real com LLM/MCP aqui
+        const text = inputValue;
+        setInputValue("");
+        await sendMessage(text);
     };
 
     return (
@@ -43,9 +48,27 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 <div className={styles.messagesContainer}>
                     {messages.map((msg) => (
                         <div key={msg.id} className={`${styles.messageWrapper} ${styles[msg.sender]}`}>
-                            <div className={styles.messageBubble}>{msg.text}</div>
+                            <div className={styles.messageBubble}>
+                                {msg.sender === "ai" ? (
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                                ) : (
+                                    msg.text
+                                )}
+                            </div>
                         </div>
                     ))}
+                    {isLoading && (
+                        <div className={`${styles.messageWrapper} ${styles.ai}`}>
+                            <div
+                                className={styles.messageBubble}
+                                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                            >
+                                <Loader2 size={16} className={styles.spinner} />
+                                Consultando dados...
+                            </div>
+                        </div>
+                    )}
+                    <div ref={messagesEndRef} />
                 </div>
 
                 <form className={styles.inputArea} onSubmit={handleSend}>
@@ -53,10 +76,11 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                         type="text"
                         placeholder="Mensagem para o assistente..."
                         className={styles.input}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        disabled={isLoading}
                     />
-                    <button type="submit" className={styles.sendButton} disabled={!message.trim()}>
+                    <button type="submit" className={styles.sendButton} disabled={!inputValue.trim() || isLoading}>
                         <Send size={18} />
                     </button>
                 </form>

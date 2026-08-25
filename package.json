@@ -12,12 +12,15 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@google/genai": "^2.19.0",
         "@supabase/supabase-js": "^2.112.3",
         "lucide-react": "^1.33.0",
         "motion": "^13.1.1",
         "react": "^19.2.8",
         "react-dom": "^19.2.8",
-        "react-router-dom": "^7.18.2"
+        "react-markdown": "^10.1.0",
+        "react-router-dom": "^7.18.2",
+        "remark-gfm": "^4.0.1"
     },
     "devDependencies": {
         "@babel/core": "^7.29.7",

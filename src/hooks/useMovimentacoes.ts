@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Movimentacao, Produto } from "../types";
 
-export type MovimentacaoComProduto = Movimentacao & { produtos: { nome: string; sku: string } | null };
+export type MovimentacaoComProduto = Movimentacao & {
+    produtos: { nome: string; sku: string } | null;
+    usuarios: { nome: string; email: string } | null;
+};
 
 export function useMovimentacoes() {
     const [movimentacoes, setMovimentacoes] = useState<MovimentacaoComProduto[]>([]);
@@ -19,7 +22,7 @@ export function useMovimentacoes() {
             const [movsRes, prodRes] = await Promise.all([
                 supabase
                     .from("movimentacoes")
-                    .select("*, produtos(nome, sku)")
+                    .select("*, produtos(nome, sku), usuarios(nome, email)")
                     .order("criada_em", { ascending: false }),
                 supabase.from("produtos").select("id, nome, sku").order("nome"),
             ]);
@@ -40,8 +43,13 @@ export function useMovimentacoes() {
     const movimentacoesFiltradas = movimentacoes.filter((m) => {
         const pNome = m.produtos?.nome || "";
         const pSku = m.produtos?.sku || "";
+        const uNome = m.usuarios?.nome || "";
+        const uEmail = m.usuarios?.email || "";
         const matchBusca =
-            pNome.toLowerCase().includes(busca.toLowerCase()) || pSku.toLowerCase().includes(busca.toLowerCase());
+            pNome.toLowerCase().includes(busca.toLowerCase()) ||
+            pSku.toLowerCase().includes(busca.toLowerCase()) ||
+            uNome.toLowerCase().includes(busca.toLowerCase()) ||
+            uEmail.toLowerCase().includes(busca.toLowerCase());
         const matchTipo = tipoFiltro ? m.tipo === tipoFiltro : true;
         const matchProduto = produtoFiltro ? m.produto_id === produtoFiltro : true;
 
@@ -52,8 +60,8 @@ export function useMovimentacoes() {
         produto_id: string;
         tipo: string;
         quantidade: number;
-        motivo: string;
-        responsavel: string;
+        motivo?: string;
+        usuario_id?: string;
     }) {
         try {
             if (data.quantidade <= 0) {
@@ -67,8 +75,8 @@ export function useMovimentacoes() {
                 p_produto_id: data.produto_id,
                 p_tipo: data.tipo,
                 p_quantidade: data.quantidade,
-                p_responsavel: data.responsavel,
-                p_motivo: data.motivo,
+                p_usuario_id: data.usuario_id || null,
+                p_motivo: data.motivo || null,
             });
 
             if (rpcError) throw rpcError;

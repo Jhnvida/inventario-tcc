@@ -50,17 +50,22 @@ export function useProdutos() {
 
             if (insertError) throw insertError;
 
-            // Se houver saldo inicial, dispara a movimentação
             if (newProd && produto.quantidade && produto.quantidade > 0) {
+                const {
+                    data: { user: currentUser },
+                } = await supabase.auth.getUser();
+
                 const { error: movError } = await supabase.rpc("registrar_movimentacao", {
                     p_produto_id: newProd.id,
                     p_tipo: "entrada",
                     p_quantidade: produto.quantidade,
-                    p_responsavel: "Administrador",
+                    p_usuario_id: currentUser?.id || null,
                     p_motivo: "Saldo inicial de cadastro",
                 });
+
                 if (movError) console.error("Erro ao registrar mov inicial:", movError);
             }
+
             await fetchDados();
             return { success: true };
         } catch (error: any) {

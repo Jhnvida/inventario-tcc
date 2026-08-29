@@ -1,4 +1,5 @@
 import { Brain, Loader2, Send, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -33,7 +34,17 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
     };
 
     return (
-        <aside className={`${styles.chatSidebar} ${isOpen ? styles.open : ""}`}>
+        <motion.aside
+            className={styles.chatSidebar}
+            initial={false}
+            animate={{
+                width: isOpen ? 400 : 0,
+                borderLeftWidth: isOpen ? 1 : 0,
+                borderLeftStyle: "solid",
+                borderLeftColor: "var(--color-border)",
+            }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        >
             <div className={styles.sidebarContent}>
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
@@ -46,28 +57,43 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 </div>
 
                 <div className={styles.messagesContainer}>
-                    {messages.map((msg) => (
-                        <div key={msg.id} className={`${styles.messageWrapper} ${styles[msg.sender]}`}>
-                            <div className={styles.messageBubble}>
-                                {msg.sender === "ai" ? (
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
-                                ) : (
-                                    msg.text
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                    {isLoading && (
-                        <div className={`${styles.messageWrapper} ${styles.ai}`}>
-                            <div
-                                className={styles.messageBubble}
-                                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                    <AnimatePresence initial={false}>
+                        {messages.map((msg) => (
+                            <motion.div
+                                key={msg.id}
+                                className={`${styles.messageWrapper} ${styles[msg.sender]}`}
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ duration: 0.2 }}
                             >
-                                <Loader2 size={16} className={styles.spinner} />
-                                Consultando dados...
-                            </div>
-                        </div>
-                    )}
+                                <div className={styles.messageBubble}>
+                                    {msg.sender === "ai" ? (
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                                    ) : (
+                                        msg.text
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                        {isLoading && (
+                            <motion.div
+                                key="loading"
+                                className={`${styles.messageWrapper} ${styles.ai}`}
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <div
+                                    className={styles.messageBubble}
+                                    style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                                >
+                                    <Loader2 size={16} className={styles.spinner} />
+                                    Consultando dados...
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                     <div ref={messagesEndRef} />
                 </div>
 
@@ -85,6 +111,6 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                     </button>
                 </form>
             </div>
-        </aside>
+        </motion.aside>
     );
 }

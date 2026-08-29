@@ -42,18 +42,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
             width="large"
         >
             <div className={styles.detalhes_container}>
-                {error && (
-                    <div
-                        style={{
-                            padding: "1rem",
-                            backgroundColor: "var(--status-critical-bg)",
-                            color: "var(--status-critical-text)",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
+                {error && <div className="alert-error">{error}</div>}
 
                 <div className={styles.detalhes_header}>
                     <div>
@@ -84,26 +73,28 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     </div>
                 </div>
 
-                <div className={`${styles.table_container} ${styles.mt8}`}>
-                    <h3 className={styles.modal_subtitle}>Itens do Pedido</h3>
-                    <table className={styles.table}>
+                <div className={`table-container ${styles.mt8}`}>
+                    <h3 className={styles.modal_subtitle} style={{ padding: "16px 16px 0", margin: 0 }}>
+                        Itens do Pedido
+                    </h3>
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Produto</th>
                                 <th>SKU</th>
-                                <th className={styles.text_right}>Quantidade</th>
-                                <th className={styles.text_right}>Preço Unitário</th>
-                                <th className={styles.text_right}>Subtotal</th>
+                                <th className="text-right">Quantidade</th>
+                                <th className="text-right">Preço Unitário</th>
+                                <th className="text-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pedido.itens_pedido?.map((item) => (
                                 <tr key={item.id}>
-                                    <td className={styles.fw500}>{item.produtos?.nome}</td>
-                                    <td className={styles.text_secondary}>{item.produtos?.sku}</td>
-                                    <td className={`${styles.text_right} ${styles.fw500}`}>{item.quantidade}</td>
-                                    <td className={styles.text_right}>{formatCurrency(item.preco_unitario)}</td>
-                                    <td className={`${styles.text_right} ${styles.fw600}`}>
+                                    <td className="fw500">{item.produtos?.nome}</td>
+                                    <td className="text-secondary">{item.produtos?.sku}</td>
+                                    <td className="text-right fw500">{item.quantidade}</td>
+                                    <td className="text-right">{formatCurrency(item.preco_unitario)}</td>
+                                    <td className="text-right fw600">
                                         {formatCurrency(item.quantidade * item.preco_unitario)}
                                     </td>
                                 </tr>
@@ -112,17 +103,14 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     </table>
                 </div>
 
-                <div className={styles.form_actions_lg}>
-                    <Button type="button" variant="ghost" onClick={onClose}>
-                        Fechar
-                    </Button>
-                    {isRecebivel && (
+                {isRecebivel && (
+                    <div className={styles.form_actions_lg}>
                         <Button type="button" variant="primary" onClick={handleReceber} disabled={loading}>
                             <CheckCircle size={18} className={styles.mr2} />
                             {loading ? "Processando..." : "Receber Pedido"}
                         </Button>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </Modal>
     );

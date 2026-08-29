@@ -79,11 +79,9 @@ export function Usuarios() {
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
+                                <th>Usuário</th>
                                 <th>Perfil</th>
                                 <th>Status</th>
-                                <th>Data de Cadastro</th>
                                 <th style={{ textAlign: "right" }}>Ações</th>
                             </tr>
                         </thead>
@@ -106,8 +104,12 @@ export function Usuarios() {
                                         visible: { opacity: 1, x: 0 },
                                     }}
                                 >
-                                    <td className="fw500">{user.nome}</td>
-                                    <td>{user.email}</td>
+                                    <td>
+                                        <div className="fw500">{user.nome}</div>
+                                        <div className="text-secondary" style={{ fontSize: "0.85em" }}>
+                                            {user.email}
+                                        </div>
+                                    </td>
                                     <td>
                                         <Badge variant={user.perfil === "admin" ? "critical" : "neutral"}>
                                             {user.perfil === "admin" ? "Administrador" : "Operador"}
@@ -118,7 +120,6 @@ export function Usuarios() {
                                             {user.ativo ? "Ativo" : "Inativo"}
                                         </Badge>
                                     </td>
-                                    <td>{new Date(user.criado_em).toLocaleDateString()}</td>
                                     <td style={{ textAlign: "right" }}>
                                         <button
                                             className={styles.action_btn}
@@ -184,7 +185,7 @@ export function Usuarios() {
                             <option value="false">Inativo (Bloquear Acesso)</option>
                         </Select>
 
-                        {error && <span className={styles.error_message}>{error}</span>}
+                        {error && <div className="alert-error">{error}</div>}
 
                         <div className={styles.form_actions}>
                             <Button

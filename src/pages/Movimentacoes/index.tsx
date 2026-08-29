@@ -83,8 +83,7 @@ export function Movimentacoes() {
                                 <th>Produto</th>
                                 <th className="text-right">Qtd.</th>
                                 <th>Responsável</th>
-                                <th>Motivo</th>
-                                <th>Data e Hora</th>
+                                <th>Data</th>
                             </tr>
                         </thead>
                         <motion.tbody
@@ -118,9 +117,16 @@ export function Movimentacoes() {
                                         {mov.tipo === "entrada" ? "+" : "-"}
                                         {mov.quantidade}
                                     </td>
-                                    <td>{mov.responsavel}</td>
-                                    <td className="text-secondary">{mov.motivo || "-"}</td>
-                                    <td className="text-secondary">{formatDate(mov.criada_em)}</td>
+                                    <td>{mov.usuarios?.nome || mov.usuarios?.email || "Sistema / Desconhecido"}</td>
+                                    <td className="text-secondary">
+                                        <div>{formatDate(mov.criada_em)}</div>
+                                        <div style={{ fontSize: "0.85em", marginTop: "2px" }}>
+                                            {new Date(mov.criada_em).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </div>
+                                    </td>
                                 </motion.tr>
                             ))}
                         </motion.tbody>

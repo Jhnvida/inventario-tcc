@@ -3,6 +3,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
+import { useAuth } from "../../contexts/AuthContext";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import type { Produto } from "../../types";
 import styles from "./styles.module.css";
@@ -16,6 +17,7 @@ interface MovimentacaoFormModalProps {
 
 export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: MovimentacaoFormModalProps) {
     const { createMovimentacao } = useMovimentacoes();
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         produto_id: "",
         tipo: "entrada",
@@ -42,7 +44,7 @@ export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: 
             produto_id: formData.produto_id,
             tipo: formData.tipo,
             quantidade: formData.quantidade,
-            responsavel: "Administrador", // Simulação do usuário logado
+            usuario_id: user?.id,
             motivo: formData.motivo,
         });
 
@@ -59,18 +61,7 @@ export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Nova Movimentação Manual" width="medium">
             <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && (
-                    <div
-                        style={{
-                            padding: "1rem",
-                            backgroundColor: "var(--status-critical-bg)",
-                            color: "var(--status-critical-text)",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
+                {error && <div className="alert-error">{error}</div>}
 
                 <Select label="Produto" name="produto_id" value={formData.produto_id} onChange={handleChange} required>
                     <option value="">Selecione um produto...</option>

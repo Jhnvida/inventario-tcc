@@ -224,3 +224,12 @@ ul {
 .text-right {
     text-align: right;
 }
+
+.alert-error {
+    padding: 16px;
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-text);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 14px;
+}

@@ -1,7 +1,6 @@
 import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -97,7 +96,6 @@ export function Produtos() {
                                 <th>Categoria</th>
                                 <th>Preço Un.</th>
                                 <th className="text-right">Estoque</th>
-                                <th className="text-center">Status</th>
                                 <th className="text-center">Ações</th>
                             </tr>
                         </thead>
@@ -125,11 +123,13 @@ export function Produtos() {
                                             {produto.categorias?.nome || "Sem Categoria"}
                                         </td>
                                         <td>{formatCurrency(produto.preco)}</td>
-                                        <td className="text-right fw600">{produto.quantidade}</td>
-                                        <td className="text-center">
-                                            <Badge variant={isCritico ? "critical" : "success"}>
-                                                {isCritico ? "Crítico" : "Normal"}
-                                            </Badge>
+                                        <td className="text-right">
+                                            <span
+                                                className="fw600"
+                                                style={isCritico ? { color: "var(--color-danger-text)" } : {}}
+                                            >
+                                                {produto.quantidade}
+                                            </span>
                                         </td>
                                         <td
                                             className="text-center"

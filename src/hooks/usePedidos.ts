@@ -50,7 +50,15 @@ export function usePedidos() {
 
     async function receberPedido(pedidoId: string) {
         try {
-            const { error } = await supabase.rpc("receber_pedido", { p_pedido_id: pedidoId });
+            const {
+                data: { user: currentUser },
+            } = await supabase.auth.getUser();
+
+            const { error } = await supabase.rpc("receber_pedido", {
+                p_pedido_id: pedidoId,
+                p_usuario_id: currentUser?.id || null,
+            });
+
             if (error) throw error;
             await fetchDados();
             return { success: true };

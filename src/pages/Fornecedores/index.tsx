@@ -70,8 +70,7 @@ export function Fornecedores() {
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>Razão Social</th>
-                                <th>Nome Fantasia</th>
+                                <th>Fornecedor</th>
                                 <th>CNPJ</th>
                                 <th>Contato</th>
                                 <th>Status</th>
@@ -97,8 +96,12 @@ export function Fornecedores() {
                                         visible: { opacity: 1, x: 0 },
                                     }}
                                 >
-                                    <td className="fw500">{fornecedor.razao_social}</td>
-                                    <td className="text-secondary">{fornecedor.nome_fantasia || "-"}</td>
+                                    <td>
+                                        <div className="fw500">{fornecedor.razao_social}</div>
+                                        <div className="text-secondary" style={{ fontSize: "0.85em" }}>
+                                            {fornecedor.nome_fantasia || "Sem nome fantasia"}
+                                        </div>
+                                    </td>
                                     <td>{fornecedor.cnpj}</td>
                                     <td className="text-secondary">{fornecedor.email || fornecedor.telefone || "-"}</td>
                                     <td>

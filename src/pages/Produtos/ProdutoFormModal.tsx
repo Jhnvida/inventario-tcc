@@ -104,18 +104,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Editar Produto" : "Novo Produto"} width="large">
             <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && (
-                    <div
-                        style={{
-                            padding: "1rem",
-                            backgroundColor: "var(--status-critical-bg)",
-                            color: "var(--status-critical-text)",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
+                {error && <div className="alert-error">{error}</div>}
 
                 <div className={styles.grid2}>
                     <Input label="Nome do Produto" name="nome" value={formData.nome} onChange={handleChange} required />

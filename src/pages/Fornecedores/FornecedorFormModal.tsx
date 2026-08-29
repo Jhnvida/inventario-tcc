@@ -87,18 +87,7 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
             width="medium"
         >
             <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && (
-                    <div
-                        style={{
-                            padding: "1rem",
-                            backgroundColor: "var(--status-critical-bg)",
-                            color: "var(--status-critical-text)",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
+                {error && <div className="alert-error">{error}</div>}
 
                 <Input
                     label="Razão Social"

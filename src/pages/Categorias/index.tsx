@@ -90,7 +90,6 @@ export function Categorias() {
                         <thead>
                             <tr>
                                 <th>Nome</th>
-                                <th>Data de Criação</th>
                                 <th style={{ textAlign: "right" }}>Ações</th>
                             </tr>
                         </thead>
@@ -114,7 +113,6 @@ export function Categorias() {
                                     }}
                                 >
                                     <td className="fw500">{cat.nome}</td>
-                                    <td>{new Date(cat.criado_em).toLocaleDateString()}</td>
                                     <td style={{ textAlign: "right" }}>
                                         <button
                                             className={styles.action_btn}

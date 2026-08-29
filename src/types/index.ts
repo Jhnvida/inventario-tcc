@@ -22,10 +22,11 @@ export interface Movimentacao {
     produto_id: string;
     tipo: "entrada" | "saida";
     quantidade: number;
-    responsavel: string;
+    usuario_id?: string | null;
     motivo: string | null;
     criada_em: string;
-    produtos?: { nome: string; sku: string }; // Usado em consultas com JOIN
+    produtos?: { nome: string; sku: string };
+    usuarios?: { nome: string; email: string } | null;
 }
 
 export interface Fornecedor {
@@ -56,7 +57,6 @@ export interface ItemPedido {
     preco_unitario: number;
 }
 
-// Tipos específicos para o Dashboard
 export interface DashboardMetricas {
     valorTotal: number;
     totalProdutos: number;

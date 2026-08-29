@@ -124,7 +124,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={pedido ? "Editar Pedido" : "Novo Pedido"} width="large">
             <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && <div className={styles.error_message_modal}>{error}</div>}
+                {error && <div className="alert-error">{error}</div>}
 
                 <div className={styles.grid2}>
                     <div>
@@ -158,15 +158,15 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                     </div>
 
                     {itens.length > 0 ? (
-                        <div className={styles.table_container}>
-                            <table className={styles.table}>
+                        <div className="table-container">
+                            <table className="data-table">
                                 <thead>
                                     <tr>
                                         <th>Produto</th>
                                         <th>Qtd.</th>
                                         <th>Preço Un.</th>
-                                        <th className={styles.text_right}>Subtotal</th>
-                                        <th className={styles.text_center}></th>
+                                        <th className="text-right">Subtotal</th>
+                                        <th className="text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -211,10 +211,10 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                                                     required
                                                 />
                                             </td>
-                                            <td className={`${styles.text_right} ${styles.fw600}`}>
+                                            <td className="text-right fw600">
                                                 {formatCurrency(item.quantidade * item.preco_unitario)}
                                             </td>
-                                            <td className={styles.text_center}>
+                                            <td className="text-center">
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
@@ -229,16 +229,14 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                             </table>
                         </div>
                     ) : (
-                        <div className={styles.empty_state}>Nenhum item adicionado.</div>
+                        <div className="empty-state">Nenhum item adicionado ao pedido.</div>
                     )}
                 </div>
 
                 <div className={styles.form_actions_lg}>
                     <div className={styles.total_wrapper}>
                         <span className={styles.detalhe_label}>Valor Total:</span>
-                        <span className={`${styles.text_right} ${styles.fw600} ${styles.total_valor}`}>
-                            {formatCurrency(valorTotal)}
-                        </span>
+                        <span className={`text-right fw600 ${styles.total_valor}`}>{formatCurrency(valorTotal)}</span>
                     </div>
                     <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                         Cancelar

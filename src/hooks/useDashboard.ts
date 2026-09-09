@@ -17,19 +17,16 @@ export function useDashboard() {
     useEffect(() => {
         async function fetchDashboardData() {
             try {
-                const { data: authData } = await supabase.auth.getUser();
-                if (authData.user) {
+                const {
+                    data: { user },
+                } = await supabase.auth.getUser();
+                if (user) {
                     const { data: userData } = await supabase
                         .from("usuarios")
                         .select("nome")
-                        .eq("id", authData.user.id)
+                        .eq("id", user.id)
                         .single();
-
-                    if (userData) {
-                        setUserName(userData.nome);
-                    } else {
-                        setUserName(authData.user.user_metadata?.nome || "Usuário");
-                    }
+                    setUserName(userData?.nome || user.user_metadata?.nome || "Usuário");
                 } else {
                     setUserName("Usuário");
                 }
@@ -51,13 +48,11 @@ export function useDashboard() {
 
                 if (produtos) {
                     let valorTotal = 0;
-                    let estoqueCriticoCount = 0;
                     const criticos: Produto[] = [];
 
                     produtos.forEach((p) => {
                         valorTotal += p.quantidade * p.preco;
                         if (p.quantidade <= p.estoque_minimo) {
-                            estoqueCriticoCount++;
                             criticos.push(p);
                         }
                     });
@@ -65,7 +60,7 @@ export function useDashboard() {
                     setMetricas({
                         valorTotal,
                         totalProdutos: produtos.length,
-                        estoqueCritico: estoqueCriticoCount,
+                        estoqueCritico: criticos.length,
                         pedidosAbertos: pedidosCount || 0,
                     });
 

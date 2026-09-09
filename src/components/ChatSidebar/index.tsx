@@ -16,22 +16,18 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
     const { messages, isLoading, sendMessage } = useAssistente();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
     useEffect(() => {
-        scrollToBottom();
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
 
-    const handleSend = async (e: SubmitEvent) => {
+    function handleSend(e: SubmitEvent) {
         e.preventDefault();
         if (!inputValue.trim() || isLoading) return;
 
         const text = inputValue;
         setInputValue("");
-        await sendMessage(text);
-    };
+        sendMessage(text);
+    }
 
     return (
         <motion.aside

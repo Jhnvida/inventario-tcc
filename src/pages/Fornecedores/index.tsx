@@ -31,14 +31,14 @@ export function Fornecedores() {
         recarregar();
     }
 
-    const handleDelete = async (id: string, razao: string) => {
+    async function handleDelete(id: string, razao: string) {
         if (!window.confirm(`Tem certeza que deseja excluir o fornecedor "${razao}"?`)) return;
 
         const res = await deleteFornecedor(id);
         if (!res.success) {
             alert("Erro ao excluir fornecedor. Ele pode estar vinculado a produtos ou pedidos.");
         }
-    };
+    }
 
     return (
         <div className="page-container">

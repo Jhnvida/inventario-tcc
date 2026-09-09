@@ -27,10 +27,10 @@ export function Movimentacoes() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleSuccess = () => {
+    function handleSuccess() {
         setIsModalOpen(false);
         recarregar();
-    };
+    }
 
     return (
         <div className="page-container">
@@ -118,15 +118,7 @@ export function Movimentacoes() {
                                         {mov.quantidade}
                                     </td>
                                     <td>{mov.usuarios?.nome || mov.usuarios?.email || "Sistema / Desconhecido"}</td>
-                                    <td className="text-secondary">
-                                        <div>{formatDate(mov.criada_em)}</div>
-                                        <div style={{ fontSize: "0.85em", marginTop: "2px" }}>
-                                            {new Date(mov.criada_em).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </div>
-                                    </td>
+                                    <td className="text-secondary">{formatDate(mov.criada_em)}</td>
                                 </motion.tr>
                             ))}
                         </motion.tbody>

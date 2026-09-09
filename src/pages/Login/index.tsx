@@ -11,21 +11,14 @@ export function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = async (e: SubmitEvent) => {
+    async function handleLogin(e: SubmitEvent) {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (error) {
-                throw error;
-            }
-
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
             navigate("/");
         } catch (err) {
             setError("Algo deu errado!");
@@ -33,7 +26,7 @@ export function Login() {
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div className={styles.login_layout}>

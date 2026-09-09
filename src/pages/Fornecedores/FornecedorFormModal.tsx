@@ -62,13 +62,9 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         setLoading(true);
         setError("");
 
-        let res;
-
-        if (isEditing) {
-            res = await updateFornecedor(fornecedorToEdit.id, formData);
-        } else {
-            res = await createFornecedor(formData);
-        }
+        const res = isEditing
+            ? await updateFornecedor(fornecedorToEdit.id, formData)
+            : await createFornecedor(formData);
 
         if (res.success) {
             onSuccess();

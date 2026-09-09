@@ -56,41 +56,37 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
         setError("");
     }, [produtoToEdit, isOpen]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: ["quantidade", "estoque_minimo", "preco"].includes(name) ? Number(value) : value,
         }));
-    };
+    }
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        let res;
-
-        if (isEditing) {
-            res = await updateProduto(produtoToEdit.id, {
-                nome: formData.nome,
-                sku: formData.sku,
-                categoria_id: formData.categoria_id || null,
-                localizacao: formData.localizacao,
-                estoque_minimo: formData.estoque_minimo,
-                preco: formData.preco,
-            });
-        } else {
-            res = await createProduto({
-                nome: formData.nome,
-                sku: formData.sku,
-                categoria_id: formData.categoria_id || null,
-                localizacao: formData.localizacao,
-                quantidade: formData.quantidade,
-                estoque_minimo: formData.estoque_minimo,
-                preco: formData.preco,
-            });
-        }
+        const res = isEditing
+            ? await updateProduto(produtoToEdit.id, {
+                  nome: formData.nome,
+                  sku: formData.sku,
+                  categoria_id: formData.categoria_id || null,
+                  localizacao: formData.localizacao,
+                  estoque_minimo: formData.estoque_minimo,
+                  preco: formData.preco,
+              })
+            : await createProduto({
+                  nome: formData.nome,
+                  sku: formData.sku,
+                  categoria_id: formData.categoria_id || null,
+                  localizacao: formData.localizacao,
+                  quantidade: formData.quantidade,
+                  estoque_minimo: formData.estoque_minimo,
+                  preco: formData.preco,
+              });
 
         if (res.success) {
             onSuccess();
@@ -99,7 +95,7 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
         }
 
         setLoading(false);
-    };
+    }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Editar Produto" : "Novo Produto"} width="large">

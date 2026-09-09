@@ -39,14 +39,14 @@ export function Pedidos() {
         setIsModalOpen(true);
     }
 
-    const handleDelete = async (id: string) => {
+    async function handleDelete(id: string) {
         if (!window.confirm("Tem certeza que deseja excluir este pedido? Ação irreversível.")) return;
 
         const res = await deletePedido(id);
         if (!res.success) {
             alert("Erro ao excluir pedido. Pode haver restrições do banco de dados.");
         }
-    };
+    }
 
     return (
         <div className="page-container">

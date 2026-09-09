@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { Chat, GoogleGenAI } from "@google/genai";
 import { useRef, useState } from "react";
 import { systemPrompt } from "../services/ai/prompts";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
@@ -20,7 +20,7 @@ export function useAssistente() {
     ]);
 
     const [isLoading, setIsLoading] = useState(false);
-    const chatRef = useRef<any>(null);
+    const chatRef = useRef<Chat | null>(null);
 
     function initChat() {
         if (!chatRef.current) {
@@ -45,7 +45,7 @@ export function useAssistente() {
             const chat = initChat();
             let response = await chat.sendMessage({ message: text });
 
-            while (response.functionCalls && response.functionCalls.length > 0) {
+            while (response.functionCalls?.length) {
                 const parts = [];
 
                 for (const call of response.functionCalls) {
@@ -61,8 +61,9 @@ export function useAssistente() {
                 response = await chat.sendMessage({ message: parts });
             }
 
-            if (response.text) {
-                setMessages((prev) => [...prev, { id: Date.now().toString(), text: response.text, sender: "ai" }]);
+            const responseText = response.text;
+            if (responseText) {
+                setMessages((prev) => [...prev, { id: Date.now().toString(), text: responseText, sender: "ai" }]);
             }
         } catch (error: any) {
             console.error("Erro no chat:", error);

@@ -17,7 +17,7 @@ export function Categorias() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSave = async (e: SubmitEvent) => {
+    async function handleSave(e: SubmitEvent) {
         e.preventDefault();
         if (!novaCategoria.trim()) {
             setError("O nome da categoria é obrigatório.");
@@ -27,12 +27,9 @@ export function Categorias() {
         setIsSubmitting(true);
         setError(null);
 
-        let res;
-        if (categoriaEditando) {
-            res = await updateCategoria(categoriaEditando.id, novaCategoria.trim());
-        } else {
-            res = await createCategoria(novaCategoria.trim());
-        }
+        const res = categoriaEditando
+            ? await updateCategoria(categoriaEditando.id, novaCategoria.trim())
+            : await createCategoria(novaCategoria.trim());
 
         if (res.success) {
             setIsModalOpen(false);
@@ -47,9 +44,9 @@ export function Categorias() {
         }
 
         setIsSubmitting(false);
-    };
+    }
 
-    const handleDelete = async (id: string, nome: string) => {
+    async function handleDelete(id: string, nome: string) {
         if (
             !window.confirm(
                 `Tem certeza que deseja excluir a categoria "${nome}"? Produtos vinculados perderão a categoria.`,
@@ -62,7 +59,7 @@ export function Categorias() {
         if (!res.success) {
             alert("Erro ao excluir categoria.");
         }
-    };
+    }
 
     return (
         <div className="page-container">

@@ -27,29 +27,29 @@ export function Produtos() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [produtoToEdit, setProdutoToEdit] = useState<Produto | null>(null);
 
-    const handleOpenCreate = () => {
+    function handleOpenCreate() {
         setProdutoToEdit(null);
         setIsModalOpen(true);
-    };
+    }
 
-    const handleOpenEdit = (produto: ProdutoComCategoria) => {
+    function handleOpenEdit(produto: ProdutoComCategoria) {
         setProdutoToEdit(produto);
         setIsModalOpen(true);
-    };
+    }
 
-    const handleSuccess = () => {
+    function handleSuccess() {
         setIsModalOpen(false);
         recarregar();
-    };
+    }
 
-    const handleDelete = async (id: string, nome: string) => {
+    async function handleDelete(id: string, nome: string) {
         if (!window.confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) return;
 
         const res = await deleteProduto(id);
         if (!res.success) {
             alert("Erro ao excluir produto. Ele pode estar vinculado a movimentações ou pedidos.");
         }
-    };
+    }
 
     return (
         <div className="page-container">

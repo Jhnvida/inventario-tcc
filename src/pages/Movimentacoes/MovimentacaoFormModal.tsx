@@ -27,15 +27,15 @@ export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: name === "quantidade" ? Number(value) : value,
         }));
-    };
+    }
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -56,7 +56,7 @@ export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: 
         }
 
         setLoading(false);
-    };
+    }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Nova Movimentação Manual" width="medium">

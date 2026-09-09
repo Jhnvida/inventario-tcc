@@ -22,36 +22,34 @@ export function Usuarios() {
     const [ativo, setAtivo] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const handleEdit = (user: Usuario) => {
+    function handleEdit(user: Usuario) {
         setSelectedUser(user);
         setNome(user.nome);
         setPerfil(user.perfil);
         setAtivo(user.ativo);
         setError(null);
         setIsModalOpen(true);
-    };
+    }
 
-    const handleDelete = async (id: string, nome: string) => {
+    async function handleDelete(id: string, nome: string) {
         if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nome}"? Essa ação é irreversível.`)) return;
 
         const res = await deleteUsuario(id);
         if (!res.success) {
             alert("Erro ao excluir usuário. Ele pode estar vinculado a registros no banco.");
         }
-    };
+    }
 
-    const handleUpdate = async (e: SubmitEvent) => {
+    async function handleUpdate(e: SubmitEvent) {
         e.preventDefault();
         if (!selectedUser) return;
+        if (!nome.trim()) {
+            setError("O nome é obrigatório.");
+            return;
+        }
 
         setIsSubmitting(true);
         setError(null);
-
-        if (!nome.trim()) {
-            setError("O nome é obrigatório.");
-            setIsSubmitting(false);
-            return;
-        }
 
         const res = await updateUsuario(selectedUser.id, { nome: nome.trim(), perfil, ativo });
 
@@ -62,7 +60,7 @@ export function Usuarios() {
         }
 
         setIsSubmitting(false);
-    };
+    }
 
     return (
         <div className="page-container">
@@ -169,8 +167,8 @@ export function Usuarios() {
                             onChange={(e) => setPerfil(e.target.value as "admin" | "operador")}
                             disabled={isSubmitting}
                         >
-                            <option value="operador">Operador (Acesso Padrão)</option>
-                            <option value="admin">Administrador (Acesso Total)</option>
+                            <option value="operador">Operador</option>
+                            <option value="admin">Administrador</option>
                         </Select>
 
                         <Select
@@ -179,8 +177,8 @@ export function Usuarios() {
                             onChange={(e) => setAtivo(e.target.value === "true")}
                             disabled={isSubmitting}
                         >
-                            <option value="true">Ativo (Permitir Acesso)</option>
-                            <option value="false">Inativo (Bloquear Acesso)</option>
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
                         </Select>
 
                         {error && <div className="alert-error">{error}</div>}

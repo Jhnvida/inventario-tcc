@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-
-export type Categoria = {
-    id: string;
-    nome: string;
-    criado_em: string;
-};
+import type { Categoria } from "../types";
 
 export function useCategorias() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);

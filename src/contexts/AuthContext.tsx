@@ -6,7 +6,7 @@ interface AuthContextType {
     user: User | null;
     session: Session | null;
     loading: boolean;
-    signOut: () => Promise<void>;
+    signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -34,9 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => subscription.unsubscribe();
     }, []);
 
-    const signOut = async () => {
-        await supabase.auth.signOut();
-    };
+    function signOut() {
+        supabase.auth.signOut();
+    }
 
     return (
         <AuthContext.Provider value={{ user, session, loading, signOut }}>{!loading && children}</AuthContext.Provider>

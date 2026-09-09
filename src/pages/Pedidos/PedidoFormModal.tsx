@@ -139,7 +139,13 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                     </div>
                     <div>
                         <label className={styles.detalhe_label}>Status</label>
-                        <Select value={status} onChange={(e) => setStatus(e.target.value as any)} required>
+                        <Select
+                            value={status}
+                            onChange={(e) =>
+                                setStatus(e.target.value as "rascunho" | "enviado" | "concluido" | "cancelado")
+                            }
+                            required
+                        >
                             <option value="rascunho">Rascunho</option>
                             <option value="enviado">Enviado</option>
                             <option value="concluido">Concluído</option>

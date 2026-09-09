@@ -1,5 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
@@ -89,7 +89,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
 
     const valorTotal = itens.reduce((acc, item) => acc + item.quantidade * item.preco_unitario, 0);
 
-    async function handleSubmit(e: FormEvent) {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         setError(null);
 
@@ -120,7 +120,6 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         }
     }
 
-    // Remove inline css because of strict rules
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={pedido ? "Editar Pedido" : "Novo Pedido"} width="large">
             <form onSubmit={handleSubmit} className={styles.form_container}>

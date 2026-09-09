@@ -1,6 +1,6 @@
-import { Type } from "@google/genai";
+import { Type, type Tool } from "@google/genai";
 
-export const tools = [
+export const tools: Tool[] = [
     {
         functionDeclarations: [
             {
@@ -29,6 +29,26 @@ export const tools = [
             {
                 name: "consultar_fornecedores",
                 description: "Retorna a lista de fornecedores cadastrados.",
+            },
+            {
+                name: "analisar_movimentacao",
+                description:
+                    "Realiza um cálculo estatístico do consumo médio de um produto específico com base no seu histórico de saídas e estima os dias até a ruptura do estoque.",
+                parameters: {
+                    type: Type.OBJECT,
+                    properties: {
+                        produto_id: {
+                            type: Type.STRING,
+                            description: "O ID do produto a ser analisado. Obrigatório.",
+                        },
+                        dias_historico: {
+                            type: Type.NUMBER,
+                            description:
+                                "Opcional. Quantidade de dias de histórico para basear o cálculo (ex: 7, 30, 60, 90). Padrão é 30 dias.",
+                        },
+                    },
+                    required: ["produto_id"],
+                },
             },
         ],
     },

@@ -6,7 +6,6 @@
     color: var(--color-danger-text);
 }
 
-/* Styles de Movimentacoes Form Modal */
 .form_container {
     display: flex;
     flex-direction: column;

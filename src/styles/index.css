@@ -26,14 +26,12 @@
     --radius-md: 8px;
     --radius-lg: 12px;
 
-    /* Premium UI Extras */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 5%);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 8%), 0 2px 4px -2px rgb(0 0 0 / 8%);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 8%), 0 4px 6px -4px rgb(0 0 0 / 8%);
     --transition: none;
 }
 
-/* CSS Reset & Base Styles */
 *,
 *::before,
 *::after {
@@ -69,7 +67,6 @@ ul {
     list-style: none;
 }
 
-/* Scrollbar premium */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -88,7 +85,6 @@ ul {
     background: var(--color-text-muted);
 }
 
-/* Page Global Layout */
 .page-container {
     display: flex;
     flex-direction: column;
@@ -146,7 +142,6 @@ ul {
     padding-left: 36px !important;
 }
 
-/* Data Table Global Styles */
 .table-container {
     overflow: hidden;
     border: 1px solid var(--color-border);
@@ -193,7 +188,6 @@ ul {
     text-align: center;
 }
 
-/* Utilitários tipográficos */
 .text-monospace {
     font-family: monospace;
     font-size: 13px;

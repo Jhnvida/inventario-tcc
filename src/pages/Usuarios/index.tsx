@@ -13,12 +13,10 @@ import styles from "./styles.module.css";
 export function Usuarios() {
     const { usuarios, loading, updateUsuario, deleteUsuario } = useUsuarios();
 
-    // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Form state
     const [nome, setNome] = useState("");
     const [perfil, setPerfil] = useState<"admin" | "operador">("operador");
     const [ativo, setAtivo] = useState(true);

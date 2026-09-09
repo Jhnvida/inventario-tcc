@@ -80,7 +80,6 @@ export function usePedidos() {
         try {
             let pid = pedidoId;
 
-            // 1. Inserir ou atualizar pedido
             if (pid) {
                 const { error: errorPedido } = await supabase
                     .from("pedidos")
@@ -88,7 +87,6 @@ export function usePedidos() {
                     .eq("id", pid);
                 if (errorPedido) throw errorPedido;
 
-                // Apagar itens antigos
                 const { error: errorDelete } = await supabase.from("itens_pedido").delete().eq("pedido_id", pid);
                 if (errorDelete) throw errorDelete;
             } else {
@@ -101,7 +99,6 @@ export function usePedidos() {
                 pid = newPedido.id;
             }
 
-            // 2. Inserir itens
             if (itens.length > 0) {
                 const itensParaInserir = itens.map((item) => ({
                     ...item,

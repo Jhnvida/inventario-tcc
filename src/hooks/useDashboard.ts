@@ -17,7 +17,6 @@ export function useDashboard() {
     useEffect(() => {
         async function fetchDashboardData() {
             try {
-                // Obter usuário atual do Supabase Auth para pegar o ID e buscar o nome atualizado
                 const { data: authData } = await supabase.auth.getUser();
                 if (authData.user) {
                     const { data: userData } = await supabase
@@ -35,18 +34,15 @@ export function useDashboard() {
                     setUserName("Usuário");
                 }
 
-                // 1. Busca produtos
                 const { data: produtos } = await supabase
                     .from("produtos")
                     .select("id, nome, sku, quantidade, estoque_minimo, preco");
 
-                // 2. Busca pedidos em aberto
                 const { count: pedidosCount } = await supabase
                     .from("pedidos")
                     .select("*", { count: "exact", head: true })
                     .in("status", ["rascunho", "enviado"]);
 
-                // 3. Busca movimentações recentes
                 const { data: movs } = await supabase
                     .from("movimentacoes")
                     .select(`*, produtos (nome, sku)`)

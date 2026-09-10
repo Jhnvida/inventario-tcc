@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Categoria } from "../types";
+import { translateDbError } from "../utils/errors";
 
 export function useCategorias() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -32,7 +33,7 @@ export function useCategorias() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir categoria:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -44,7 +45,7 @@ export function useCategorias() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao criar categoria:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -56,7 +57,7 @@ export function useCategorias() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar categoria:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 

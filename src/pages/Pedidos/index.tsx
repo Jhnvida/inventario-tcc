@@ -29,8 +29,13 @@ export function Pedidos() {
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [pedidoEditando, setPedidoEditando] = useState<PedidoCompleto | null>(null);
 
-    function handleOpenForm(pedido?: PedidoCompleto) {
-        setPedidoEditando(pedido || null);
+    function handleOpenCreate() {
+        setPedidoEditando(null);
+        setIsFormModalOpen(true);
+    }
+
+    function handleOpenEdit(pedido: PedidoCompleto) {
+        setPedidoEditando(pedido);
         setIsFormModalOpen(true);
     }
 
@@ -44,14 +49,14 @@ export function Pedidos() {
 
         const res = await deletePedido(id);
         if (!res.success) {
-            alert("Erro ao excluir pedido. Pode haver restrições do banco de dados.");
+            alert(res.error);
         }
     }
 
     return (
         <div className="page-container">
             <PageHeader title="Pedidos de Compra" subtitle="Gerencie os pedidos para reposição de estoque.">
-                <Button onClick={() => handleOpenForm()}>
+                <Button onClick={handleOpenCreate}>
                     <Plus size={18} style={{ marginRight: 8 }} />
                     Novo Pedido
                 </Button>
@@ -146,7 +151,7 @@ export function Pedidos() {
                                         </Button>
                                         <Button
                                             variant="ghost"
-                                            onClick={() => handleOpenForm(pedido)}
+                                            onClick={() => handleOpenEdit(pedido)}
                                             title="Editar Pedido"
                                         >
                                             <Edit size={16} />

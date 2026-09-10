@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Movimentacao, Produto } from "../types";
+import { translateDbError } from "../utils/errors";
 
 export type MovimentacaoComProduto = Movimentacao & {
     produtos: { nome: string; sku: string } | null;
@@ -84,7 +85,7 @@ export function useMovimentacoes() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao registrar movimentação:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 

@@ -18,7 +18,7 @@ export function Usuarios() {
     const [nome, setNome] = useState("");
     const [error, setError] = useState<string | null>(null);
 
-    function handleEdit(user: Usuario) {
+    function handleOpenEdit(user: Usuario) {
         setSelectedUser(user);
         setNome(user.nome);
         setError(null);
@@ -34,7 +34,7 @@ export function Usuarios() {
         }
     }
 
-    async function handleUpdate(e: SubmitEvent) {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         if (!selectedUser) return;
         if (!nome.trim()) {
@@ -101,7 +101,7 @@ export function Usuarios() {
                                     <td style={{ textAlign: "right" }}>
                                         <button
                                             className={styles.action_btn}
-                                            onClick={() => handleEdit(user)}
+                                            onClick={() => handleOpenEdit(user)}
                                             title="Editar Usuário"
                                         >
                                             <Edit2 size={18} className={styles.edit_icon} />
@@ -128,7 +128,7 @@ export function Usuarios() {
                 width="small"
             >
                 {selectedUser && (
-                    <form onSubmit={handleUpdate} className={styles.form}>
+                    <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.user_details}>
                             <p>
                                 <strong>Email:</strong> {selectedUser.email}

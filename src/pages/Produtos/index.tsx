@@ -47,7 +47,7 @@ export function Produtos() {
 
         const res = await deleteProduto(id);
         if (!res.success) {
-            alert("Erro ao excluir produto. Ele pode estar vinculado a movimentações ou pedidos.");
+            alert(res.error);
         }
     }
 

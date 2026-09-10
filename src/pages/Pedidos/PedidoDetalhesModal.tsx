@@ -20,7 +20,8 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
 
     if (!pedido) return null;
 
-    const handleReceber = async () => {
+    async function handleReceber() {
+        if (!pedido) return;
         setLoading(true);
         setError("");
         const res = await onReceberPedido(pedido.id);
@@ -30,7 +31,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
             setError(res.error || "Erro ao receber pedido.");
         }
         setLoading(false);
-    };
+    }
 
     const isRecebivel = pedido.status === "enviado";
 

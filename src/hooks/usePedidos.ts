@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { ItemPedido, Pedido } from "../types";
+import { translateDbError } from "../utils/errors";
 
 export type PedidoCompleto = Pedido & {
     fornecedores: { razao_social: string; nome_fantasia: string } | null;
@@ -64,7 +65,7 @@ export function usePedidos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao receber pedido:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -112,7 +113,7 @@ export function usePedidos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao salvar pedido:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -124,7 +125,7 @@ export function usePedidos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir pedido:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 

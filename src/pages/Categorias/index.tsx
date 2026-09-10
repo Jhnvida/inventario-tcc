@@ -17,7 +17,7 @@ export function Categorias() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    async function handleSave(e: SubmitEvent) {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
         if (!novaCategoria.trim()) {
             setError("O nome da categoria é obrigatório.");
@@ -36,11 +36,7 @@ export function Categorias() {
             setNovaCategoria("");
             setCategoriaEditando(null);
         } else {
-            setError(
-                categoriaEditando
-                    ? "Erro ao atualizar categoria."
-                    : "Erro ao criar categoria. Verifique se já não existe uma com este nome.",
-            );
+            setError(res.error || "Erro ao salvar categoria.");
         }
 
         setIsSubmitting(false);
@@ -57,7 +53,7 @@ export function Categorias() {
 
         const res = await deleteCategoria(id);
         if (!res.success) {
-            alert("Erro ao excluir categoria.");
+            alert(res.error);
         }
     }
 
@@ -144,7 +140,7 @@ export function Categorias() {
                 title={categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
                 width="small"
             >
-                <form onSubmit={handleSave} className={styles.form}>
+                <form onSubmit={handleSubmit} className={styles.form}>
                     <Input
                         label="Nome da Categoria"
                         value={novaCategoria}

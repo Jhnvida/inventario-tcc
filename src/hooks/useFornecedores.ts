@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Fornecedor } from "../types";
+import { translateDbError } from "../utils/errors";
 import { stripFormatting } from "../utils/formatters";
 
 export function useFornecedores() {
@@ -43,7 +44,7 @@ export function useFornecedores() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao criar fornecedor:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -55,7 +56,7 @@ export function useFornecedores() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar fornecedor:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -67,7 +68,7 @@ export function useFornecedores() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir fornecedor:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 

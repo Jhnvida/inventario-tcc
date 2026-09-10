@@ -36,7 +36,7 @@ export function Fornecedores() {
 
         const res = await deleteFornecedor(id);
         if (!res.success) {
-            alert("Erro ao excluir fornecedor. Ele pode estar vinculado a produtos ou pedidos.");
+            alert(res.error);
         }
     }
 

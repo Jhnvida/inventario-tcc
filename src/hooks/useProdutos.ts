@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Categoria, Produto } from "../types";
+import { translateDbError } from "../utils/errors";
 
 export type ProdutoComCategoria = Produto & { categorias: { id: string; nome: string } | null };
 
@@ -70,7 +71,7 @@ export function useProdutos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao criar produto:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -86,7 +87,7 @@ export function useProdutos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar produto:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -98,7 +99,7 @@ export function useProdutos() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir produto:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 

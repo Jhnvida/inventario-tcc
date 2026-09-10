@@ -5,8 +5,6 @@ export type Usuario = {
     id: string;
     nome: string;
     email: string;
-    perfil: "admin" | "operador";
-    ativo: boolean;
     criado_em: string;
 };
 
@@ -32,10 +30,7 @@ export function useUsuarios() {
         fetchUsuarios();
     }, []);
 
-    async function updateUsuario(
-        id: string,
-        updates: { nome?: string; perfil?: "admin" | "operador"; ativo?: boolean },
-    ) {
+    async function updateUsuario(id: string, updates: { nome?: string }) {
         try {
             const { error } = await supabase.from("usuarios").update(updates).eq("id", id);
             if (error) throw error;

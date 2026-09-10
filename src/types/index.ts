@@ -36,7 +36,6 @@ export interface Fornecedor {
     cnpj: string;
     telefone?: string | null;
     email?: string | null;
-    status: "ativo" | "inativo";
     criado_em: string;
 }
 

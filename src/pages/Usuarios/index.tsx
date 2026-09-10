@@ -1,12 +1,10 @@
 import { Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type SubmitEvent } from "react";
-import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
-import { Select } from "../../components/ui/Select";
 import { useUsuarios, type Usuario } from "../../hooks/useUsuarios";
 import styles from "./styles.module.css";
 
@@ -18,15 +16,11 @@ export function Usuarios() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [nome, setNome] = useState("");
-    const [perfil, setPerfil] = useState<"admin" | "operador">("operador");
-    const [ativo, setAtivo] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     function handleEdit(user: Usuario) {
         setSelectedUser(user);
         setNome(user.nome);
-        setPerfil(user.perfil);
-        setAtivo(user.ativo);
         setError(null);
         setIsModalOpen(true);
     }
@@ -51,7 +45,7 @@ export function Usuarios() {
         setIsSubmitting(true);
         setError(null);
 
-        const res = await updateUsuario(selectedUser.id, { nome: nome.trim(), perfil, ativo });
+        const res = await updateUsuario(selectedUser.id, { nome: nome.trim() });
 
         if (res.success) {
             setIsModalOpen(false);
@@ -64,7 +58,7 @@ export function Usuarios() {
 
     return (
         <div className="page-container">
-            <PageHeader title="Gestão de Usuários" subtitle="Gerencie os usuários e os níveis de acesso do sistema." />
+            <PageHeader title="Gestão de Usuários" subtitle="Gerencie as informações dos usuários do sistema." />
 
             <div className="table-container">
                 {loading ? (
@@ -76,8 +70,6 @@ export function Usuarios() {
                         <thead>
                             <tr>
                                 <th>Usuário</th>
-                                <th>Perfil</th>
-                                <th>Status</th>
                                 <th style={{ textAlign: "right" }}>Ações</th>
                             </tr>
                         </thead>
@@ -106,21 +98,11 @@ export function Usuarios() {
                                             {user.email}
                                         </div>
                                     </td>
-                                    <td>
-                                        <Badge variant={user.perfil === "admin" ? "critical" : "neutral"}>
-                                            {user.perfil === "admin" ? "Administrador" : "Operador"}
-                                        </Badge>
-                                    </td>
-                                    <td>
-                                        <Badge variant={user.ativo ? "success" : "neutral"}>
-                                            {user.ativo ? "Ativo" : "Inativo"}
-                                        </Badge>
-                                    </td>
                                     <td style={{ textAlign: "right" }}>
                                         <button
                                             className={styles.action_btn}
                                             onClick={() => handleEdit(user)}
-                                            title="Editar Acessos"
+                                            title="Editar Usuário"
                                         >
                                             <Edit2 size={18} className={styles.edit_icon} />
                                         </button>
@@ -160,26 +142,6 @@ export function Usuarios() {
                             disabled={isSubmitting}
                             autoFocus
                         />
-
-                        <Select
-                            label="Nível de Acesso (Perfil)"
-                            value={perfil}
-                            onChange={(e) => setPerfil(e.target.value as "admin" | "operador")}
-                            disabled={isSubmitting}
-                        >
-                            <option value="operador">Operador</option>
-                            <option value="admin">Administrador</option>
-                        </Select>
-
-                        <Select
-                            label="Status"
-                            value={ativo ? "true" : "false"}
-                            onChange={(e) => setAtivo(e.target.value === "true")}
-                            disabled={isSubmitting}
-                        >
-                            <option value="true">Ativo</option>
-                            <option value="false">Inativo</option>
-                        </Select>
 
                         {error && <div className="alert-error">{error}</div>}
 

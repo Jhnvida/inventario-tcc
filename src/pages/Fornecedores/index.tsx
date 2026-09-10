@@ -1,12 +1,12 @@
 import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { useFornecedores } from "../../hooks/useFornecedores";
 import type { Fornecedor } from "../../types";
+import { formatCNPJ, formatTelefone } from "../../utils/formatters";
 import { FornecedorFormModal } from "./FornecedorFormModal";
 import styles from "./styles.module.css";
 
@@ -73,7 +73,6 @@ export function Fornecedores() {
                                 <th>Fornecedor</th>
                                 <th>CNPJ</th>
                                 <th>Contato</th>
-                                <th>Status</th>
                                 <th className={styles.text_center}>Ações</th>
                             </tr>
                         </thead>
@@ -102,12 +101,10 @@ export function Fornecedores() {
                                             {fornecedor.nome_fantasia || "Sem nome fantasia"}
                                         </div>
                                     </td>
-                                    <td>{fornecedor.cnpj}</td>
-                                    <td className="text-secondary">{fornecedor.email || fornecedor.telefone || "-"}</td>
-                                    <td>
-                                        <Badge variant={fornecedor.status === "ativo" ? "success" : "neutral"}>
-                                            {fornecedor.status}
-                                        </Badge>
+                                    <td>{formatCNPJ(fornecedor.cnpj)}</td>
+                                    <td className="text-secondary">
+                                        {fornecedor.email ||
+                                            (fornecedor.telefone ? formatTelefone(fornecedor.telefone) : "-")}
                                     </td>
                                     <td
                                         className="text-center"

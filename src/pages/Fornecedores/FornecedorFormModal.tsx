@@ -2,9 +2,9 @@ import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
-import { Select } from "../../components/ui/Select";
 import { useFornecedores } from "../../hooks/useFornecedores";
 import type { Fornecedor } from "../../types";
+import { formatCNPJ, formatTelefone, stripFormatting } from "../../utils/formatters";
 import styles from "./styles.module.css";
 
 interface FornecedorFormModalProps {
@@ -24,7 +24,6 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         cnpj: "",
         telefone: "",
         email: "",
-        status: "ativo" as "ativo" | "inativo",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -34,10 +33,9 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
             setFormData({
                 razao_social: fornecedorToEdit.razao_social,
                 nome_fantasia: fornecedorToEdit.nome_fantasia || "",
-                cnpj: fornecedorToEdit.cnpj,
-                telefone: fornecedorToEdit.telefone || "",
+                cnpj: formatCNPJ(fornecedorToEdit.cnpj),
+                telefone: formatTelefone(fornecedorToEdit.telefone),
                 email: fornecedorToEdit.email || "",
-                status: fornecedorToEdit.status,
             });
         } else {
             setFormData({
@@ -46,7 +44,6 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
                 cnpj: "",
                 telefone: "",
                 email: "",
-                status: "ativo",
             });
         }
         setError("");
@@ -54,7 +51,15 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
 
     function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        let formattedValue = value;
+        if (name === "cnpj") {
+            formattedValue = formatCNPJ(value);
+        } else if (name === "telefone") {
+            formattedValue = formatTelefone(value);
+        }
+
+        setFormData((prev) => ({ ...prev, [name]: formattedValue }));
     }
 
     async function handleSubmit(e: SubmitEvent) {
@@ -62,9 +67,13 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         setLoading(true);
         setError("");
 
-        const res = isEditing
-            ? await updateFornecedor(fornecedorToEdit.id, formData)
-            : await createFornecedor(formData);
+        const payload = {
+            ...formData,
+            cnpj: stripFormatting(formData.cnpj),
+            telefone: stripFormatting(formData.telefone),
+        };
+
+        const res = isEditing ? await updateFornecedor(fornecedorToEdit.id, payload) : await createFornecedor(payload);
 
         if (res.success) {
             onSuccess();
@@ -100,20 +109,14 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
                     onChange={handleChange}
                 />
 
-                <div className={styles.grid2}>
-                    <Input
-                        label="CNPJ"
-                        name="cnpj"
-                        value={formData.cnpj}
-                        onChange={handleChange}
-                        required
-                        placeholder="00.000.000/0001-00"
-                    />
-                    <Select label="Status" name="status" value={formData.status} onChange={handleChange} required>
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                    </Select>
-                </div>
+                <Input
+                    label="CNPJ"
+                    name="cnpj"
+                    value={formData.cnpj}
+                    onChange={handleChange}
+                    required
+                    placeholder="00.000.000/0001-00"
+                />
 
                 <div className={styles.grid2}>
                     <Input

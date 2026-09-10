@@ -52,7 +52,7 @@ export function useAssistente() {
         const response = await fetch("http://localhost:11434/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "llama3.2", messages: chatHistory, tools, stream: false }),
+            body: JSON.stringify({ model: "llama3.2:3b", messages: chatHistory, tools, stream: false }),
         });
 
         if (!response.ok) {

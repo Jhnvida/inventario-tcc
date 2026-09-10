@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Fornecedor } from "../types";
+import { stripFormatting } from "../utils/formatters";
 
 export function useFornecedores() {
     const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
@@ -25,8 +26,13 @@ export function useFornecedores() {
     }, []);
 
     const fornecedoresFiltrados = fornecedores.filter((f) => {
-        const text = `${f.razao_social} ${f.nome_fantasia || ""} ${f.cnpj}`.toLowerCase();
-        return text.includes(busca.toLowerCase());
+        const searchRaw = busca.toLowerCase();
+        const searchStripped = stripFormatting(busca);
+
+        const matchText = `${f.razao_social} ${f.nome_fantasia || ""}`.toLowerCase().includes(searchRaw);
+        const matchCnpj = searchStripped ? f.cnpj.includes(searchStripped) : false;
+
+        return matchText || matchCnpj;
     });
 
     async function createFornecedor(fornecedor: Partial<Fornecedor>) {

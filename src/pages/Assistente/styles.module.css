@@ -3,8 +3,8 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    min-height: 0;
 
+    min-height: 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
 
@@ -142,10 +142,49 @@
 
 .messageBubble ul,
 .messageBubble ol {
-    margin: 12px 0;
-    padding-left: 24px;
+    margin: 16px 0;
+    padding-left: 28px;
 }
 
 .messageBubble li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    line-height: 1.6;
+}
+
+.messageBubble li::marker {
+    color: var(--color-primary);
+}
+
+.messageBubble table {
+    overflow: hidden;
+    border-collapse: collapse;
+
+    width: 100%;
+    margin: 16px 0;
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+}
+
+.messageBubble th,
+.messageBubble td {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.messageBubble th {
+    font-weight: 600;
+    background-color: var(--color-surface);
+}
+
+.messageWrapper.ai .messageBubble tr:nth-child(even) {
+    background-color: var(--color-surface);
+}
+
+.messageBubble strong {
+    font-weight: 600;
+    color: var(--color-primary);
 }

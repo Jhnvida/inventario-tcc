@@ -36,7 +36,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
     },
 
     consultar_fornecedores: async function () {
-        const { data } = await supabase.from("fornecedores").select("razao_social, nome_fantasia, status");
+        const { data } = await supabase.from("fornecedores").select("razao_social, nome_fantasia");
         return data;
     },
 };

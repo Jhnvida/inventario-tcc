@@ -27,7 +27,7 @@ export function Assistente() {
     return (
         <div className="page-container" style={{ height: "100%", overflow: "hidden" }}>
             <PageHeader
-                title="Assistente Inteligente"
+                title="Assistente"
                 subtitle="Consulte e interaja com os dados do seu inventário utilizando inteligência artificial."
             />
 

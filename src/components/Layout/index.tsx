@@ -3,6 +3,7 @@ import {
     Brain,
     LayoutDashboard,
     LogOut,
+    Menu,
     Package,
     ShoppingCart,
     Tags,
@@ -10,14 +11,17 @@ import {
     Users,
 } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
+import { Button } from "../ui/Button";
 import styles from "./styles.module.css";
 
 export function Layout() {
     const { user, signOut } = useAuth();
     const [userName, setUserName] = useState<string>(user?.user_metadata?.nome || "Usuário Logado");
+    const [isSidebarOpen, setSidebarOpen] = useState(true);
+    const location = useLocation();
 
     const navSections = [
         {
@@ -63,61 +67,92 @@ export function Layout() {
         fetchUserName();
     }, [user]);
 
+    // Derived title for the top header
+    const currentPath = location.pathname;
+    let pageTitle = "Inventário Inteligente";
+    navSections.forEach((section) => {
+        section.items.forEach((item) => {
+            if (item.path === currentPath) pageTitle = item.label;
+            else if (currentPath.startsWith(item.path) && item.path !== "/") {
+                pageTitle = item.label;
+            }
+        });
+    });
+    if (currentPath === "/assistente") pageTitle = "Assistente";
+
     return (
         <div className={styles.app_layout}>
-            <aside className={styles.sidebar}>
-                <div className={styles.sidebar_header}>
-                    <h2>Inventário Inteligente</h2>
+            {/* Sidebar */}
+            <aside className={`${styles.sidebar} ${isSidebarOpen ? "" : styles.sidebar_closed}`}>
+                <div className={`${styles.sidebar_header} ${!isSidebarOpen ? styles.sidebar_header_closed : ""}`}>
+                    {isSidebarOpen && (
+                        <div className={styles.logo_container}>
+                            <span className={styles.logo_text}>Inventário Inteligente</span>
+                        </div>
+                    )}
+                    <button className={styles.toggle_btn} onClick={() => setSidebarOpen(!isSidebarOpen)}>
+                        <Menu size={20} />
+                    </button>
                 </div>
 
                 <nav className={styles.sidebar_nav}>
                     {navSections.map((section) => (
                         <Fragment key={section.title}>
-                            <div className={styles.nav_section}>{section.title}</div>
+                            {isSidebarOpen && <div className={styles.nav_section}>{section.title}</div>}
                             {section.items.map((item) => (
                                 <NavLink
                                     key={item.path}
                                     to={item.path}
+                                    title={!isSidebarOpen ? item.label : undefined}
                                     className={({ isActive }) =>
                                         `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`
                                     }
                                 >
-                                    <item.icon size={18} />
-                                    {item.label}
+                                    <item.icon size={20} className={styles.nav_icon} />
+                                    {isSidebarOpen && <span className={styles.nav_label}>{item.label}</span>}
                                 </NavLink>
                             ))}
                         </Fragment>
                     ))}
 
-                    <div className={styles.nav_section}>Ferramentas</div>
+                    {isSidebarOpen && <div className={styles.nav_section}>Ferramentas</div>}
                     <NavLink
                         to="/assistente"
-                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
+                        title={!isSidebarOpen ? "Assistente" : undefined}
+                        className={({ isActive }) =>
+                            `${styles.nav_item} ${styles.nav_item_highlight} ${isActive ? styles.nav_item_active : ""}`
+                        }
                     >
-                        <Brain size={18} />
-                        Assistente Inteligente
+                        <Brain size={20} className={styles.nav_icon} />
+                        {isSidebarOpen && <span className={styles.nav_label}>Assistente</span>}
                     </NavLink>
                 </nav>
-
-                <div className={styles.sidebar_footer}>
-                    <div className={styles.user_info_container}>
-                        <div className={styles.user_details}>
-                            <div className={styles.user_name}>{userName}</div>
-                            <div className={styles.user_email}>{user?.email}</div>
-                        </div>
-                    </div>
-                    <div className={styles.footer_actions}>
-                        <button className={`${styles.nav_item} ${styles.sidebar_btn}`} onClick={signOut}>
-                            <LogOut size={18} />
-                            Sair
-                        </button>
-                    </div>
-                </div>
             </aside>
 
+            {/* Main Content Area */}
             <main className={styles.main_content}>
+                {/* Top Header */}
+                <header className={styles.top_header}>
+                    <div className={styles.header_left}>
+                        <h2 className={styles.header_title}>{pageTitle}</h2>
+                    </div>
+                    <div className={styles.header_right}>
+                        <div className={styles.user_profile}>
+                            <div className={styles.user_details}>
+                                <span className={styles.user_name}>{userName}</span>
+                                <span className={styles.user_role}>Administrador</span>
+                            </div>
+                            <Button variant="ghost" className={styles.logout_btn} onClick={signOut} title="Sair">
+                                <LogOut size={18} />
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+
                 <div className={styles.content_area}>
-                    <Outlet />
+                    <div className={styles.content_container}>
+                        <Outlet />
+                    </div>
                 </div>
             </main>
         </div>

@@ -2,36 +2,44 @@
     display: inline-flex;
     align-items: center;
 
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
 
-    font-size: 0.75rem;
+    font-size: 11px;
     font-weight: 600;
+    line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.05em;
 }
 
 .success {
+    border-color: var(--color-success-border);
     color: var(--color-success-text);
     background-color: var(--color-success-bg);
 }
 
 .critical {
+    border-color: var(--color-danger-border);
     color: var(--color-danger-text);
     background-color: var(--color-danger-bg);
 }
 
 .warning {
+    border-color: var(--color-warning-border);
     color: var(--color-warning-text);
     background-color: var(--color-warning-bg);
 }
 
 .draft {
-    color: var(--color-neutral-text);
-    background-color: var(--color-neutral-bg);
+    border-color: var(--color-info-border);
+    color: var(--color-info-text);
+    background-color: var(--color-info-bg);
 }
 
 .neutral {
+    border-color: var(--color-border);
     color: var(--color-text-secondary);
-    background-color: var(--color-surface-hover);
+    background-color: var(--color-bg-subtle);
 }
+

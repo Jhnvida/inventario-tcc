@@ -5,20 +5,20 @@
     justify-content: center;
 
     padding: 10px 16px;
+    border: 1px solid transparent;
     border-radius: var(--radius-md);
 
     font-size: 14px;
     font-weight: 500;
+    line-height: 1.2;
 
     outline: none;
 
-    transition: var(--transition);
+    transition: all var(--transition-fast);
 }
 
 .button:focus-visible {
-    box-shadow:
-        0 0 0 2px var(--color-bg),
-        0 0 0 4px var(--color-primary);
+    box-shadow: var(--shadow-focus);
 }
 
 .button:disabled {
@@ -26,37 +26,51 @@
     opacity: 0.6;
 }
 
+/* Primary Variant */
 .primary {
     color: var(--color-primary-text);
     background-color: var(--color-primary);
-}
-
-.primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    background-color: var(--color-primary-hover);
     box-shadow: var(--shadow-sm);
 }
 
+.primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.primary:active:not(:disabled) {
+    background-color: var(--color-primary-active);
+}
+
+/* Secondary Variant */
 .secondary {
-    border: 1px solid var(--color-border);
+    border-color: var(--color-border);
     color: var(--color-text-primary);
-    background-color: var(--color-surface);
+    background-color: var(--color-bg-surface);
+    box-shadow: var(--shadow-sm);
 }
 
 .secondary:hover:not(:disabled) {
-    background-color: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    background-color: var(--color-bg-surface-hover);
 }
 
+/* Danger Variant */
 .danger {
+    border-color: var(--color-danger-border);
     color: var(--color-danger-text);
     background-color: var(--color-danger-bg);
 }
 
-.danger:hover:not(:disabled) {
-    background-color: var(--color-danger-bg);
-    filter: brightness(0.95);
+.danger:focus-visible {
+    box-shadow: var(--shadow-focus-danger);
 }
 
+.danger:hover:not(:disabled) {
+    background-color: #fecaca; /* slightly darker danger bg */
+}
+
+/* Ghost Variant */
 .ghost {
     color: var(--color-text-secondary);
     background-color: transparent;
@@ -64,9 +78,10 @@
 
 .ghost:hover:not(:disabled) {
     color: var(--color-text-primary);
-    background-color: var(--color-surface-hover);
+    background-color: var(--color-bg-surface-hover);
 }
 
+/* Utilities */
 .full_width {
     width: 100%;
 }

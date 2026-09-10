@@ -107,26 +107,30 @@ export function Categorias() {
                                 >
                                     <td className="fw500">{cat.nome}</td>
                                     <td style={{ textAlign: "right" }}>
-                                        <button
-                                            className={styles.action_btn}
-                                            onClick={() => {
-                                                setCategoriaEditando({ id: cat.id, nome: cat.nome });
-                                                setNovaCategoria(cat.nome);
-                                                setIsModalOpen(true);
-                                                setError(null);
-                                            }}
-                                            title="Editar"
-                                        >
-                                            <Edit2 size={18} className={styles.edit_icon} />
-                                        </button>
-                                        <button
-                                            className={styles.action_btn}
-                                            onClick={() => handleDelete(cat.id, cat.nome)}
-                                            title="Excluir"
-                                        >
-                                            <Trash2 size={18} className={styles.danger_icon} />
-                                        </button>
+                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setCategoriaEditando({ id: cat.id, nome: cat.nome });
+                                                    setNovaCategoria(cat.nome);
+                                                    setIsModalOpen(true);
+                                                    setError(null);
+                                                }}
+                                                title="Editar"
+                                            >
+                                                <Edit2 size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleDelete(cat.id, cat.nome)}
+                                                title="Excluir"
+                                                style={{ color: "var(--color-danger-text)" }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </div>
                                     </td>
+
                                 </motion.tr>
                             ))}
                         </motion.tbody>

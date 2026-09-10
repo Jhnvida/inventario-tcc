@@ -1,53 +1,61 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 6px;
     width: 100%;
 }
 
 .label {
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: 500;
     color: var(--color-text-primary);
 }
 
 .select {
     width: 100%;
-    padding: 0.625rem 1rem;
-    padding-right: 2.5rem;
+    padding: 10px 14px;
+    padding-right: 40px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
 
-    font-size: 0.875rem;
+    font-size: 14px;
     color: var(--color-text-primary);
 
     appearance: none;
-    background-color: var(--color-surface);
+    background-color: var(--color-bg-surface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
     outline: none;
+    box-shadow: var(--shadow-sm);
 
-    transition: var(--transition);
+    transition: all var(--transition-fast);
 }
 
 .select:focus {
-    border-color: var(--color-primary);
+    border-color: var(--color-border-focus);
     box-shadow: var(--shadow-focus);
 }
 
 .select:disabled {
     cursor: not-allowed;
     color: var(--color-text-secondary);
-    background-color: var(--color-bg);
+    background-color: var(--color-bg-base);
 }
 
 .select_error {
-    border-color: var(--color-danger-text);
+    border-color: var(--color-danger-border);
 }
 
 .select_error:focus {
+    border-color: var(--color-danger-text);
     box-shadow: var(--shadow-focus-danger);
 }
 
 .error_message {
-    font-size: 0.75rem;
+    font-size: 12px;
+    font-weight: 500;
     color: var(--color-danger-text);
 }
+

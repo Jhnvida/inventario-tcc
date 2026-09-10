@@ -99,21 +99,25 @@ export function Usuarios() {
                                         </div>
                                     </td>
                                     <td style={{ textAlign: "right" }}>
-                                        <button
-                                            className={styles.action_btn}
-                                            onClick={() => handleOpenEdit(user)}
-                                            title="Editar Usuário"
-                                        >
-                                            <Edit2 size={18} className={styles.edit_icon} />
-                                        </button>
-                                        <button
-                                            className={styles.action_btn}
-                                            onClick={() => handleDelete(user.id, user.nome)}
-                                            title="Excluir Usuário"
-                                        >
-                                            <Trash2 size={18} className={styles.danger_icon} />
-                                        </button>
+                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleOpenEdit(user)}
+                                                title="Editar Usuário"
+                                            >
+                                                <Edit2 size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleDelete(user.id, user.nome)}
+                                                title="Excluir Usuário"
+                                                style={{ color: "var(--color-danger-text)" }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </div>
                                     </td>
+
                                 </motion.tr>
                             ))}
                         </motion.tbody>

@@ -1,4 +1,3 @@
-import { Chat, GoogleGenAI } from "@google/genai";
 import { useRef, useState } from "react";
 import { systemPrompt } from "../services/ai/prompts";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
@@ -10,6 +9,12 @@ export type Message = {
     sender: "user" | "ai";
 };
 
+type ChatMessage = {
+    role: "system" | "user" | "assistant" | "tool";
+    content: string;
+    tool_calls?: any[];
+};
+
 export function useAssistente() {
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -18,77 +23,92 @@ export function useAssistente() {
             sender: "ai",
         },
     ]);
-
     const [isLoading, setIsLoading] = useState(false);
-    const chatRef = useRef<Chat | null>(null);
+    const historyRef = useRef<ChatMessage[]>([{ role: "system", content: systemPrompt }]);
 
-    function initChat() {
-        if (!chatRef.current) {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+    function addUserMessage(text: string) {
+        historyRef.current.push({ role: "user", content: text });
+        setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender: "user" }]);
+    }
 
-            chatRef.current = ai.chats.create({
-                model: "gemini-3.6-flash",
-                config: { systemInstruction: systemPrompt, tools: tools },
-            });
+    function addAiMessage(text: string) {
+        historyRef.current.push({ role: "assistant", content: text });
+        setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender: "ai" }]);
+    }
+
+    function addErrorMessage(errorMessage: string) {
+        setMessages((prev) => [...prev, { id: Date.now().toString(), text: errorMessage, sender: "ai" }]);
+    }
+
+    function setUiFeedback(id: string, text: string) {
+        setMessages((prev) => [...prev, { id, text, sender: "ai" }]);
+    }
+
+    function removeUiFeedback(id: string) {
+        setMessages((prev) => prev.filter((m) => m.id !== id));
+    }
+
+    async function sendToOllama(chatHistory: ChatMessage[]) {
+        const response = await fetch("http://localhost:11434/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "llama3.2", messages: chatHistory, tools, stream: false }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Erro na IA (${response.status}): ${errorData}`);
         }
 
-        return chatRef.current;
+        return await response.json();
     }
 
     async function sendMessage(text: string) {
-        const userMsgId = Date.now().toString();
-
-        setMessages((prev) => [...prev, { id: userMsgId, text, sender: "user" }]);
+        addUserMessage(text);
         setIsLoading(true);
 
+        const tempToolId = "temp-tool-msg";
+
         try {
-            const chat = initChat();
-            let response = await chat.sendMessage({ message: text });
+            let response = await sendToOllama(historyRef.current);
+            let responseMessage = response.message;
 
-            while (response.functionCalls?.length) {
-                const parts = [];
-
-                for (const call of response.functionCalls) {
-                    const result = await handleFunctionCall(call);
-                    parts.push({
-                        functionResponse: {
-                            name: call.name,
-                            response: { data: result },
-                        },
-                    });
-                }
-
-                response = await chat.sendMessage({ message: parts });
+            if (responseMessage.tool_calls?.length > 0) {
+                setUiFeedback(tempToolId, "Consultando banco de dados...");
             }
 
-            const responseText = response.text;
-            if (responseText) {
-                setMessages((prev) => [...prev, { id: Date.now().toString(), text: responseText, sender: "ai" }]);
+            while (responseMessage.tool_calls?.length > 0) {
+                historyRef.current.push(responseMessage);
+
+                for (const toolCall of responseMessage.tool_calls) {
+                    const functionName = toolCall.function.name;
+                    const functionArgs = toolCall.function.arguments;
+
+                    const args = typeof functionArgs === "string" ? JSON.parse(functionArgs) : functionArgs;
+                    const result = await handleFunctionCall({ name: functionName, args });
+
+                    historyRef.current.push({ role: "tool", content: JSON.stringify(result) });
+                }
+
+                response = await sendToOllama(historyRef.current);
+                responseMessage = response.message;
+            }
+
+            if (responseMessage.content) {
+                removeUiFeedback(tempToolId);
+                addAiMessage(responseMessage.content);
             }
         } catch (error: any) {
             console.error("Erro no chat:", error);
+            removeUiFeedback(tempToolId);
 
-            let errorMessage = "Desculpe, ocorreu um erro ao processar sua solicitação.";
+            let errorMessage = "Desculpe, ocorreu um erro de processamento.";
 
-            if (error.message?.includes("API")) {
-                errorMessage = "Erro de configuração: Verifique a chave da API do Gemini.";
-            } else if (
-                error.message?.includes("503") ||
-                error.message?.includes("high demand") ||
-                error.message?.includes("UNAVAILABLE")
-            ) {
-                errorMessage =
-                    "O assistente está com alta demanda no momento. Por favor, aguarde alguns instantes e tente novamente.";
+            if (error.message?.includes("Failed to fetch")) {
+                errorMessage = "Não foi possível conectar à Inteligência Artificial.";
             }
 
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: Date.now().toString(),
-                    text: errorMessage,
-                    sender: "ai",
-                },
-            ]);
+            addErrorMessage(errorMessage);
         } finally {
             setIsLoading(false);
         }

@@ -76,53 +76,89 @@ export function Movimentacoes() {
                 ) : movimentacoes.length === 0 ? (
                     <div className="empty-state">Nenhuma movimentação encontrada.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Produto</th>
-                                <th className="text-right">Qtd.</th>
-                                <th>Responsável</th>
-                                <th>Data</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 },
-                                },
-                            }}
-                        >
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Produto</th>
+                                    <th className="text-right">Qtd.</th>
+                                    <th>Responsável</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.05 },
+                                    },
+                                }}
+                            >
+                                {movimentacoes.map((mov) => (
+                                    <motion.tr
+                                        key={mov.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
+                                    >
+                                        <td>
+                                            <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
+                                                {mov.tipo === "entrada" ? "Entrada" : "Saída"}
+                                            </Badge>
+                                        </td>
+                                        <td className="fw500">{mov.produtos?.nome || "-"}</td>
+                                        <td
+                                            className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
+                                        >
+                                            {mov.tipo === "entrada" ? "+" : "-"}
+                                            {mov.quantidade}
+                                        </td>
+                                        <td>{mov.usuarios?.nome || mov.usuarios?.email || "Sistema / Desconhecido"}</td>
+                                        <td className="text-secondary">{formatDate(mov.criada_em)}</td>
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
+                        </table>
+
+                        <div className="mobile-cards-list mobile-only">
                             {movimentacoes.map((mov) => (
-                                <motion.tr
-                                    key={mov.id}
-                                    variants={{
-                                        hidden: { opacity: 0, x: -10 },
-                                        visible: { opacity: 1, x: 0 },
-                                    }}
-                                >
-                                    <td>
+                                <div key={mov.id} className="mobile-card">
+                                    <div className="mobile-card-header">
+                                        <div className="mobile-card-title">{mov.produtos?.nome || "-"}</div>
                                         <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
                                             {mov.tipo === "entrada" ? "Entrada" : "Saída"}
                                         </Badge>
-                                    </td>
-                                    <td className="fw500">{mov.produtos?.nome || "-"}</td>
-                                    <td
-                                        className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
-                                    >
-                                        {mov.tipo === "entrada" ? "+" : "-"}
-                                        {mov.quantidade}
-                                    </td>
-                                    <td>{mov.usuarios?.nome || mov.usuarios?.email || "Sistema / Desconhecido"}</td>
-                                    <td className="text-secondary">{formatDate(mov.criada_em)}</td>
-                                </motion.tr>
+                                    </div>
+                                    <div className="mobile-card-body">
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Quantidade</span>
+                                            <span
+                                                className={`mobile-card-value ${mov.tipo === "entrada" ? styles.text_success : styles.text_danger}`}
+                                            >
+                                                {mov.tipo === "entrada" ? "+" : "-"}
+                                                {mov.quantidade}
+                                            </span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Responsável</span>
+                                            <span className="mobile-card-value">
+                                                {mov.usuarios?.nome || mov.usuarios?.email || "Sistema"}
+                                            </span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Data</span>
+                                            <span className="mobile-card-value">{formatDate(mov.criada_em)}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

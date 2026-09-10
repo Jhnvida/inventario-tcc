@@ -20,8 +20,6 @@ export function stripFormatting(value: string | null | undefined): string {
 export function formatCNPJ(value: string | null | undefined): string {
     if (!value) return "";
     const cleanValue = stripFormatting(value);
-
-    // Limit to 14 digits
     const truncated = cleanValue.slice(0, 14);
 
     return truncated
@@ -34,15 +32,11 @@ export function formatCNPJ(value: string | null | undefined): string {
 export function formatTelefone(value: string | null | undefined): string {
     if (!value) return "";
     const cleanValue = stripFormatting(value);
-
-    // Limit to 11 digits
     const truncated = cleanValue.slice(0, 11);
 
     if (truncated.length <= 10) {
-        // Formato Fixo: (99) 9999-9999
         return truncated.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
     } else {
-        // Formato Celular: (99) 99999-9999
         return truncated.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
     }
 }

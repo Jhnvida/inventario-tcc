@@ -79,62 +79,95 @@ export function Categorias() {
                 ) : categorias.length === 0 ? (
                     <div className="empty-state">Nenhuma categoria encontrada.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th style={{ textAlign: "right" }}>Ações</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 },
-                                },
-                            }}
-                        >
-                            {categorias.map((cat) => (
-                                <motion.tr
-                                    key={cat.id}
-                                    variants={{
-                                        hidden: { opacity: 0, x: -10 },
-                                        visible: { opacity: 1, x: 0 },
-                                    }}
-                                >
-                                    <td className="fw500">{cat.nome}</td>
-                                    <td style={{ textAlign: "right" }}>
-                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => {
-                                                    setCategoriaEditando({ id: cat.id, nome: cat.nome });
-                                                    setNovaCategoria(cat.nome);
-                                                    setIsModalOpen(true);
-                                                    setError(null);
-                                                }}
-                                                title="Editar"
-                                            >
-                                                <Edit2 size={16} />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleDelete(cat.id, cat.nome)}
-                                                title="Excluir"
-                                                style={{ color: "var(--color-danger-text)" }}
-                                            >
-                                                <Trash2 size={16} />
-                                            </Button>
-                                        </div>
-                                    </td>
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th style={{ textAlign: "right" }}>Ações</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.05 },
+                                    },
+                                }}
+                            >
+                                {categorias.map((cat) => (
+                                    <motion.tr
+                                        key={cat.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
+                                    >
+                                        <td className="fw500">{cat.nome}</td>
+                                        <td style={{ textAlign: "right" }}>
+                                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => {
+                                                        setCategoriaEditando({ id: cat.id, nome: cat.nome });
+                                                        setNovaCategoria(cat.nome);
+                                                        setIsModalOpen(true);
+                                                        setError(null);
+                                                    }}
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(cat.id, cat.nome)}
+                                                    title="Excluir"
+                                                    style={{ color: "var(--color-danger-text)" }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
+                        </table>
 
-                                </motion.tr>
+                        <div className="mobile-cards-list mobile-only">
+                            {categorias.map((cat) => (
+                                <div key={cat.id} className="mobile-card">
+                                    <div className="mobile-card-header">
+                                        <div className="mobile-card-title">{cat.nome}</div>
+                                    </div>
+                                    <div className="mobile-card-actions">
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setCategoriaEditando({ id: cat.id, nome: cat.nome });
+                                                setNovaCategoria(cat.nome);
+                                                setIsModalOpen(true);
+                                                setError(null);
+                                            }}
+                                            title="Editar"
+                                        >
+                                            <Edit2 size={16} />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => handleDelete(cat.id, cat.nome)}
+                                            title="Excluir"
+                                            style={{ color: "var(--color-danger-text)" }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    </div>
+                                </div>
                             ))}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

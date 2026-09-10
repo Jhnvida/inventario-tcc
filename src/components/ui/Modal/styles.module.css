@@ -81,3 +81,18 @@
     text-align: right;
 }
 
+@media (width <= 768px) {
+    .modal {
+        width: 100%;
+        max-height: 95vh;
+        border-radius: var(--radius-lg);
+    }
+
+    .header {
+        padding: 1rem;
+    }
+
+    .content {
+        padding: 1rem;
+    }
+}

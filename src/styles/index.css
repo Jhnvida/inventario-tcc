@@ -1,33 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-    /* Fonts */
     --font-family-base: "Inter", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, sans-serif;
-    
-    /* Layout & Backgrounds */
-    --color-bg-base: #f8fafc; /* Very light slate for body */
-    --color-bg-surface: #fff; /* Pure white for cards/modals */
+    --color-bg-base: #f8fafc;
+    --color-bg-surface: #fff;
     --color-bg-surface-hover: #f1f5f9;
     --color-bg-subtle: #f1f5f9;
-    
-    /* Borders */
     --color-border: #e2e8f0;
     --color-border-hover: #cbd5e1;
     --color-border-focus: #818cf8;
-
-    /* Text */
-    --color-text-primary: #0f172a; /* Slate 900 */
-    --color-text-secondary: #475569; /* Slate 600 */
-    --color-text-muted: #94a3b8; /* Slate 400 */
-
-    /* Brand / Primary (Indigo) */
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94a3b8;
     --color-primary: #4f46e5;
     --color-primary-hover: #4338ca;
     --color-primary-active: #3730a3;
     --color-primary-light: #e0e7ff;
     --color-primary-text: #fff;
-
-    /* Semantic / Status Colors */
     --color-success-bg: #ecfdf5;
     --color-success-text: #059669;
     --color-success-border: #a7f3d0;
@@ -40,28 +29,18 @@
     --color-info-bg: #eff6ff;
     --color-info-text: #2563eb;
     --color-info-border: #bfdbfe;
-
-    /* Overlay */
-    --color-overlay: rgb(15 23 42 / 40%); /* Darker slate with opacity */
-
-    /* Focus Rings */
+    --color-overlay: rgb(15 23 42 / 40%);
     --shadow-focus: 0 0 0 3px rgb(79 70 229 / 15%);
     --shadow-focus-danger: 0 0 0 3px rgb(220 38 38 / 15%);
-
-    /* Radii */
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
     --radius-full: 9999px;
-
-    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 5%);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 5%), 0 2px 4px -2px rgb(0 0 0 / 5%);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 5%), 0 4px 6px -4px rgb(0 0 0 / 5%);
     --shadow-card: 0 0 0 1px rgb(0 0 0 / 5%), 0 2px 4px rgb(0 0 0 / 3%);
-
-    /* Transitions */
     --transition-fast: 150ms ease-in-out;
     --transition: 200ms ease-in-out;
 }
@@ -101,7 +80,6 @@ ul {
     list-style: none;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -120,7 +98,6 @@ ul {
     background: var(--color-text-muted);
 }
 
-/* Base utility classes for layouts */
 .page-container {
     display: flex;
     flex-direction: column;
@@ -131,7 +108,12 @@ ul {
     margin: 0 auto;
 }
 
-/* Table Utilities - to be refactored inside a specific component if needed, but keeping global for now */
+@media (width <= 768px) {
+    .page-container {
+        gap: 24px;
+    }
+}
+
 .table-container {
     overflow-x: auto;
 
@@ -178,7 +160,6 @@ ul {
     border-bottom: none;
 }
 
-/* Common text utilities */
 .text-monospace {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 13px;
@@ -186,17 +167,41 @@ ul {
     color: var(--color-text-secondary);
 }
 
-.fw400 { font-weight: 400; }
-.fw500 { font-weight: 500; }
-.fw600 { font-weight: 600; }
-.fw700 { font-weight: 700; }
+.fw400 {
+    font-weight: 400;
+}
 
-.text-primary { color: var(--color-text-primary); }
-.text-secondary { color: var(--color-text-secondary); }
-.text-muted { color: var(--color-text-muted); }
+.fw500 {
+    font-weight: 500;
+}
 
-.text-center { text-align: center; }
-.text-right { text-align: right; }
+.fw600 {
+    font-weight: 600;
+}
+
+.fw700 {
+    font-weight: 700;
+}
+
+.text-primary {
+    color: var(--color-text-primary);
+}
+
+.text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
 
 .loading-state,
 .empty-state {
@@ -210,6 +215,13 @@ ul {
 
     color: var(--color-text-secondary);
     text-align: center;
+}
+
+@media (width <= 768px) {
+    .loading-state,
+    .empty-state {
+        padding: 40px 16px;
+    }
 }
 
 .alert-error {
@@ -242,6 +254,18 @@ ul {
     box-shadow: var(--shadow-sm);
 }
 
+@media (width <= 768px) {
+    .filter-grid {
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: var(--radius-lg);
+    }
+
+    .filter-grid > * {
+        width: 100%;
+    }
+}
+
 .search-wrapper {
     position: relative;
     flex: 1;
@@ -261,4 +285,98 @@ ul {
 
 .search-input {
     padding-left: 40px !important;
+}
+
+.hidden-mobile {
+    display: table;
+}
+
+.mobile-only {
+    display: none;
+}
+
+.mobile-cards-list {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+
+    background-color: var(--color-bg-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.mobile-card-header {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.mobile-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow-wrap: break-word;
+}
+
+.mobile-card-subtitle {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.mobile-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.mobile-card-label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.mobile-card-value {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+}
+
+@media (width <= 768px) {
+    .hidden-mobile {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: block !important;
+    }
+
+    .mobile-cards-list {
+        display: flex;
+    }
 }

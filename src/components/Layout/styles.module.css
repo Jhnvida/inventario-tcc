@@ -8,8 +8,9 @@
     background-color: var(--color-bg-base);
 }
 
-/* Sidebar */
 .sidebar {
+    z-index: 50;
+
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -19,11 +20,27 @@
 
     background-color: var(--color-bg-surface);
 
-    transition: width var(--transition-fast);
+    transition:
+        width var(--transition-fast),
+        transform var(--transition-fast);
 }
 
 .sidebar_closed {
     width: 72px;
+}
+
+.sidebar_overlay {
+    position: fixed;
+    z-index: 40;
+    top: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: var(--color-overlay);
+
+    transition: opacity var(--transition-fast);
 }
 
 .sidebar_header {
@@ -154,18 +171,17 @@
     background-color: var(--color-primary-light);
 }
 
-/* Main Content Area */
 .main_content {
     display: flex;
     flex: 1;
     flex-direction: column;
-    min-width: 0; /* Important for preventing flex blowout */
+    min-width: 0;
 }
 
-/* Top Header */
 .top_header {
     display: flex;
     flex-shrink: 0;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
 
@@ -176,11 +192,36 @@
     background-color: var(--color-bg-surface);
 }
 
+.header_left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .header_title {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
     color: var(--color-text-primary);
+}
+
+.toggle_btn_mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px;
+    border-radius: var(--radius-sm);
+
+    color: var(--color-text-primary);
+
+    background-color: var(--color-bg-subtle);
+
+    transition: all var(--transition-fast);
+}
+
+.toggle_btn_mobile:hover {
+    background-color: var(--color-border);
 }
 
 .user_profile {
@@ -231,8 +272,6 @@
     color: var(--color-danger-text);
 }
 
-
-/* Scrollable Content */
 .content_area {
     overflow-y: auto;
     flex: 1;
@@ -249,3 +288,52 @@
     margin: 0 auto;
 }
 
+@media (width <= 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(0);
+
+        height: 100%;
+    }
+
+    .sidebar_closed {
+        transform: translateX(-100%);
+        width: 260px;
+    }
+
+    .top_header {
+        padding: 0 16px;
+    }
+
+    .header_title {
+        overflow: hidden;
+
+        max-width: 150px;
+
+        font-size: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .content_area {
+        padding: 16px;
+    }
+
+    .user_details {
+        display: none;
+    }
+
+    .logo_container {
+        display: none;
+    }
+
+    .sidebar_header {
+        justify-content: flex-end;
+    }
+
+    .sidebar_header_closed {
+        justify-content: center;
+    }
+}

@@ -88,53 +88,123 @@ export function Produtos() {
                 ) : produtos.length === 0 ? (
                     <div className="empty-state">Nenhum produto encontrado.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>SKU</th>
-                                <th>Categoria</th>
-                                <th>Preço Un.</th>
-                                <th className="text-right">Estoque</th>
-                                <th className="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
-                            }}
-                        >
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>SKU</th>
+                                    <th>Categoria</th>
+                                    <th>Preço Un.</th>
+                                    <th className="text-right">Estoque</th>
+                                    <th className="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+                                }}
+                            >
+                                {produtos.map((produto) => {
+                                    const isCritico = produto.quantidade <= produto.estoque_minimo;
+                                    return (
+                                        <motion.tr
+                                            key={produto.id}
+                                            variants={{
+                                                hidden: { opacity: 0, x: -10 },
+                                                visible: { opacity: 1, x: 0 },
+                                            }}
+                                        >
+                                            <td className="fw500">{produto.nome}</td>
+                                            <td className="text-monospace">{produto.sku}</td>
+                                            <td className="text-secondary">
+                                                {produto.categorias?.nome || "Sem Categoria"}
+                                            </td>
+                                            <td>{formatCurrency(produto.preco)}</td>
+                                            <td className="text-right">
+                                                <span
+                                                    className="fw600"
+                                                    style={isCritico ? { color: "var(--color-danger-text)" } : {}}
+                                                >
+                                                    {produto.quantidade}
+                                                </span>
+                                            </td>
+                                            <td
+                                                className="text-center"
+                                                style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleOpenEdit(produto)}
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(produto.id, produto.nome)}
+                                                    title="Excluir"
+                                                    className={styles.danger_icon}
+                                                    style={{ color: "var(--color-danger-text)" }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                            </td>
+                                        </motion.tr>
+                                    );
+                                })}
+                            </motion.tbody>
+                        </table>
+
+                        <div className="mobile-cards-list mobile-only">
                             {produtos.map((produto) => {
                                 const isCritico = produto.quantidade <= produto.estoque_minimo;
                                 return (
-                                    <motion.tr
-                                        key={produto.id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 },
-                                        }}
-                                    >
-                                        <td className="fw500">{produto.nome}</td>
-                                        <td className="text-monospace">{produto.sku}</td>
-                                        <td className="text-secondary">
-                                            {produto.categorias?.nome || "Sem Categoria"}
-                                        </td>
-                                        <td>{formatCurrency(produto.preco)}</td>
-                                        <td className="text-right">
-                                            <span
-                                                className="fw600"
-                                                style={isCritico ? { color: "var(--color-danger-text)" } : {}}
-                                            >
-                                                {produto.quantidade}
-                                            </span>
-                                        </td>
-                                        <td
-                                            className="text-center"
-                                            style={{ display: "flex", gap: "8px", justifyContent: "center" }}
-                                        >
+                                    <div key={produto.id} className="mobile-card">
+                                        <div className="mobile-card-header">
+                                            <div>
+                                                <div className="mobile-card-title">{produto.nome}</div>
+                                                <div className="mobile-card-subtitle">{produto.sku}</div>
+                                            </div>
+                                            {isCritico && (
+                                                <span
+                                                    style={{
+                                                        fontSize: "12px",
+                                                        color: "var(--color-danger-text)",
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
+                                                    Crítico
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="mobile-card-body">
+                                            <div className="mobile-card-row">
+                                                <span className="mobile-card-label">Categoria</span>
+                                                <span className="mobile-card-value">
+                                                    {produto.categorias?.nome || "Sem Categoria"}
+                                                </span>
+                                            </div>
+                                            <div className="mobile-card-row">
+                                                <span className="mobile-card-label">Preço</span>
+                                                <span className="mobile-card-value">
+                                                    {formatCurrency(produto.preco)}
+                                                </span>
+                                            </div>
+                                            <div className="mobile-card-row">
+                                                <span className="mobile-card-label">Estoque</span>
+                                                <span
+                                                    className="mobile-card-value"
+                                                    style={isCritico ? { color: "var(--color-danger-text)" } : {}}
+                                                >
+                                                    {produto.quantidade}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="mobile-card-actions">
                                             <Button
                                                 variant="ghost"
                                                 onClick={() => handleOpenEdit(produto)}
@@ -151,12 +221,12 @@ export function Produtos() {
                                             >
                                                 <Trash2 size={16} />
                                             </Button>
-                                        </td>
-                                    </motion.tr>
+                                        </div>
+                                    </div>
                                 );
                             })}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

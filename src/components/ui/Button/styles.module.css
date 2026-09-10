@@ -26,7 +26,6 @@
     opacity: 0.6;
 }
 
-/* Primary Variant */
 .primary {
     color: var(--color-primary-text);
     background-color: var(--color-primary);
@@ -42,7 +41,6 @@
     background-color: var(--color-primary-active);
 }
 
-/* Secondary Variant */
 .secondary {
     border-color: var(--color-border);
     color: var(--color-text-primary);
@@ -55,7 +53,6 @@
     background-color: var(--color-bg-surface-hover);
 }
 
-/* Danger Variant */
 .danger {
     border-color: var(--color-danger-border);
     color: var(--color-danger-text);
@@ -67,10 +64,9 @@
 }
 
 .danger:hover:not(:disabled) {
-    background-color: #fecaca; /* slightly darker danger bg */
+    background-color: #fecaca;
 }
 
-/* Ghost Variant */
 .ghost {
     color: var(--color-text-secondary);
     background-color: transparent;
@@ -81,7 +77,6 @@
     background-color: var(--color-bg-surface-hover);
 }
 
-/* Utilities */
 .full_width {
     width: 100%;
 }

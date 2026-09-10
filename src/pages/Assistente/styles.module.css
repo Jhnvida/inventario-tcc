@@ -197,3 +197,29 @@
     color: var(--color-primary);
 }
 
+@media (width <= 768px) {
+    .messagesContainer {
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .messageBubble {
+        max-width: 95%;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .inputArea {
+        gap: 8px;
+        padding: 16px;
+    }
+
+    .input {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .sendButton {
+        padding: 12px;
+    }
+}

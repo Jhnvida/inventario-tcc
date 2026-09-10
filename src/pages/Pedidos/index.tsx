@@ -89,41 +89,98 @@ export function Pedidos() {
                 ) : pedidos.length === 0 ? (
                     <div className="empty-state">Nenhum pedido encontrado.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID Pedido</th>
-                                <th>Fornecedor</th>
-                                <th>Data de Emissão</th>
-                                <th className="text-right">Valor Total</th>
-                                <th className="text-center">Status</th>
-                                <th className="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 },
-                                },
-                            }}
-                        >
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>ID Pedido</th>
+                                    <th>Fornecedor</th>
+                                    <th>Data de Emissão</th>
+                                    <th className="text-right">Valor Total</th>
+                                    <th className="text-center">Status</th>
+                                    <th className="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.05 },
+                                    },
+                                }}
+                            >
+                                {pedidos.map((pedido) => (
+                                    <motion.tr
+                                        key={pedido.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
+                                    >
+                                        <td className="text-monospace fw600">#{pedido.id.substring(0, 8)}</td>
+                                        <td className="fw500">{pedido.fornecedores?.razao_social || "-"}</td>
+                                        <td className="text-secondary">{formatDate(pedido.criado_em)}</td>
+                                        <td className="text-right fw600">{formatCurrency(pedido.valor_total)}</td>
+                                        <td className="text-center">
+                                            <Badge
+                                                variant={
+                                                    pedido.status === "concluido"
+                                                        ? "success"
+                                                        : pedido.status === "cancelado"
+                                                          ? "critical"
+                                                          : pedido.status === "enviado"
+                                                            ? "warning"
+                                                            : "neutral"
+                                                }
+                                            >
+                                                {pedido.status}
+                                            </Badge>
+                                        </td>
+                                        <td
+                                            className="text-center"
+                                            style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleOpenDetails(pedido)}
+                                                title="Ver Detalhes"
+                                            >
+                                                <Eye size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleOpenEdit(pedido)}
+                                                title="Editar Pedido"
+                                            >
+                                                <Edit size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleDelete(pedido.id)}
+                                                title="Excluir"
+                                                style={{ color: "var(--color-danger-text)" }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
+                        </table>
+
+                        <div className="mobile-cards-list mobile-only">
                             {pedidos.map((pedido) => (
-                                <motion.tr
-                                    key={pedido.id}
-                                    variants={{
-                                        hidden: { opacity: 0, x: -10 },
-                                        visible: { opacity: 1, x: 0 },
-                                    }}
-                                >
-                                    <td className="text-monospace fw600">#{pedido.id.substring(0, 8)}</td>
-                                    <td className="fw500">{pedido.fornecedores?.razao_social || "-"}</td>
-                                    <td className="text-secondary">{formatDate(pedido.criado_em)}</td>
-                                    <td className="text-right fw600">{formatCurrency(pedido.valor_total)}</td>
-                                    <td className="text-center">
+                                <div key={pedido.id} className="mobile-card">
+                                    <div className="mobile-card-header">
+                                        <div>
+                                            <div className="mobile-card-title">Pedido #{pedido.id.substring(0, 8)}</div>
+                                            <div className="mobile-card-subtitle">
+                                                {pedido.fornecedores?.razao_social || "-"}
+                                            </div>
+                                        </div>
                                         <Badge
                                             variant={
                                                 pedido.status === "concluido"
@@ -137,11 +194,20 @@ export function Pedidos() {
                                         >
                                             {pedido.status}
                                         </Badge>
-                                    </td>
-                                    <td
-                                        className="text-center"
-                                        style={{ display: "flex", gap: "8px", justifyContent: "center" }}
-                                    >
+                                    </div>
+                                    <div className="mobile-card-body">
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Data</span>
+                                            <span className="mobile-card-value">{formatDate(pedido.criado_em)}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Valor Total</span>
+                                            <span className="mobile-card-value" style={{ fontWeight: 600 }}>
+                                                {formatCurrency(pedido.valor_total)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mobile-card-actions">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenDetails(pedido)}
@@ -164,11 +230,11 @@ export function Pedidos() {
                                         >
                                             <Trash2 size={16} />
                                         </Button>
-                                    </td>
-                                </motion.tr>
+                                    </div>
+                                </div>
                             ))}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

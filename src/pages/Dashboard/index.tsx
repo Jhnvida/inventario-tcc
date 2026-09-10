@@ -93,34 +93,61 @@ export function Dashboard() {
                                 {itensCriticos.length === 0 ? (
                                     <div className="empty-state">Nenhum produto em nível crítico.</div>
                                 ) : (
-                                    <table className="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Produto / SKU</th>
-                                                <th className="text-right">Estoque</th>
-                                                <th className="text-center">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {itensCriticos.map((item) => (
-                                                <tr key={item.id}>
-                                                    <td>
-                                                        <div className="fw500">{item.nome}</div>
-                                                        <div className="text-monospace">{item.sku}</div>
-                                                    </td>
-                                                    <td className="text-right fw600">
-                                                        {item.quantidade}{" "}
-                                                        <span className="text-secondary fw400">
-                                                            / {item.estoque_minimo}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <Badge variant="critical">Crítico</Badge>
-                                                    </td>
+                                    <>
+                                        <table className="data-table hidden-mobile">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produto / SKU</th>
+                                                    <th className="text-right">Estoque</th>
+                                                    <th className="text-center">Status</th>
                                                 </tr>
+                                            </thead>
+                                            <tbody>
+                                                {itensCriticos.map((item) => (
+                                                    <tr key={item.id}>
+                                                        <td>
+                                                            <div className="fw500">{item.nome}</div>
+                                                            <div className="text-monospace">{item.sku}</div>
+                                                        </td>
+                                                        <td className="text-right fw600">
+                                                            {item.quantidade}{" "}
+                                                            <span className="text-secondary fw400">
+                                                                / {item.estoque_minimo}
+                                                            </span>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <Badge variant="critical">Crítico</Badge>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        <div className="mobile-cards-list mobile-only">
+                                            {itensCriticos.map((item) => (
+                                                <div key={item.id} className="mobile-card">
+                                                    <div className="mobile-card-header">
+                                                        <div>
+                                                            <div className="mobile-card-title">{item.nome}</div>
+                                                            <div className="mobile-card-subtitle">{item.sku}</div>
+                                                        </div>
+                                                        <Badge variant="critical">Crítico</Badge>
+                                                    </div>
+                                                    <div className="mobile-card-body">
+                                                        <div className="mobile-card-row">
+                                                            <span className="mobile-card-label">Estoque</span>
+                                                            <span
+                                                                className="mobile-card-value"
+                                                                style={{ color: "var(--color-danger-text)" }}
+                                                            >
+                                                                {item.quantidade} / {item.estoque_minimo}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </tbody>
-                                    </table>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -131,39 +158,79 @@ export function Dashboard() {
                                 {movimentacoesRecentes.length === 0 ? (
                                     <div className="empty-state">Nenhuma movimentação registrada.</div>
                                 ) : (
-                                    <table className="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Tipo</th>
-                                                <th>Produto</th>
-                                                <th className="text-right">Qtd</th>
-                                                <th>Data</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+                                    <>
+                                        <table className="data-table hidden-mobile">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tipo</th>
+                                                    <th>Produto</th>
+                                                    <th className="text-right">Qtd</th>
+                                                    <th>Data</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {movimentacoesRecentes.map((mov) => (
+                                                    <tr key={mov.id}>
+                                                        <td>
+                                                            <Badge
+                                                                variant={
+                                                                    mov.tipo === "entrada" ? "success" : "critical"
+                                                                }
+                                                            >
+                                                                {mov.tipo}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="fw500">
+                                                            {mov.produtos?.nome || "Desconhecido"}
+                                                        </td>
+                                                        <td
+                                                            className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
+                                                        >
+                                                            {mov.tipo === "entrada" ? "+" : "-"}
+                                                            {mov.quantidade}
+                                                        </td>
+                                                        <td className="text-secondary">
+                                                            {formatDate(mov.criada_em).split(" ")[0]}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        <div className="mobile-cards-list mobile-only">
                                             {movimentacoesRecentes.map((mov) => (
-                                                <tr key={mov.id}>
-                                                    <td>
+                                                <div key={mov.id} className="mobile-card">
+                                                    <div className="mobile-card-header">
+                                                        <div className="mobile-card-title">
+                                                            {mov.produtos?.nome || "Desconhecido"}
+                                                        </div>
                                                         <Badge
                                                             variant={mov.tipo === "entrada" ? "success" : "critical"}
                                                         >
                                                             {mov.tipo}
                                                         </Badge>
-                                                    </td>
-                                                    <td className="fw500">{mov.produtos?.nome || "Desconhecido"}</td>
-                                                    <td
-                                                        className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
-                                                    >
-                                                        {mov.tipo === "entrada" ? "+" : "-"}
-                                                        {mov.quantidade}
-                                                    </td>
-                                                    <td className="text-secondary">
-                                                        {formatDate(mov.criada_em).split(" ")[0]}
-                                                    </td>
-                                                </tr>
+                                                    </div>
+                                                    <div className="mobile-card-body">
+                                                        <div className="mobile-card-row">
+                                                            <span className="mobile-card-label">Data</span>
+                                                            <span className="mobile-card-value">
+                                                                {formatDate(mov.criada_em).split(" ")[0]}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mobile-card-row">
+                                                            <span className="mobile-card-label">Quantidade</span>
+                                                            <span
+                                                                className={`mobile-card-value ${mov.tipo === "entrada" ? styles.text_success : styles.text_danger}`}
+                                                            >
+                                                                {mov.tipo === "entrada" ? "+" : "-"}
+                                                                {mov.quantidade}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </tbody>
-                                    </table>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

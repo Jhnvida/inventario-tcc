@@ -21,7 +21,27 @@ export function Layout() {
     const { user, signOut } = useAuth();
     const [userName, setUserName] = useState<string>(user?.user_metadata?.nome || "Usuário Logado");
     const [isSidebarOpen, setSidebarOpen] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+            if (window.innerWidth <= 768) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+    useEffect(() => {
+        if (isMobile) {
+            setSidebarOpen(false);
+        }
+    }, [location.pathname, isMobile]);
 
     const navSections = [
         {
@@ -66,8 +86,6 @@ export function Layout() {
         }
         fetchUserName();
     }, [user]);
-
-    // Derived title for the top header
     const currentPath = location.pathname;
     let pageTitle = "Inventário Inteligente";
     navSections.forEach((section) => {
@@ -82,7 +100,10 @@ export function Layout() {
 
     return (
         <div className={styles.app_layout}>
-            {/* Sidebar */}
+            {isMobile && isSidebarOpen && (
+                <div className={styles.sidebar_overlay} onClick={() => setSidebarOpen(false)} />
+            )}
+
             <aside className={`${styles.sidebar} ${isSidebarOpen ? "" : styles.sidebar_closed}`}>
                 <div className={`${styles.sidebar_header} ${!isSidebarOpen ? styles.sidebar_header_closed : ""}`}>
                     {isSidebarOpen && (
@@ -129,11 +150,14 @@ export function Layout() {
                 </nav>
             </aside>
 
-            {/* Main Content Area */}
             <main className={styles.main_content}>
-                {/* Top Header */}
                 <header className={styles.top_header}>
                     <div className={styles.header_left}>
+                        {isMobile && (
+                            <button className={styles.toggle_btn_mobile} onClick={() => setSidebarOpen(true)}>
+                                <Menu size={20} />
+                            </button>
+                        )}
                         <h2 className={styles.header_title}>{pageTitle}</h2>
                     </div>
                     <div className={styles.header_right}>

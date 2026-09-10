@@ -66,62 +66,93 @@ export function Usuarios() {
                 ) : usuarios.length === 0 ? (
                     <div className="empty-state">Nenhum usuário encontrado.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Usuário</th>
-                                <th style={{ textAlign: "right" }}>Ações</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 },
-                                },
-                            }}
-                        >
-                            {usuarios.map((user) => (
-                                <motion.tr
-                                    key={user.id}
-                                    variants={{
-                                        hidden: { opacity: 0, x: -10 },
-                                        visible: { opacity: 1, x: 0 },
-                                    }}
-                                >
-                                    <td>
-                                        <div className="fw500">{user.nome}</div>
-                                        <div className="text-secondary" style={{ fontSize: "0.85em" }}>
-                                            {user.email}
-                                        </div>
-                                    </td>
-                                    <td style={{ textAlign: "right" }}>
-                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleOpenEdit(user)}
-                                                title="Editar Usuário"
-                                            >
-                                                <Edit2 size={16} />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleDelete(user.id, user.nome)}
-                                                title="Excluir Usuário"
-                                                style={{ color: "var(--color-danger-text)" }}
-                                            >
-                                                <Trash2 size={16} />
-                                            </Button>
-                                        </div>
-                                    </td>
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th style={{ textAlign: "right" }}>Ações</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.05 },
+                                    },
+                                }}
+                            >
+                                {usuarios.map((user) => (
+                                    <motion.tr
+                                        key={user.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
+                                    >
+                                        <td>
+                                            <div className="fw500">{user.nome}</div>
+                                            <div className="text-secondary" style={{ fontSize: "0.85em" }}>
+                                                {user.email}
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: "right" }}>
+                                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleOpenEdit(user)}
+                                                    title="Editar Usuário"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(user.id, user.nome)}
+                                                    title="Excluir Usuário"
+                                                    style={{ color: "var(--color-danger-text)" }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
+                        </table>
 
-                                </motion.tr>
+                        <div className="mobile-cards-list mobile-only">
+                            {usuarios.map((user) => (
+                                <div key={user.id} className="mobile-card">
+                                    <div className="mobile-card-header">
+                                        <div>
+                                            <div className="mobile-card-title">{user.nome}</div>
+                                            <div className="mobile-card-subtitle">{user.email}</div>
+                                        </div>
+                                    </div>
+                                    <div className="mobile-card-actions">
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => handleOpenEdit(user)}
+                                            title="Editar Usuário"
+                                        >
+                                            <Edit2 size={16} />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => handleDelete(user.id, user.nome)}
+                                            title="Excluir Usuário"
+                                            style={{ color: "var(--color-danger-text)" }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    </div>
+                                </div>
                             ))}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

@@ -67,49 +67,97 @@ export function Fornecedores() {
                 ) : fornecedores.length === 0 ? (
                     <div className="empty-state">Nenhum fornecedor encontrado.</div>
                 ) : (
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fornecedor</th>
-                                <th>CNPJ</th>
-                                <th>Contato</th>
-                                <th className={styles.text_center}>Ações</th>
-                            </tr>
-                        </thead>
-                        <motion.tbody
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 },
-                                },
-                            }}
-                        >
-                            {fornecedores.map((fornecedor) => (
-                                <motion.tr
-                                    key={fornecedor.id}
-                                    variants={{
-                                        hidden: { opacity: 0, x: -10 },
-                                        visible: { opacity: 1, x: 0 },
-                                    }}
-                                >
-                                    <td>
-                                        <div className="fw500">{fornecedor.razao_social}</div>
-                                        <div className="text-secondary" style={{ fontSize: "0.85em" }}>
-                                            {fornecedor.nome_fantasia || "Sem nome fantasia"}
-                                        </div>
-                                    </td>
-                                    <td>{formatCNPJ(fornecedor.cnpj)}</td>
-                                    <td className="text-secondary">
-                                        {fornecedor.email ||
-                                            (fornecedor.telefone ? formatTelefone(fornecedor.telefone) : "-")}
-                                    </td>
-                                    <td
-                                        className="text-center"
-                                        style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                    <>
+                        <table className="data-table hidden-mobile">
+                            <thead>
+                                <tr>
+                                    <th>Fornecedor</th>
+                                    <th>CNPJ</th>
+                                    <th>Contato</th>
+                                    <th className={styles.text_center}>Ações</th>
+                                </tr>
+                            </thead>
+                            <motion.tbody
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.05 },
+                                    },
+                                }}
+                            >
+                                {fornecedores.map((fornecedor) => (
+                                    <motion.tr
+                                        key={fornecedor.id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 },
+                                        }}
                                     >
+                                        <td>
+                                            <div className="fw500">{fornecedor.razao_social}</div>
+                                            <div className="text-secondary" style={{ fontSize: "0.85em" }}>
+                                                {fornecedor.nome_fantasia || "Sem nome fantasia"}
+                                            </div>
+                                        </td>
+                                        <td>{formatCNPJ(fornecedor.cnpj)}</td>
+                                        <td className="text-secondary">
+                                            {fornecedor.email ||
+                                                (fornecedor.telefone ? formatTelefone(fornecedor.telefone) : "-")}
+                                        </td>
+                                        <td
+                                            className="text-center"
+                                            style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleOpenEdit(fornecedor)}
+                                                title="Editar"
+                                            >
+                                                <Edit2 size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => handleDelete(fornecedor.id, fornecedor.razao_social)}
+                                                title="Excluir"
+                                                className={styles.danger_icon}
+                                                style={{ color: "var(--color-danger-text)" }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
+                        </table>
+
+                        <div className="mobile-cards-list mobile-only">
+                            {fornecedores.map((fornecedor) => (
+                                <div key={fornecedor.id} className="mobile-card">
+                                    <div className="mobile-card-header">
+                                        <div>
+                                            <div className="mobile-card-title">{fornecedor.razao_social}</div>
+                                            <div className="mobile-card-subtitle">
+                                                {fornecedor.nome_fantasia || "Sem nome fantasia"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mobile-card-body">
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">CNPJ</span>
+                                            <span className="mobile-card-value">{formatCNPJ(fornecedor.cnpj)}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">Contato</span>
+                                            <span className="mobile-card-value">
+                                                {fornecedor.email ||
+                                                    (fornecedor.telefone ? formatTelefone(fornecedor.telefone) : "-")}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mobile-card-actions">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleOpenEdit(fornecedor)}
@@ -126,11 +174,11 @@ export function Fornecedores() {
                                         >
                                             <Trash2 size={16} />
                                         </Button>
-                                    </td>
-                                </motion.tr>
+                                    </div>
+                                </div>
                             ))}
-                        </motion.tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

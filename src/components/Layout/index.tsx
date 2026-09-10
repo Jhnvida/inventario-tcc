@@ -13,13 +13,11 @@ import { Fragment, useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
-import { ChatSidebar } from "../ChatSidebar";
 import styles from "./styles.module.css";
 
 export function Layout() {
     const { user, signOut } = useAuth();
     const [userName, setUserName] = useState<string>(user?.user_metadata?.nome || "Usuário Logado");
-    const [isChatOpen, setIsChatOpen] = useState(false);
 
     const navSections = [
         {
@@ -92,13 +90,13 @@ export function Layout() {
                     ))}
 
                     <div className={styles.nav_section}>Ferramentas</div>
-                    <button
-                        className={`${styles.nav_item} ${styles.sidebar_btn} ${isChatOpen ? styles.nav_item_active : ""}`}
-                        onClick={() => setIsChatOpen(!isChatOpen)}
+                    <NavLink
+                        to="/assistente"
+                        className={({ isActive }) => `${styles.nav_item} ${isActive ? styles.nav_item_active : ""}`}
                     >
                         <Brain size={18} />
-                        Assistente IA
-                    </button>
+                        Assistente Inteligente
+                    </NavLink>
                 </nav>
 
                 <div className={styles.sidebar_footer}>
@@ -122,8 +120,6 @@ export function Layout() {
                     <Outlet />
                 </div>
             </main>
-
-            <ChatSidebar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
     );
 }

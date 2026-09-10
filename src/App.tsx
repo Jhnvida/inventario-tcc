@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Assistente } from "./pages/Assistente";
 import { Categorias } from "./pages/Categorias";
 import { Dashboard } from "./pages/Dashboard";
 import { Fornecedores } from "./pages/Fornecedores";
@@ -27,6 +28,7 @@ export function App() {
                             <Route path="fornecedores" element={<Fornecedores />} />
                             <Route path="categorias" element={<Categorias />} />
                             <Route path="usuarios" element={<Usuarios />} />
+                            <Route path="assistente" element={<Assistente />} />
                         </Route>
                     </Route>
 

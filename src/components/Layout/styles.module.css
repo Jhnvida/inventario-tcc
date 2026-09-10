@@ -126,7 +126,10 @@
 
 .content_area {
     overflow-y: auto;
+    display: flex;
     flex: 1;
+    flex-direction: column;
+
     padding: 32px;
 }
 

@@ -114,5 +114,16 @@ export function useAssistente() {
         }
     }
 
-    return { messages, isLoading, sendMessage };
+    function clearMessages() {
+        setMessages([
+            {
+                id: "initial",
+                text: "Olá! Sou seu Assistente Inteligente. Como posso ajudar com o seu inventário hoje?",
+                sender: "ai",
+            },
+        ]);
+        historyRef.current = [{ role: "system", content: systemPrompt }];
+    }
+
+    return { messages, isLoading, sendMessage, clearMessages };
 }

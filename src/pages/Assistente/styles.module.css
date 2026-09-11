@@ -24,6 +24,8 @@
 
 .messageWrapper {
     display: flex;
+    gap: 12px;
+    align-items: flex-end;
     width: 100%;
 }
 
@@ -35,11 +37,22 @@
     justify-content: flex-start;
 }
 
+.messageContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+
+    max-width: 85%;
+}
+
+.messageWrapper.user .messageContentWrapper {
+    align-items: flex-end;
+}
+
 .messageBubble {
-    max-width: 80%;
     padding: 16px 20px;
     border-radius: var(--radius-xl);
-
     font-size: 15px;
     line-height: 1.6;
 }
@@ -61,40 +74,80 @@
     box-shadow: var(--shadow-sm);
 }
 
-.inputArea {
+.inputContainer {
     display: flex;
-    gap: 16px;
-    align-items: center;
-
     padding: 24px 32px;
     border-top: 1px solid var(--color-border);
-
     background-color: var(--color-bg-surface);
 }
 
-.input {
+.inputArea {
+    display: flex;
     flex: 1;
+    gap: 8px;
+    align-items: flex-end;
 
-    padding: 16px 24px;
+    padding: 8px 8px 8px 12px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
+    border-radius: 24px;
 
-    font-size: 15px;
-    color: var(--color-text-primary);
-
-    background-color: var(--color-bg-subtle);
-    outline: none;
+    background-color: var(--color-bg-base);
 
     transition: all var(--transition-fast);
 }
 
-.input:focus {
-    border-color: var(--color-border-focus);
+.inputArea:focus-within {
+    border-color: var(--color-primary);
     background-color: var(--color-bg-surface);
-    box-shadow: var(--shadow-focus);
+    box-shadow: 0 0 0 2px var(--color-bg-subtle);
 }
 
-.input::placeholder {
+.libraryButton {
+    cursor: pointer;
+
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    margin-bottom: 2px;
+    border: none;
+    border-radius: 50%;
+
+    color: var(--color-text-secondary);
+
+    background-color: transparent;
+
+    transition: all var(--transition-fast);
+}
+
+.libraryButton:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg-subtle);
+}
+
+.textarea {
+    resize: none;
+
+    flex: 1;
+
+    max-height: 150px;
+    margin-bottom: 2px;
+    padding: 8px 4px;
+    border: none;
+
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+
+    background: transparent;
+    outline: none;
+}
+
+.textarea::placeholder {
     color: var(--color-text-muted);
 }
 
@@ -102,25 +155,27 @@
     cursor: pointer;
 
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
 
-    padding: 16px;
+    width: 36px;
+    height: 36px;
+    margin-bottom: 2px;
     border: none;
     border-radius: 50%;
 
     color: white;
 
     background-color: var(--color-primary);
-    box-shadow: var(--shadow-sm);
 
     transition: all var(--transition-fast);
 }
 
 .sendButton:disabled {
     cursor: not-allowed;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg-subtle);
+    color: var(--color-text-muted);
+    background-color: transparent;
     box-shadow: none;
 }
 
@@ -136,8 +191,167 @@
 }
 
 .spinner {
-    color: var(--color-primary);
     animation: spin 1s linear infinite;
+}
+
+.loadingBubble {
+    padding: 18px 24px;
+}
+
+.typingIndicator {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.typingIndicator span {
+    display: block;
+
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+
+    background-color: var(--color-text-muted);
+
+    animation: typing 1.4s infinite ease-in-out both;
+}
+
+.typingIndicator span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typingIndicator span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing {
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.emptyStateContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 550px;
+    margin: auto;
+    padding: 40px 20px;
+
+    text-align: center;
+}
+
+.emptyStateContainer h3 {
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text-title);
+}
+
+.emptyStateContainer p {
+    margin-bottom: 32px;
+    font-size: 15px;
+    color: var(--color-text-secondary);
+}
+
+.quickPrompts {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.quickPromptBtn {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+
+    padding: 16px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-align: left;
+
+    background-color: var(--color-bg-base);
+
+    transition: all var(--transition-fast);
+}
+
+.quickPromptBtn:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-subtle);
+    box-shadow: var(--shadow-sm);
+}
+
+.libraryContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.libraryDesc {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.libraryCategory {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.libraryCategory h4 {
+    margin: 0;
+
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.libraryList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.libraryItem {
+    cursor: pointer;
+
+    padding: 12px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    font-size: 14px;
+    color: var(--color-text-primary);
+    text-align: left;
+
+    background-color: var(--color-bg-surface);
+
+    transition: all var(--transition-fast);
+}
+
+.libraryItem:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-subtle);
 }
 
 .messageBubble p {
@@ -203,23 +417,24 @@
         padding: 16px;
     }
 
-    .messageBubble {
-        max-width: 95%;
-        padding: 12px 16px;
-        font-size: 14px;
+    .messageContentWrapper {
+        max-width: 90%;
     }
 
-    .inputArea {
-        gap: 8px;
+    .inputContainer {
         padding: 16px;
     }
 
-    .input {
-        padding: 12px 16px;
+    .sendButton {
+        width: 36px;
+        height: 36px;
+    }
+
+    .textarea {
         font-size: 14px;
     }
 
-    .sendButton {
-        padding: 12px;
+    .quickPrompts {
+        padding: 0 16px;
     }
 }

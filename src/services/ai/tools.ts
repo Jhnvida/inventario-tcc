@@ -126,6 +126,34 @@ export const tools = [
     {
         type: "function",
         function: {
+            name: "analisar_previsao_ruptura",
+            description:
+                "Calcula a previsão de ruptura de estoque (consumo médio diário, dias restantes até zerar e data prevista de esgotamento) a partir do histórico real de movimentações de saída dos produtos.",
+            parameters: {
+                type: "object",
+                properties: {
+                    termo_busca: {
+                        type: "string",
+                        description:
+                            "Opcional. Nome ou SKU do produto a ser analisado. Se omitido, analisa os produtos com estoque mais baixo.",
+                    },
+                    dias_historico: {
+                        type: "number",
+                        description:
+                            "Opcional. Número de dias de histórico de saídas a analisar para calcular a média de consumo (padrão: 30 dias).",
+                    },
+                    limite: {
+                        type: "number",
+                        description:
+                            "Opcional. Quantidade de produtos a retornar na análise caso não especificado termo_busca (padrão: 5).",
+                    },
+                },
+            },
+        },
+    },
+    {
+        type: "function",
+        function: {
             name: "consultar_pedidos",
             description: "Consulta o status e o valor dos pedidos de reposição junto aos fornecedores.",
             parameters: {
@@ -133,7 +161,8 @@ export const tools = [
                 properties: {
                     status: {
                         type: "string",
-                        description: "Opcional. Valores aceitos: 'Pendente', 'Concluído', 'Cancelado'.",
+                        description:
+                            "Opcional. Valores aceitos: 'abertos' (inclui rascunho e enviado), 'rascunho', 'enviado', 'concluido', 'cancelado'.",
                     },
                     limite: {
                         type: "number",

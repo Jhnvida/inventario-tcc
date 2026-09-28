@@ -8,21 +8,33 @@ import { useAssistente } from "../../hooks/useAssistente";
 import styles from "./styles.module.css";
 
 const QUICK_PROMPTS = [
-    "Qual é o valor total do estoque?",
-    "Quais produtos estão com estoque baixo?",
-    "Mostre as últimas movimentações de hoje.",
+    "Qual é a previsão de esgotamento dos produtos com estoque baixo?",
+    "Quais pedidos de reposição estão em aberto?",
+    "Qual é o valor total do estoque atual?",
 ];
 
 const PROMPT_LIBRARY = [
     {
-        category: "Geral",
-        prompts: ["Qual é o valor total do estoque atual?", "Quantos produtos temos cadastrados no total?"],
+        category: "Previsão e Ruptura",
+        prompts: [
+            "Qual é a previsão de esgotamento dos produtos com estoque baixo?",
+            "Quantos dias de estoque restam para os itens críticos?",
+            "Existe algum produto com risco iminente de ruptura?",
+        ],
     },
     {
-        category: "Alertas e Quantidades",
+        category: "Pedidos de Compra",
         prompts: [
+            "Quais pedidos de reposição estão em aberto?",
+            "Mostre os últimos pedidos de compra cadastrados.",
+            "Qual é o valor dos pedidos em andamento?",
+        ],
+    },
+    {
+        category: "Geral e Alertas",
+        prompts: [
+            "Qual é o valor total do estoque atual?",
             "Quais produtos estão com estoque abaixo do mínimo?",
-            "Existe algum produto com estoque zerado?",
             "Quais são os 5 produtos com maior quantidade em estoque?",
         ],
     },
@@ -144,7 +156,7 @@ export function Assistente() {
                             </div>
                         ))}
 
-                    {isLoading && (
+                    {isLoading && messages[messages.length - 1]?.sender === "user" && (
                         <div className={`${styles.messageWrapper} ${styles.ai}`}>
                             <div className={`${styles.messageBubble} ${styles.loadingBubble}`}>
                                 <div className={styles.typingIndicator}>

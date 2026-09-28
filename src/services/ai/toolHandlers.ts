@@ -147,15 +147,133 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         return ranking;
     },
 
+    analisar_previsao_ruptura: async function (args) {
+        const diasHistorico = args.dias_historico && args.dias_historico > 0 ? Number(args.dias_historico) : 30;
+        const limite = args.limite && args.limite > 0 ? Number(args.limite) : 5;
+
+        let prodQuery = supabase
+            .from("produtos")
+            .select("id, nome, sku, quantidade, estoque_minimo, preco, criado_em, localizacao");
+
+        if (args.termo_busca) {
+            prodQuery = prodQuery.or(`nome.ilike.%${args.termo_busca}%,sku.ilike.%${args.termo_busca}%`).limit(limite);
+        } else {
+            prodQuery = prodQuery.order("quantidade", { ascending: true }).limit(limite);
+        }
+
+        const { data: produtos, error: prodError } = await prodQuery;
+
+        if (prodError || !produtos || produtos.length === 0) {
+            return {
+                mensagem: "Nenhum produto encontrado para análise com os critérios informados.",
+                resultados: [],
+            };
+        }
+
+        const dataLimite = new Date();
+        dataLimite.setDate(dataLimite.getDate() - diasHistorico);
+        const dataLimiteIso = dataLimite.toISOString();
+
+        const resultados = await Promise.all(
+            produtos.map(async (prod: any) => {
+                const { data: movs } = await supabase
+                    .from("movimentacoes")
+                    .select("quantidade, motivo, criada_em")
+                    .eq("produto_id", prod.id)
+                    .eq("tipo", "saida")
+                    .gte("criada_em", dataLimiteIso);
+
+                const saidasValidas = (movs || []).filter((m: any) => {
+                    if (!m.motivo) return true;
+                    const mot = m.motivo.toLowerCase();
+                    return !/(perda|avaria|descarte|vencid|vencimento|quebra)/i.test(mot);
+                });
+
+                const totalSaidas = saidasValidas.reduce((acc: number, curr: any) => acc + curr.quantidade, 0);
+
+                const dataCriacao = prod.criado_em ? new Date(prod.criado_em) : dataLimite;
+                const diasDesdeCriacao = Math.max(
+                    1,
+                    Math.ceil((Date.now() - dataCriacao.getTime()) / (1000 * 60 * 60 * 24)),
+                );
+                const diasEfetivos = Math.min(diasHistorico, diasDesdeCriacao);
+
+                const consumoMedioDiario = Number((totalSaidas / diasEfetivos).toFixed(2));
+
+                let diasParaRuptura: number | null = null;
+                let dataEstimadaEsgotamento: string | null = null;
+                let statusRisco = "NORMAL";
+
+                if (prod.quantidade <= 0) {
+                    diasParaRuptura = 0;
+                    statusRisco = "ESTOQUE_ZERADO";
+                } else if (consumoMedioDiario > 0) {
+                    diasParaRuptura = Math.floor(prod.quantidade / consumoMedioDiario);
+                    const dataEsgotamento = new Date();
+                    dataEsgotamento.setDate(dataEsgotamento.getDate() + diasParaRuptura);
+                    dataEstimadaEsgotamento = dataEsgotamento.toISOString().split("T")[0];
+
+                    if (diasParaRuptura <= 3) {
+                        statusRisco = "CRITICO_IMINENTE";
+                    } else if (diasParaRuptura <= 10 || prod.quantidade <= prod.estoque_minimo) {
+                        statusRisco = "ALERTA";
+                    } else {
+                        statusRisco = "CONFORTAVEL";
+                    }
+                } else {
+                    statusRisco = "SEM_CONSUMO_REGISTRADO";
+                }
+
+                return {
+                    produto: prod.nome,
+                    sku: prod.sku,
+                    estoque_atual: prod.quantidade,
+                    estoque_minimo: prod.estoque_minimo,
+                    localizacao: prod.localizacao || "Não informada",
+                    periodo_dias_analisados: diasEfetivos,
+                    total_saidas_no_periodo: totalSaidas,
+                    consumo_medio_diario: consumoMedioDiario,
+                    dias_ate_ruptura: diasParaRuptura,
+                    data_estimada_esgotamento: dataEstimadaEsgotamento,
+                    status_risco: statusRisco,
+                };
+            }),
+        );
+
+        return {
+            periodo_base_dias: diasHistorico,
+            total_produtos_analisados: resultados.length,
+            resultados,
+        };
+    },
+
     consultar_pedidos: async function (args) {
         let query = supabase
             .from("pedidos")
-            .select("status, valor_total, criado_em, fornecedores(nome_fantasia)")
+            .select("id, status, valor_total, criado_em, fornecedores(razao_social, nome_fantasia)")
             .order("criado_em", { ascending: false })
             .limit(args.limite || 5);
 
         if (args.status) {
-            query = query.ilike("status", `%${args.status}%`);
+            const st = args.status
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+
+            if (st === "aberto" || st === "abertos" || st === "pendente" || st === "pendentes" || st === "em aberto") {
+                query = query.in("status", ["rascunho", "enviado"]);
+            } else if (st === "concluido" || st === "finalizado" || st === "recebido") {
+                query = query.eq("status", "concluido");
+            } else if (st === "cancelado") {
+                query = query.eq("status", "cancelado");
+            } else if (st === "rascunho") {
+                query = query.eq("status", "rascunho");
+            } else if (st === "enviado") {
+                query = query.eq("status", "enviado");
+            } else {
+                query = query.ilike("status", `%${st}%`);
+            }
         }
 
         const { data, error } = await query;

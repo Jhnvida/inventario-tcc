@@ -8,7 +8,7 @@ import { formatCurrency, formatDate } from "../../utils/formatters";
 import styles from "./styles.module.css";
 
 export function Dashboard() {
-    const { loading, metricas, itensCriticos, movimentacoesRecentes, userName } = useDashboard();
+    const { loading, metricas, itensCriticos, movimentacoesRecentes, userName, curvaABC } = useDashboard();
 
     return (
         <div className="page-container">
@@ -82,6 +82,92 @@ export function Dashboard() {
                     </motion.div>
 
                     <motion.div
+                        className={styles.curva_abc_section}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: 0.15 }}
+                    >
+                        <Card padding="medium">
+                            <div className={styles.curva_abc_header}>
+                                <div>
+                                    <h3 className={styles.curva_abc_title}>Classificação Curva ABC</h3>
+                                    <p className={styles.curva_abc_subtitle}>
+                                        Concentração do capital imobilizado por relevância de valor (quantidade × preço)
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.abc_bar_wrapper}>
+                                <div
+                                    className={styles.abc_bar_a}
+                                    style={{ width: `${Math.max(curvaABC.classes.A.percentualValor, 3)}%` }}
+                                    title={`Classe A: ${curvaABC.classes.A.percentualValor}% do valor total`}
+                                />
+                                <div
+                                    className={styles.abc_bar_b}
+                                    style={{ width: `${Math.max(curvaABC.classes.B.percentualValor, 3)}%` }}
+                                    title={`Classe B: ${curvaABC.classes.B.percentualValor}% do valor total`}
+                                />
+                                <div
+                                    className={styles.abc_bar_c}
+                                    style={{ width: `${Math.max(curvaABC.classes.C.percentualValor, 3)}%` }}
+                                    title={`Classe C: ${curvaABC.classes.C.percentualValor}% do valor total`}
+                                />
+                            </div>
+
+                            <div className={styles.abc_cards_grid}>
+                                <div className={styles.abc_col}>
+                                    <div className={styles.abc_col_header}>
+                                        <span className={styles.dot_a} />
+                                        <span className={styles.abc_name}>Classe A</span>
+                                        <span className={styles.abc_pill}>Alto Impacto</span>
+                                    </div>
+                                    <div className={styles.abc_val}>
+                                        {formatCurrency(curvaABC.classes.A.valorTotal)}
+                                    </div>
+                                    <div className={styles.abc_detail}>
+                                        {curvaABC.classes.A.qtdProdutos} produtos (
+                                        {curvaABC.classes.A.percentualProdutos}% dos itens) ·{" "}
+                                        {curvaABC.classes.A.percentualValor}% do valor
+                                    </div>
+                                </div>
+
+                                <div className={styles.abc_col}>
+                                    <div className={styles.abc_col_header}>
+                                        <span className={styles.dot_b} />
+                                        <span className={styles.abc_name}>Classe B</span>
+                                        <span className={styles.abc_pill}>Médio Impacto</span>
+                                    </div>
+                                    <div className={styles.abc_val}>
+                                        {formatCurrency(curvaABC.classes.B.valorTotal)}
+                                    </div>
+                                    <div className={styles.abc_detail}>
+                                        {curvaABC.classes.B.qtdProdutos} produtos (
+                                        {curvaABC.classes.B.percentualProdutos}% dos itens) ·{" "}
+                                        {curvaABC.classes.B.percentualValor}% do valor
+                                    </div>
+                                </div>
+
+                                <div className={styles.abc_col}>
+                                    <div className={styles.abc_col_header}>
+                                        <span className={styles.dot_c} />
+                                        <span className={styles.abc_name}>Classe C</span>
+                                        <span className={styles.abc_pill}>Baixo Impacto</span>
+                                    </div>
+                                    <div className={styles.abc_val}>
+                                        {formatCurrency(curvaABC.classes.C.valorTotal)}
+                                    </div>
+                                    <div className={styles.abc_detail}>
+                                        {curvaABC.classes.C.qtdProdutos} produtos (
+                                        {curvaABC.classes.C.percentualProdutos}% dos itens) ·{" "}
+                                        {curvaABC.classes.C.percentualValor}% do valor
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
                         className={styles.tables_grid}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -99,6 +185,7 @@ export function Dashboard() {
                                                 <tr>
                                                     <th>Produto / SKU</th>
                                                     <th className="text-right">Estoque</th>
+                                                    <th className="text-center">Curva ABC</th>
                                                     <th className="text-center">Status</th>
                                                 </tr>
                                             </thead>
@@ -114,6 +201,19 @@ export function Dashboard() {
                                                             <span className="text-secondary fw400">
                                                                 / {item.estoque_minimo}
                                                             </span>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <Badge
+                                                                variant={
+                                                                    item.classeABC === "A"
+                                                                        ? "draft"
+                                                                        : item.classeABC === "B"
+                                                                          ? "warning"
+                                                                          : "neutral"
+                                                                }
+                                                            >
+                                                                Classe {item.classeABC || "C"}
+                                                            </Badge>
                                                         </td>
                                                         <td className="text-center">
                                                             <Badge variant="critical">Crítico</Badge>
@@ -134,6 +234,22 @@ export function Dashboard() {
                                                         <Badge variant="critical">Crítico</Badge>
                                                     </div>
                                                     <div className="mobile-card-body">
+                                                        <div className="mobile-card-row">
+                                                            <span className="mobile-card-label">Curva ABC</span>
+                                                            <span className="mobile-card-value">
+                                                                <Badge
+                                                                    variant={
+                                                                        item.classeABC === "A"
+                                                                            ? "draft"
+                                                                            : item.classeABC === "B"
+                                                                              ? "warning"
+                                                                              : "neutral"
+                                                                    }
+                                                                >
+                                                                    Classe {item.classeABC || "C"}
+                                                                </Badge>
+                                                            </span>
+                                                        </div>
                                                         <div className="mobile-card-row">
                                                             <span className="mobile-card-label">Estoque</span>
                                                             <span

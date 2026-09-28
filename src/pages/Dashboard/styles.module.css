@@ -93,3 +93,132 @@
     border-top-color: var(--color-primary);
     border-radius: 50%;
 }
+
+.curva_abc_section {
+    margin-top: 24px;
+    margin-bottom: 32px;
+}
+
+.curva_abc_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.curva_abc_title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.curva_abc_subtitle {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.abc_bar_wrapper {
+    overflow: hidden;
+    display: flex;
+
+    width: 100%;
+    height: 8px;
+    margin-bottom: 20px;
+    border-radius: var(--radius-full);
+
+    background-color: var(--color-bg-subtle);
+}
+
+.abc_bar_a {
+    background-color: var(--color-primary);
+    transition: width var(--transition);
+}
+
+.abc_bar_b {
+    background-color: var(--color-warning-text);
+    transition: width var(--transition);
+}
+
+.abc_bar_c {
+    background-color: var(--color-text-muted);
+    transition: width var(--transition);
+}
+
+.abc_cards_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (width <= 768px) {
+    .abc_cards_grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+.abc_col {
+    display: flex;
+    flex-direction: column;
+
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    background-color: var(--color-bg-base);
+}
+
+.abc_col_header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.dot_a {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+}
+
+.dot_b {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-warning-text);
+}
+
+.dot_c {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-text-muted);
+}
+
+.abc_name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.abc_pill {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.abc_val {
+    margin-bottom: 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.abc_detail {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}

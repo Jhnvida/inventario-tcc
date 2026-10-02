@@ -1,0 +1,137 @@
+.form_container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (width <= 640px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.grid3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 16px;
+}
+
+@media (width <= 640px) {
+    .grid3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tipo_toggle_container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tipo_toggle_label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.tipo_toggle_group {
+    display: flex;
+    gap: 12px;
+}
+
+.tipo_toggle_btn {
+    cursor: pointer;
+
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+
+    background-color: var(--color-bg-surface);
+
+    transition: all 0.2s ease;
+}
+
+.tipo_toggle_btn:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-bg-hover);
+}
+
+.tipo_toggle_btn_active {
+    border-color: var(--color-primary);
+    font-weight: 600;
+    color: var(--color-primary);
+    background-color: var(--color-primary-light, rgb(59 130 246 / 8%));
+}
+
+.checkbox_wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.checkbox_wrapper input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+}
+
+.checkbox_label {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+
+.form_actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.actions_cell {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.filters_row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+
+    margin-bottom: 24px;
+}
+
+.search_field {
+    flex: 1;
+    min-width: 240px;
+}
+
+.select_filter {
+    min-width: 160px;
+}
+
+.text_secondary {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}

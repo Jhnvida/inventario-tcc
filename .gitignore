@@ -28,3 +28,7 @@ dist-ssr
 
 # Documentation
 docs
+
+# Supabase
+supabase/*
+!supabase/migrations/

@@ -4,6 +4,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Assistente } from "./pages/Assistente";
 import { Categorias } from "./pages/Categorias";
+import { Clientes } from "./pages/Clientes";
 import { Dashboard } from "./pages/Dashboard";
 import { Fornecedores } from "./pages/Fornecedores";
 import { Login } from "./pages/Login";
@@ -25,6 +26,7 @@ export function App() {
                             <Route path="produtos" element={<Produtos />} />
                             <Route path="movimentacoes" element={<Movimentacoes />} />
                             <Route path="pedidos" element={<Pedidos />} />
+                            <Route path="clientes" element={<Clientes />} />
                             <Route path="fornecedores" element={<Fornecedores />} />
                             <Route path="categorias" element={<Categorias />} />
                             <Route path="usuarios" element={<Usuarios />} />

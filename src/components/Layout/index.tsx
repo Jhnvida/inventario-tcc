@@ -7,6 +7,7 @@ import {
     Package,
     ShoppingCart,
     Tags,
+    UserCheck,
     UserCog,
     Users,
 } from "lucide-react";
@@ -53,12 +54,13 @@ export function Layout() {
             items: [
                 { path: "/produtos", label: "Produtos", icon: Package },
                 { path: "/movimentacoes", label: "Movimentações", icon: ArrowLeftRight },
-                { path: "/pedidos", label: "Pedidos", icon: ShoppingCart },
+                { path: "/pedidos", label: "Pedidos de Compra", icon: ShoppingCart },
             ],
         },
         {
             title: "Cadastros",
             items: [
+                { path: "/clientes", label: "Clientes", icon: UserCheck },
                 { path: "/fornecedores", label: "Fornecedores", icon: Users },
                 { path: "/categorias", label: "Categorias", icon: Tags },
                 { path: "/usuarios", label: "Usuários", icon: UserCog },

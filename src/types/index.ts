@@ -29,6 +29,20 @@ export interface Movimentacao {
     usuarios?: { nome: string; email: string } | null;
 }
 
+export interface Cliente {
+    id: string;
+    nome: string;
+    tipo_pessoa: "PF" | "PJ";
+    documento?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+    cidade?: string | null;
+    estado?: string | null;
+    ativo: boolean;
+    criado_em: string;
+    atualizado_em?: string;
+}
+
 export interface Fornecedor {
     id: string;
     razao_social: string;

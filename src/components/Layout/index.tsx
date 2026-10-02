@@ -7,6 +7,7 @@ import {
     Package,
     ShoppingCart,
     Tags,
+    TrendingUp,
     UserCheck,
     UserCog,
     Users,
@@ -47,7 +48,10 @@ export function Layout() {
     const navSections = [
         {
             title: "Visão Geral",
-            items: [{ path: "/", label: "Dashboard", icon: LayoutDashboard }],
+            items: [
+                { path: "/", label: "Dashboard", icon: LayoutDashboard },
+                { path: "/analises", label: "Análises", icon: TrendingUp },
+            ],
         },
         {
             title: "Gestão",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { ItemPedido, Pedido } from "../types";
 import { translateDbError } from "../utils/errors";
@@ -8,46 +8,86 @@ export type PedidoCompleto = Pedido & {
     itens_pedido?: (ItemPedido & { produtos: { nome: string; sku: string } | null })[];
 };
 
+const ITENS_POR_PAGINA = 10;
+
 export function usePedidos() {
     const [pedidos, setPedidos] = useState<PedidoCompleto[]>([]);
+    const [totalPedidos, setTotalPedidos] = useState(0);
+    const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
+
     const [busca, setBusca] = useState("");
     const [statusFiltro, setStatusFiltro] = useState("");
 
-    async function fetchDados() {
-        setLoading(true);
-        try {
-            const { data, error } = await supabase
-                .from("pedidos")
-                .select(
-                    `
+    const fetchDados = useCallback(
+        async (paginaAlvo = pagina) => {
+            setLoading(true);
+            try {
+                const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
+                const to = from + ITENS_POR_PAGINA - 1;
+
+                const selectQuery = busca.trim()
+                    ? `
+                    *,
+                    fornecedores!inner(razao_social, nome_fantasia),
+                    itens_pedido(*, produtos(nome, sku))
+                `
+                    : `
                     *,
                     fornecedores(razao_social, nome_fantasia),
                     itens_pedido(*, produtos(nome, sku))
-                `,
-                )
-                .order("criado_em", { ascending: false });
+                `;
 
-            if (error) throw error;
-            if (data) setPedidos(data as unknown as PedidoCompleto[]);
-        } catch (error) {
-            console.error("Erro ao buscar pedidos:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
+                let query = supabase.from("pedidos").select(selectQuery, { count: "exact" });
+
+                if (statusFiltro) {
+                    query = query.eq("status", statusFiltro);
+                }
+
+                if (busca.trim()) {
+                    const b = busca.trim();
+                    query = query.or(`razao_social.ilike.%${b}%,nome_fantasia.ilike.%${b}%`, {
+                        foreignTable: "fornecedores",
+                    });
+                }
+
+                query = query.order("criado_em", { ascending: false }).range(from, to);
+
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                const total = count ?? 0;
+                setTotalPedidos(total);
+
+                const maxPaginas = Math.max(1, Math.ceil(total / ITENS_POR_PAGINA));
+                if (paginaAlvo > maxPaginas && total > 0) {
+                    setPagina(maxPaginas);
+                    return;
+                }
+
+                setPedidos((data as unknown as PedidoCompleto[]) || []);
+            } catch (error) {
+                console.error("Erro ao buscar pedidos:", error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [pagina, busca, statusFiltro],
+    );
 
     useEffect(() => {
-        fetchDados();
-    }, []);
+        fetchDados(pagina);
+    }, [fetchDados, pagina]);
 
-    const pedidosFiltrados = pedidos.filter((p) => {
-        const fornecedor = p.fornecedores?.razao_social || "";
-        const matchBusca = fornecedor.toLowerCase().includes(busca.toLowerCase());
-        const matchStatus = statusFiltro ? p.status === statusFiltro : true;
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
 
-        return matchBusca && matchStatus;
-    });
+    const handleSetStatusFiltro = (novoStatus: string) => {
+        setStatusFiltro(novoStatus);
+        setPagina(1);
+    };
 
     async function receberPedido(pedidoId: string) {
         try {
@@ -61,7 +101,7 @@ export function usePedidos() {
             });
 
             if (error) throw error;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao receber pedido:", error);
@@ -109,7 +149,7 @@ export function usePedidos() {
                 if (errorItens) throw errorItens;
             }
 
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao salvar pedido:", error);
@@ -121,7 +161,7 @@ export function usePedidos() {
         try {
             const { error } = await supabase.from("pedidos").delete().eq("id", id);
             if (error) throw error;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir pedido:", error);
@@ -130,13 +170,18 @@ export function usePedidos() {
     }
 
     return {
-        pedidos: pedidosFiltrados,
+        pedidos,
+        totalPedidos,
+        pagina,
+        setPagina,
+        totalPaginas: Math.ceil(totalPedidos / ITENS_POR_PAGINA),
+        itensPorPagina: ITENS_POR_PAGINA,
         loading,
         busca,
-        setBusca,
+        setBusca: handleSetBusca,
         statusFiltro,
-        setStatusFiltro,
-        recarregar: fetchDados,
+        setStatusFiltro: handleSetStatusFiltro,
+        recarregar: () => fetchDados(pagina),
         receberPedido,
         salvarPedido,
         deletePedido,

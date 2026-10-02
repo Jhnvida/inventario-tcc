@@ -5,6 +5,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
 import { useClientes, type FiltroStatusCliente, type FiltroTipoCliente } from "../../hooks/useClientes";
 import type { Cliente } from "../../types";
@@ -15,6 +16,11 @@ import styles from "./styles.module.css";
 export function Clientes() {
     const {
         clientes,
+        totalClientes,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
         loading,
         busca,
         setBusca,
@@ -287,6 +293,15 @@ export function Clientes() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalClientes}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="clientes"
+                        />
                     </>
                 )}
             </div>

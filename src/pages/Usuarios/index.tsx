@@ -5,11 +5,22 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { useUsuarios, type Usuario } from "../../hooks/useUsuarios";
 import styles from "./styles.module.css";
 
 export function Usuarios() {
-    const { usuarios, loading, updateUsuario, deleteUsuario } = useUsuarios();
+    const {
+        usuarios,
+        totalUsuarios,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
+        loading,
+        updateUsuario,
+        deleteUsuario,
+    } = useUsuarios();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
@@ -152,6 +163,15 @@ export function Usuarios() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalUsuarios}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="usuários"
+                        />
                     </>
                 )}
             </div>

@@ -1,45 +1,88 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Categoria, Produto } from "../types";
 import { translateDbError } from "../utils/errors";
 
 export type ProdutoComCategoria = Produto & { categorias: { id: string; nome: string } | null };
 
+const ITENS_POR_PAGINA = 10;
+
 export function useProdutos() {
     const [produtos, setProdutos] = useState<ProdutoComCategoria[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+    const [totalProdutos, setTotalProdutos] = useState(0);
+    const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
 
     const [busca, setBusca] = useState("");
     const [categoriaFiltro, setCategoriaFiltro] = useState("");
 
-    async function fetchDados() {
-        setLoading(true);
+    const fetchCategorias = useCallback(async () => {
         try {
-            const [prodRes, catRes] = await Promise.all([
-                supabase.from("produtos").select("*, categorias(id, nome)").order("criado_em", { ascending: false }),
-                supabase.from("categorias").select("*").order("nome"),
-            ]);
-
-            if (prodRes.data) setProdutos(prodRes.data as ProdutoComCategoria[]);
-            if (catRes.data) setCategorias(catRes.data as Categoria[]);
+            const { data } = await supabase.from("categorias").select("*").order("nome");
+            if (data) setCategorias(data as Categoria[]);
         } catch (error) {
-            console.error("Erro ao buscar produtos:", error);
-        } finally {
-            setLoading(false);
+            console.error("Erro ao buscar categorias:", error);
         }
-    }
-
-    useEffect(() => {
-        fetchDados();
     }, []);
 
-    const produtosFiltrados = produtos.filter((p) => {
-        const matchBusca =
-            p.nome.toLowerCase().includes(busca.toLowerCase()) || p.sku.toLowerCase().includes(busca.toLowerCase());
-        const matchCategoria = categoriaFiltro ? p.categoria_id === categoriaFiltro : true;
-        return matchBusca && matchCategoria;
-    });
+    const fetchDados = useCallback(
+        async (paginaAlvo = pagina) => {
+            setLoading(true);
+            try {
+                const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
+                const to = from + ITENS_POR_PAGINA - 1;
+
+                let query = supabase.from("produtos").select("*, categorias(id, nome)", { count: "exact" });
+
+                if (categoriaFiltro) {
+                    query = query.eq("categoria_id", categoriaFiltro);
+                }
+                if (busca.trim()) {
+                    query = query.or(`nome.ilike.%${busca.trim()}%,sku.ilike.%${busca.trim()}%`);
+                }
+
+                query = query.order("criado_em", { ascending: false }).range(from, to);
+
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                const total = count ?? 0;
+                setTotalProdutos(total);
+
+                const maxPaginas = Math.max(1, Math.ceil(total / ITENS_POR_PAGINA));
+                if (paginaAlvo > maxPaginas && total > 0) {
+                    setPagina(maxPaginas);
+                    return;
+                }
+
+                setProdutos((data as ProdutoComCategoria[]) || []);
+            } catch (error) {
+                console.error("Erro ao buscar produtos:", error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [pagina, busca, categoriaFiltro],
+    );
+
+    useEffect(() => {
+        fetchCategorias();
+    }, [fetchCategorias]);
+
+    useEffect(() => {
+        fetchDados(pagina);
+    }, [fetchDados, pagina]);
+
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
+
+    const handleSetCategoriaFiltro = (novaCategoria: string) => {
+        setCategoriaFiltro(novaCategoria);
+        setPagina(1);
+    };
 
     async function createProduto(produto: Partial<Produto>) {
         try {
@@ -67,7 +110,7 @@ export function useProdutos() {
                 if (movError) console.error("Erro ao registrar mov inicial:", movError);
             }
 
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao criar produto:", error);
@@ -83,7 +126,7 @@ export function useProdutos() {
                 .eq("id", id);
 
             if (updateError) throw updateError;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar produto:", error);
@@ -95,7 +138,7 @@ export function useProdutos() {
         try {
             const { error } = await supabase.from("produtos").delete().eq("id", id);
             if (error) throw error;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir produto:", error);
@@ -104,14 +147,19 @@ export function useProdutos() {
     }
 
     return {
-        produtos: produtosFiltrados,
+        produtos,
         categorias,
         loading,
         busca,
-        setBusca,
+        setBusca: handleSetBusca,
         categoriaFiltro,
-        setCategoriaFiltro,
-        recarregar: fetchDados,
+        setCategoriaFiltro: handleSetCategoriaFiltro,
+        pagina,
+        setPagina,
+        totalProdutos,
+        totalPaginas: Math.ceil(totalProdutos / ITENS_POR_PAGINA),
+        itensPorPagina: ITENS_POR_PAGINA,
+        recarregar: () => fetchDados(pagina),
         createProduto,
         updateProduto,
         deleteProduto,

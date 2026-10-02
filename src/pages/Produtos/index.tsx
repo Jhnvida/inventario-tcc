@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
 import { useProdutos, type ProdutoComCategoria } from "../../hooks/useProdutos";
 import type { Produto } from "../../types";
@@ -20,6 +21,11 @@ export function Produtos() {
         setBusca,
         categoriaFiltro,
         setCategoriaFiltro,
+        pagina,
+        setPagina,
+        totalProdutos,
+        totalPaginas,
+        itensPorPagina,
         recarregar,
         deleteProduto,
     } = useProdutos();
@@ -226,6 +232,15 @@ export function Produtos() {
                                 );
                             })}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalProdutos}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="produtos"
+                        />
                     </>
                 )}
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Movimentacao, Produto } from "../types";
 import { translateDbError } from "../utils/errors";
@@ -8,54 +8,100 @@ export type MovimentacaoComProduto = Movimentacao & {
     usuarios: { nome: string; email: string } | null;
 };
 
+const ITENS_POR_PAGINA = 10;
+
 export function useMovimentacoes() {
     const [movimentacoes, setMovimentacoes] = useState<MovimentacaoComProduto[]>([]);
     const [produtos, setProdutos] = useState<Produto[]>([]);
+    const [totalMovimentacoes, setTotalMovimentacoes] = useState(0);
+    const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
 
     const [busca, setBusca] = useState("");
     const [tipoFiltro, setTipoFiltro] = useState("");
     const [produtoFiltro, setProdutoFiltro] = useState("");
 
-    async function fetchDados() {
-        setLoading(true);
+    const fetchProdutos = useCallback(async () => {
         try {
-            const [movsRes, prodRes] = await Promise.all([
-                supabase
-                    .from("movimentacoes")
-                    .select("*, produtos(nome, sku), usuarios(nome, email)")
-                    .order("criada_em", { ascending: false }),
-                supabase.from("produtos").select("id, nome, sku").order("nome"),
-            ]);
-
-            if (movsRes.data) setMovimentacoes(movsRes.data as unknown as MovimentacaoComProduto[]);
-            if (prodRes.data) setProdutos(prodRes.data as Produto[]);
+            const { data } = await supabase.from("produtos").select("id, nome, sku").order("nome");
+            if (data) setProdutos(data as Produto[]);
         } catch (error) {
-            console.error("Erro ao buscar movimentações:", error);
-        } finally {
-            setLoading(false);
+            console.error("Erro ao buscar lista de produtos para filtro:", error);
         }
-    }
-
-    useEffect(() => {
-        fetchDados();
     }, []);
 
-    const movimentacoesFiltradas = movimentacoes.filter((m) => {
-        const pNome = m.produtos?.nome || "";
-        const pSku = m.produtos?.sku || "";
-        const uNome = m.usuarios?.nome || "";
-        const uEmail = m.usuarios?.email || "";
-        const matchBusca =
-            pNome.toLowerCase().includes(busca.toLowerCase()) ||
-            pSku.toLowerCase().includes(busca.toLowerCase()) ||
-            uNome.toLowerCase().includes(busca.toLowerCase()) ||
-            uEmail.toLowerCase().includes(busca.toLowerCase());
-        const matchTipo = tipoFiltro ? m.tipo === tipoFiltro : true;
-        const matchProduto = produtoFiltro ? m.produto_id === produtoFiltro : true;
+    const fetchDados = useCallback(
+        async (paginaAlvo = pagina) => {
+            setLoading(true);
+            try {
+                const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
+                const to = from + ITENS_POR_PAGINA - 1;
 
-        return matchBusca && matchTipo && matchProduto;
-    });
+                const selectQuery = busca.trim()
+                    ? "*, produtos!inner(nome, sku), usuarios(nome, email)"
+                    : "*, produtos(nome, sku), usuarios(nome, email)";
+
+                let query = supabase.from("movimentacoes").select(selectQuery, { count: "exact" });
+
+                if (tipoFiltro) {
+                    query = query.eq("tipo", tipoFiltro);
+                }
+
+                if (produtoFiltro) {
+                    query = query.eq("produto_id", produtoFiltro);
+                }
+
+                if (busca.trim()) {
+                    const b = busca.trim();
+                    query = query.or(`nome.ilike.%${b}%,sku.ilike.%${b}%`, { foreignTable: "produtos" });
+                }
+
+                query = query.order("criada_em", { ascending: false }).range(from, to);
+
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                const total = count ?? 0;
+                setTotalMovimentacoes(total);
+
+                const maxPaginas = Math.max(1, Math.ceil(total / ITENS_POR_PAGINA));
+                if (paginaAlvo > maxPaginas && total > 0) {
+                    setPagina(maxPaginas);
+                    return;
+                }
+
+                setMovimentacoes((data as unknown as MovimentacaoComProduto[]) || []);
+            } catch (error) {
+                console.error("Erro ao buscar movimentações:", error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [pagina, busca, tipoFiltro, produtoFiltro],
+    );
+
+    useEffect(() => {
+        fetchProdutos();
+    }, [fetchProdutos]);
+
+    useEffect(() => {
+        fetchDados(pagina);
+    }, [fetchDados, pagina]);
+
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
+
+    const handleSetTipoFiltro = (novoTipo: string) => {
+        setTipoFiltro(novoTipo);
+        setPagina(1);
+    };
+
+    const handleSetProdutoFiltro = (novoProduto: string) => {
+        setProdutoFiltro(novoProduto);
+        setPagina(1);
+    };
 
     async function createMovimentacao(data: {
         produto_id: string;
@@ -81,7 +127,7 @@ export function useMovimentacoes() {
             });
 
             if (rpcError) throw rpcError;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao registrar movimentação:", error);
@@ -90,16 +136,21 @@ export function useMovimentacoes() {
     }
 
     return {
-        movimentacoes: movimentacoesFiltradas,
+        movimentacoes,
         produtos,
+        totalMovimentacoes,
+        pagina,
+        setPagina,
+        totalPaginas: Math.ceil(totalMovimentacoes / ITENS_POR_PAGINA),
+        itensPorPagina: ITENS_POR_PAGINA,
         loading,
         busca,
-        setBusca,
+        setBusca: handleSetBusca,
         tipoFiltro,
-        setTipoFiltro,
+        setTipoFiltro: handleSetTipoFiltro,
         produtoFiltro,
-        setProdutoFiltro,
-        recarregar: fetchDados,
+        setProdutoFiltro: handleSetProdutoFiltro,
+        recarregar: () => fetchDados(pagina),
         createMovimentacao,
     };
 }

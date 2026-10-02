@@ -5,11 +5,23 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { useCategorias } from "../../hooks/useCategorias";
 import styles from "./styles.module.css";
 
 export function Categorias() {
-    const { categorias, loading, deleteCategoria, createCategoria, updateCategoria } = useCategorias();
+    const {
+        categorias,
+        totalCategorias,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
+        loading,
+        deleteCategoria,
+        createCategoria,
+        updateCategoria,
+    } = useCategorias();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [categoriaEditando, setCategoriaEditando] = useState<{ id: string; nome: string } | null>(null);
@@ -167,6 +179,15 @@ export function Categorias() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalCategorias}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="categorias"
+                        />
                     </>
                 )}
             </div>

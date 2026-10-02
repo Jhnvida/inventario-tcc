@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { useFornecedores } from "../../hooks/useFornecedores";
 import type { Fornecedor } from "../../types";
 import { formatCNPJ, formatTelefone } from "../../utils/formatters";
@@ -11,7 +12,19 @@ import { FornecedorFormModal } from "./FornecedorFormModal";
 import styles from "./styles.module.css";
 
 export function Fornecedores() {
-    const { fornecedores, loading, busca, setBusca, recarregar, deleteFornecedor } = useFornecedores();
+    const {
+        fornecedores,
+        totalFornecedores,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
+        loading,
+        busca,
+        setBusca,
+        recarregar,
+        deleteFornecedor,
+    } = useFornecedores();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fornecedorToEdit, setFornecedorToEdit] = useState<Fornecedor | null>(null);
@@ -178,6 +191,15 @@ export function Fornecedores() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalFornecedores}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="fornecedores"
+                        />
                     </>
                 )}
             </div>

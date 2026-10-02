@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Cliente } from "../types";
 import { translateDbError } from "../utils/errors";
@@ -7,52 +7,90 @@ import { stripFormatting } from "../utils/formatters";
 export type FiltroStatusCliente = "todos" | "ativos" | "inativos";
 export type FiltroTipoCliente = "todos" | "PF" | "PJ";
 
+const ITENS_POR_PAGINA = 10;
+
 export function useClientes() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [totalClientes, setTotalClientes] = useState(0);
+    const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
+
     const [busca, setBusca] = useState("");
     const [filtroStatus, setFiltroStatus] = useState<FiltroStatusCliente>("todos");
     const [filtroTipo, setFiltroTipo] = useState<FiltroTipoCliente>("todos");
 
-    async function fetchDados() {
-        setLoading(true);
+    const fetchDados = useCallback(
+        async (paginaAlvo = pagina) => {
+            setLoading(true);
 
-        try {
-            const { data, error } = await supabase.from("clientes").select("*").order("nome", { ascending: true });
+            try {
+                const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
+                const to = from + ITENS_POR_PAGINA - 1;
 
-            if (error) throw error;
-            if (data) setClientes(data as Cliente[]);
-        } catch (error) {
-            console.error("Erro ao buscar clientes:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
+                let query = supabase.from("clientes").select("*", { count: "exact" });
+
+                if (filtroStatus === "ativos") {
+                    query = query.eq("ativo", true);
+                } else if (filtroStatus === "inativos") {
+                    query = query.eq("ativo", false);
+                }
+
+                if (filtroTipo !== "todos") {
+                    query = query.eq("tipo_pessoa", filtroTipo);
+                }
+
+                if (busca.trim()) {
+                    const b = busca.trim();
+                    const bNum = stripFormatting(b);
+                    const orConds = [`nome.ilike.%${b}%`, `email.ilike.%${b}%`, `cidade.ilike.%${b}%`];
+                    if (bNum) {
+                        orConds.push(`documento.ilike.%${bNum}%`);
+                    }
+                    query = query.or(orConds.join(","));
+                }
+
+                query = query.order("nome", { ascending: true }).range(from, to);
+
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                const total = count ?? 0;
+                setTotalClientes(total);
+
+                const maxPaginas = Math.max(1, Math.ceil(total / ITENS_POR_PAGINA));
+                if (paginaAlvo > maxPaginas && total > 0) {
+                    setPagina(maxPaginas);
+                    return;
+                }
+
+                setClientes((data as Cliente[]) || []);
+            } catch (error) {
+                console.error("Erro ao buscar clientes:", error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [pagina, busca, filtroStatus, filtroTipo],
+    );
 
     useEffect(() => {
-        fetchDados();
-    }, []);
+        fetchDados(pagina);
+    }, [fetchDados, pagina]);
 
-    const clientesFiltrados = clientes.filter((c) => {
-        if (filtroStatus === "ativos" && !c.ativo) return false;
-        if (filtroStatus === "inativos" && c.ativo) return false;
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
 
-        if (filtroTipo !== "todos" && c.tipo_pessoa !== filtroTipo) return false;
+    const handleSetFiltroStatus = (novoStatus: FiltroStatusCliente) => {
+        setFiltroStatus(novoStatus);
+        setPagina(1);
+    };
 
-        if (busca.trim()) {
-            const searchRaw = busca.toLowerCase();
-            const searchStripped = stripFormatting(busca);
-
-            const matchNome = c.nome.toLowerCase().includes(searchRaw);
-            const matchEmail = c.email ? c.email.toLowerCase().includes(searchRaw) : false;
-            const matchCidade = c.cidade ? c.cidade.toLowerCase().includes(searchRaw) : false;
-            const matchDoc = searchStripped && c.documento ? c.documento.includes(searchStripped) : false;
-
-            return matchNome || matchEmail || matchCidade || matchDoc;
-        }
-
-        return true;
-    });
+    const handleSetFiltroTipo = (novoTipo: FiltroTipoCliente) => {
+        setFiltroTipo(novoTipo);
+        setPagina(1);
+    };
 
     async function createCliente(clienteData: Partial<Cliente>) {
         try {
@@ -66,7 +104,7 @@ export function useClientes() {
             const { error } = await supabase.from("clientes").insert([payload]);
             if (error) throw error;
 
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao cadastrar cliente:", error);
@@ -86,7 +124,7 @@ export function useClientes() {
             const { error } = await supabase.from("clientes").update(payload).eq("id", id);
             if (error) throw error;
 
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar cliente:", error);
@@ -99,7 +137,7 @@ export function useClientes() {
             const { error } = await supabase.from("clientes").update({ ativo: !statusAtual }).eq("id", id);
 
             if (error) throw error;
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao alternar status do cliente:", error);
@@ -120,7 +158,7 @@ export function useClientes() {
                 throw error;
             }
 
-            await fetchDados();
+            await fetchDados(pagina);
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir cliente:", error);
@@ -129,16 +167,20 @@ export function useClientes() {
     }
 
     return {
-        clientes: clientesFiltrados,
-        totalClientes: clientes.length,
+        clientes,
+        totalClientes,
+        pagina,
+        setPagina,
+        totalPaginas: Math.ceil(totalClientes / ITENS_POR_PAGINA),
+        itensPorPagina: ITENS_POR_PAGINA,
         loading,
         busca,
-        setBusca,
+        setBusca: handleSetBusca,
         filtroStatus,
-        setFiltroStatus,
+        setFiltroStatus: handleSetFiltroStatus,
         filtroTipo,
-        setFiltroTipo,
-        recarregar: fetchDados,
+        setFiltroTipo: handleSetFiltroTipo,
+        recarregar: () => fetchDados(pagina),
         createCliente,
         updateCliente,
         toggleStatusCliente,

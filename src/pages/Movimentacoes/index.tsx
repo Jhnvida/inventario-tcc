@@ -6,6 +6,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import { formatDate } from "../../utils/formatters";
@@ -18,6 +19,11 @@ export function Movimentacoes() {
     const {
         movimentacoes,
         produtos,
+        totalMovimentacoes,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
         loading,
         busca,
         setBusca,
@@ -172,6 +178,15 @@ export function Movimentacoes() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalMovimentacoes}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="movimentações"
+                        />
                     </>
                 )}
             </div>

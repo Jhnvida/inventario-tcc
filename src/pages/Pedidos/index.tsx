@@ -5,6 +5,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
 import { usePedidos, type PedidoCompleto } from "../../hooks/usePedidos";
 import { formatCurrency, formatDate } from "../../utils/formatters";
@@ -14,6 +15,11 @@ import { PedidoFormModal } from "./PedidoFormModal";
 export function Pedidos() {
     const {
         pedidos,
+        totalPedidos,
+        pagina,
+        setPagina,
+        totalPaginas,
+        itensPorPagina,
         loading,
         busca,
         setBusca,
@@ -234,6 +240,15 @@ export function Pedidos() {
                                 </div>
                             ))}
                         </div>
+
+                        <Pagination
+                            currentPage={pagina}
+                            totalPages={totalPaginas}
+                            totalItems={totalPedidos}
+                            pageSize={itensPorPagina}
+                            onPageChange={setPagina}
+                            itemName="pedidos"
+                        />
                     </>
                 )}
             </div>

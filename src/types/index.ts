@@ -70,6 +70,27 @@ export interface ItemPedido {
     preco_unitario: number;
 }
 
+export interface PedidoVenda {
+    id: string;
+    numero?: number;
+    cliente_id: string;
+    usuario_id?: string | null;
+    status: "rascunho" | "concluido" | "cancelado";
+    valor_total: number;
+    observacoes?: string | null;
+    criado_em: string;
+    atualizado_em: string;
+}
+
+export interface ItemPedidoVenda {
+    id: string;
+    pedido_venda_id: string;
+    produto_id: string;
+    quantidade: number;
+    preco_unitario: number;
+    subtotal?: number;
+}
+
 export interface DashboardMetricas {
     valorTotal: number;
     totalProdutos: number;

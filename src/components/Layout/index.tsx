@@ -1,13 +1,13 @@
 import {
     ArrowLeftRight,
     Brain,
+    Coins,
     LayoutDashboard,
     LogOut,
     Menu,
     Package,
     ShoppingCart,
     Tags,
-    TrendingUp,
     UserCheck,
     UserCog,
     Users,
@@ -48,10 +48,7 @@ export function Layout() {
     const navSections = [
         {
             title: "Visão Geral",
-            items: [
-                { path: "/", label: "Dashboard", icon: LayoutDashboard },
-                { path: "/analises", label: "Análises", icon: TrendingUp },
-            ],
+            items: [{ path: "/", label: "Dashboard", icon: LayoutDashboard }],
         },
         {
             title: "Gestão",
@@ -59,6 +56,7 @@ export function Layout() {
                 { path: "/produtos", label: "Produtos", icon: Package },
                 { path: "/movimentacoes", label: "Movimentações", icon: ArrowLeftRight },
                 { path: "/pedidos", label: "Pedidos de Compra", icon: ShoppingCart },
+                { path: "/pedidos-venda", label: "Pedidos de Venda", icon: Coins },
             ],
         },
         {

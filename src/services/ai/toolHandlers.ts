@@ -284,6 +284,26 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
 
         return data;
     },
+
+    consultar_pedidos_venda: async function (args) {
+        let query = supabase
+            .from("pedidos_venda")
+            .select("id, numero, status, valor_total, criado_em, clientes(nome)")
+            .order("criado_em", { ascending: false })
+            .limit(args.limite || 5);
+
+        if (args.status) {
+            query = query.eq("status", args.status.toLowerCase().trim());
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            console.error("Erro na consulta de pedidos de venda:", error);
+            return { erro: "Falha ao consultar pedidos de venda." };
+        }
+
+        return data;
+    },
 };
 
 export async function handleFunctionCall(call: any) {

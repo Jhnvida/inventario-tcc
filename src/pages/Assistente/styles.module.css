@@ -336,11 +336,13 @@
 .libraryItem {
     cursor: pointer;
 
+    width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
 
     font-size: 14px;
+    line-height: 1.4;
     color: var(--color-text-primary);
     text-align: left;
 

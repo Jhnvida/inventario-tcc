@@ -23,33 +23,18 @@ export function Dashboard() {
     return (
         <div className="page-container">
             <PageHeader
-                title={`Olá, ${userName || "Usuário"}!`}
-                subtitle="Visão operacional do inventário, alertas de reposição e movimentações recentes."
+                title="Dashboard"
+                subtitle={
+                    userName
+                        ? `Olá, ${userName}! Acompanhe os indicadores operacionais e o fluxo de estoque.`
+                        : "Visão consolidada do inventário, alertas de reposição e movimentações recentes."
+                }
             />
 
             {loading ? (
                 <div className="loading-state">Carregando métricas operacionais...</div>
             ) : (
                 <>
-                    {metricas.estoqueCritico > 0 && (
-                        <motion.div
-                            className={styles.alert_banner}
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <div className={styles.alert_banner_content}>
-                                <AlertTriangle size={20} className={styles.alert_banner_icon} />
-                                <span>
-                                    <strong>Atenção operacional:</strong> Existem{" "}
-                                    <strong>{metricas.estoqueCritico}</strong> produto(s) abaixo do estoque mínimo
-                                    definido. Reposição necessária para evitar ruptura.
-                                </span>
-                            </div>
-                            <Badge variant="critical">Ação necessária</Badge>
-                        </motion.div>
-                    )}
-
                     <motion.div
                         className={styles.metrics_grid}
                         initial="hidden"
@@ -123,17 +108,27 @@ export function Dashboard() {
                     <div className={styles.critical_section}>
                         <div className={styles.section_header}>
                             <div className={styles.section_title_group}>
-                                <h2 className={styles.section_title}>Produtos em Nível Crítico</h2>
+                                <div className={styles.section_title_row}>
+                                    <h2 className={styles.section_title}>Produtos em Nível Crítico</h2>
+                                    {itensCriticos.length > 0 && (
+                                        <Badge variant="critical">
+                                            {itensCriticos.length}{" "}
+                                            {itensCriticos.length === 1 ? "item crítico" : "itens críticos"}
+                                        </Badge>
+                                    )}
+                                </div>
                                 <p className={styles.section_subtitle}>
                                     Itens que exigem reposição imediata para evitar desabastecimento
                                 </p>
                             </div>
-                            {itensCriticos.length > 0 && (
-                                <Badge variant="critical">
-                                    {itensCriticos.length}{" "}
-                                    {itensCriticos.length === 1 ? "item crítico" : "itens críticos"}
-                                </Badge>
-                            )}
+                            <button
+                                type="button"
+                                className={styles.section_header_link}
+                                onClick={() => navigate("/produtos")}
+                            >
+                                <span>Ver catálogo completo</span>
+                                <ArrowRight size={14} />
+                            </button>
                         </div>
 
                         <div className="table-container">
@@ -256,9 +251,17 @@ export function Dashboard() {
                                 <div className={styles.section_title_group}>
                                     <h2 className={styles.section_title}>Movimentações Recentes</h2>
                                     <p className={styles.section_subtitle}>
-                                        Últimos 5 registros de entrada e saída com responsável
+                                        Últimos 5 registros operacionais de entrada e saída
                                     </p>
                                 </div>
+                                <button
+                                    type="button"
+                                    className={styles.section_header_link}
+                                    onClick={() => navigate("/movimentacoes")}
+                                >
+                                    <span>Ver todas</span>
+                                    <ArrowRight size={14} />
+                                </button>
                             </div>
 
                             <div className="table-container">
@@ -412,9 +415,9 @@ export function Dashboard() {
                                     <button
                                         type="button"
                                         className={styles.analises_link_btn}
-                                        onClick={() => navigate("/analises")}
+                                        onClick={() => navigate("/movimentacoes")}
                                     >
-                                        <span>Ver gráficos e análises completos</span>
+                                        <span>Ver histórico completo de movimentações</span>
                                         <ArrowRight size={15} />
                                     </button>
                                 </div>

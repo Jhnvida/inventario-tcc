@@ -172,4 +172,24 @@ export const tools = [
             },
         },
     },
+    {
+        type: "function",
+        function: {
+            name: "consultar_pedidos_venda",
+            description: "Consulta o histórico e o status dos pedidos de venda realizados para clientes.",
+            parameters: {
+                type: "object",
+                properties: {
+                    status: {
+                        type: "string",
+                        description: "Opcional. Valores aceitos: 'rascunho', 'concluido', 'cancelado'.",
+                    },
+                    limite: {
+                        type: "number",
+                        description: "Opcional. Limite de registros a retornar (padrão: 5).",
+                    },
+                },
+            },
+        },
+    },
 ];

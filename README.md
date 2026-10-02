@@ -8,7 +8,8 @@ Sistema web de gestão de inventário focado no controle de produtos, movimenta�
 - **Gestão de Produtos**: Catálogo completo com busca textual e filtros por categoria, exibindo SKU, localização física, preço unitário, quantidade atual e limite de estoque mínimo, além de formulários para cadastro, edição e exclusão.
 - **Histórico de Movimentações**: Registro auditável de entradas e saídas de estoque com quantidade, motivo, data/hora e identificação do usuário responsável pela ação.
 - **Pedidos de Compra**: Criação e acompanhamento de pedidos de reposição vinculados a fornecedores e produtos, com cálculo automático do total e fluxo transacional de recebimento com atualização atômica de estoque.
-- **Cadastros de Apoio**: Gerenciamento de fornecedores (com razão social, nome fantasia, CNPJ, telefone e e-mail), categorias de materiais e usuários do sistema.
+- **Pedidos de Venda**: Registro de vendas e orçamentos para clientes com múltiplos produtos, cálculo em tempo real e finalização com baixa atômica no estoque e geração de movimentação de saída.
+- **Cadastros de Apoio**: Gerenciamento de clientes (PF/PJ), fornecedores (razão social, CNPJ e contatos), categorias de materiais e usuários do sistema.
 - **Assistente Inteligente (IA)**: Chat conversacional integrado ao Ollama (modelo Llama 3.2) utilizando _Function Calling_ para consultar métricas, verificar níveis de estoque, listar movimentações e analisar pedidos de forma determinística e sem alucinações.
 - **Autenticação e Sessão**: Controle de acesso corporativo seguro com rotas privadas gerenciadas pelo Supabase Auth.
 

@@ -22,6 +22,7 @@ Você possui ferramentas para acessar os dados reais do sistema. SEMPRE use a fe
 - \`consultar_movimentacoes\`: Consulta o histórico recente de entradas e saídas de estoque. É útil para perguntas como "Quais foram as últimas movimentações?". Pode filtrar por 'tipo' (Entrada/Saída), 'data_inicio' e 'data_fim' (formato YYYY-MM-DD).
 - \`consultar_ranking_movimentacoes\`: Encontra os produtos com MAIOR quantidade movimentada (mais saídas ou mais entradas) em um período. Obrigatório informar o 'tipo'. Permite filtro por 'data_inicio' e 'data_fim'.
 - \`consultar_pedidos\`: Consulta o histórico de pedidos de reposição com fornecedores, valores e seus status reais ('abertos', 'rascunho', 'enviado', 'concluido', 'cancelado'). Quando o usuário perguntar sobre pedidos em aberto ou pendentes, use status 'abertos'.
+- \`consultar_pedidos_venda\`: Consulta os pedidos de venda realizados para clientes ('rascunho', 'concluido', 'cancelado'), valores totais e número da venda.
 - \`consultar_categorias\`: Retorna a lista de todas as categorias cadastradas.
 - \`consultar_fornecedores\`: Retorna os dados dos fornecedores (Razão Social e Nome Fantasia).
 `;

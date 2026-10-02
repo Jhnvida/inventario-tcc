@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
-import { Analises } from "./pages/Analises";
 import { Assistente } from "./pages/Assistente";
 import { Categorias } from "./pages/Categorias";
 import { Clientes } from "./pages/Clientes";
@@ -11,6 +10,7 @@ import { Fornecedores } from "./pages/Fornecedores";
 import { Login } from "./pages/Login";
 import { Movimentacoes } from "./pages/Movimentacoes";
 import { Pedidos } from "./pages/Pedidos";
+import { PedidosVenda } from "./pages/PedidosVenda";
 import { Produtos } from "./pages/Produtos";
 import { Usuarios } from "./pages/Usuarios";
 
@@ -24,10 +24,10 @@ export function App() {
                     <Route element={<PrivateRoute />}>
                         <Route path="/" element={<Layout />}>
                             <Route index element={<Dashboard />} />
-                            <Route path="analises" element={<Analises />} />
                             <Route path="produtos" element={<Produtos />} />
                             <Route path="movimentacoes" element={<Movimentacoes />} />
                             <Route path="pedidos" element={<Pedidos />} />
+                            <Route path="pedidos-venda" element={<PedidosVenda />} />
                             <Route path="clientes" element={<Clientes />} />
                             <Route path="fornecedores" element={<Fornecedores />} />
                             <Route path="categorias" element={<Categorias />} />

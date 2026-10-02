@@ -15,27 +15,19 @@ const QUICK_PROMPTS = [
 
 const PROMPT_LIBRARY = [
     {
-        category: "Previsão e Ruptura",
-        prompts: [
-            "Qual é a previsão de esgotamento dos produtos com estoque baixo?",
-            "Quantos dias de estoque restam para os itens críticos?",
-            "Existe algum produto com risco iminente de ruptura?",
-        ],
-    },
-    {
-        category: "Pedidos de Compra",
-        prompts: [
-            "Quais pedidos de reposição estão em aberto?",
-            "Mostre os últimos pedidos de compra cadastrados.",
-            "Qual é o valor dos pedidos em andamento?",
-        ],
-    },
-    {
-        category: "Geral e Alertas",
+        category: "Estoque Geral",
         prompts: [
             "Qual é o valor total do estoque atual?",
             "Quais produtos estão com estoque abaixo do mínimo?",
             "Quais são os 5 produtos com maior quantidade em estoque?",
+        ],
+    },
+    {
+        category: "Previsão e Ruptura",
+        prompts: [
+            "Qual é a previsão de esgotamento dos produtos críticos?",
+            "Existe algum produto com risco iminente de ruptura?",
+            "Quais produtos estão atualmente com estoque zerado?",
         ],
     },
     {
@@ -44,6 +36,22 @@ const PROMPT_LIBRARY = [
             "Mostre as últimas 5 movimentações de estoque.",
             "Quais produtos tiveram mais saídas neste mês?",
             "Quais foram as últimas entradas registradas?",
+        ],
+    },
+    {
+        category: "Pedidos de Compra",
+        prompts: [
+            "Quais pedidos de compra estão em aberto?",
+            "Mostre os últimos pedidos de compra cadastrados.",
+            "Quais pedidos de compra foram concluídos recentemente?",
+        ],
+    },
+    {
+        category: "Pedidos de Venda",
+        prompts: [
+            "Quais são os últimos pedidos de venda registrados?",
+            "Mostre os pedidos de venda que estão em rascunho.",
+            "Quais pedidos de venda foram concluídos recentemente?",
         ],
     },
 ];
@@ -201,8 +209,7 @@ export function Assistente() {
             <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title="Biblioteca">
                 <div className={styles.libraryContainer}>
                     <p className={styles.libraryDesc}>
-                        Selecione uma mensagem pronta para preencher o campo de entrada e iniciar sua consulta mais
-                        rapidamente.
+                        Selecione uma consulta para preencher o campo de mensagem e enviar ao assistente.
                     </p>
 
                     {PROMPT_LIBRARY.map((category, idx) => (
@@ -212,6 +219,7 @@ export function Assistente() {
                                 {category.prompts.map((prompt, pIdx) => (
                                     <button
                                         key={pIdx}
+                                        type="button"
                                         className={styles.libraryItem}
                                         onClick={() => handleSelectPrompt(prompt)}
                                     >

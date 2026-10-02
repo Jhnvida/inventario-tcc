@@ -30,5 +30,7 @@ dist-ssr
 docs
 
 # Supabase
-supabase/*
-!supabase/migrations/
+supabase
+
+# Scripts
+scripts

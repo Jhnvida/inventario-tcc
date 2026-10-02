@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type SubmitEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
@@ -13,19 +13,38 @@ interface MovimentacaoFormModalProps {
     onClose: () => void;
     produtos: Produto[];
     onSuccess: () => void;
+    initialProdutoId?: string;
 }
 
-export function MovimentacaoFormModal({ isOpen, onClose, produtos, onSuccess }: MovimentacaoFormModalProps) {
+export function MovimentacaoFormModal({
+    isOpen,
+    onClose,
+    produtos,
+    onSuccess,
+    initialProdutoId,
+}: MovimentacaoFormModalProps) {
     const { createMovimentacao } = useMovimentacoes();
     const { user } = useAuth();
     const [formData, setFormData] = useState({
-        produto_id: "",
+        produto_id: initialProdutoId || "",
         tipo: "entrada",
         quantidade: 0,
-        motivo: "",
+        motivo: initialProdutoId ? "Reposição de estoque crítico" : "",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData({
+                produto_id: initialProdutoId || "",
+                tipo: "entrada",
+                quantidade: 0,
+                motivo: initialProdutoId ? "Reposição de estoque crítico" : "",
+            });
+            setError("");
+        }
+    }, [isOpen, initialProdutoId]);
 
     function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = e.target;

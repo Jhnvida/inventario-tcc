@@ -1,6 +1,7 @@
 import { Plus, Search } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -12,6 +13,8 @@ import { MovimentacaoFormModal } from "./MovimentacaoFormModal";
 import styles from "./styles.module.css";
 
 export function Movimentacoes() {
+    const location = useLocation();
+    const navigate = useNavigate();
     const {
         movimentacoes,
         produtos,
@@ -26,9 +29,20 @@ export function Movimentacoes() {
     } = useMovimentacoes();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [preselectedProdutoId, setPreselectedProdutoId] = useState<string>("");
+
+    useEffect(() => {
+        const state = location.state as { preselectedProdutoId?: string; abrirModal?: boolean } | null;
+        if (state?.abrirModal && state?.preselectedProdutoId) {
+            setPreselectedProdutoId(state.preselectedProdutoId);
+            setIsModalOpen(true);
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, location.pathname, navigate]);
 
     function handleSuccess() {
         setIsModalOpen(false);
+        setPreselectedProdutoId("");
         recarregar();
     }
 
@@ -118,7 +132,7 @@ export function Movimentacoes() {
                                             {mov.tipo === "entrada" ? "+" : "-"}
                                             {mov.quantidade}
                                         </td>
-                                        <td>{mov.usuarios?.nome || mov.usuarios?.email || "Sistema / Desconhecido"}</td>
+                                        <td>{mov.usuarios?.nome || mov.usuarios?.email || "Não identificado"}</td>
                                         <td className="text-secondary">{formatDate(mov.criada_em)}</td>
                                     </motion.tr>
                                 ))}
@@ -147,7 +161,7 @@ export function Movimentacoes() {
                                         <div className="mobile-card-row">
                                             <span className="mobile-card-label">Responsável</span>
                                             <span className="mobile-card-value">
-                                                {mov.usuarios?.nome || mov.usuarios?.email || "Sistema"}
+                                                {mov.usuarios?.nome || mov.usuarios?.email || "Não identificado"}
                                             </span>
                                         </div>
                                         <div className="mobile-card-row">
@@ -164,9 +178,13 @@ export function Movimentacoes() {
 
             <MovimentacaoFormModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setPreselectedProdutoId("");
+                }}
                 produtos={produtos}
                 onSuccess={handleSuccess}
+                initialProdutoId={preselectedProdutoId}
             />
         </div>
     );

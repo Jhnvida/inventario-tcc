@@ -1,31 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { DashboardMetricas, Movimentacao, Produto } from "../types";
+import { getOperationalDateKey, getOperationalDayMonth } from "../utils/formatters";
 
-export interface ProdutoCurvaABC extends Produto {
-    valorTotal: number;
-    percentualTotal: number;
-    percentualAcumulado: number;
-    classe: "A" | "B" | "C";
+export interface FluxoMovimentacaoItem {
+    data: string;
+    diaMes: string;
+    entradas: number;
+    saidas: number;
 }
 
-export interface CurvaABCCategoria {
-    classe: "A" | "B" | "C";
-    titulo: string;
-    qtdProdutos: number;
-    percentualProdutos: number;
+export interface CategoriaDistribuicaoItem {
+    categoria: string;
     valorTotal: number;
-    percentualValor: number;
-}
-
-export interface CurvaABCResumo {
-    classes: {
-        A: CurvaABCCategoria;
-        B: CurvaABCCategoria;
-        C: CurvaABCCategoria;
-    };
-    produtosClassificados: ProdutoCurvaABC[];
-    topItensClasseA: ProdutoCurvaABC[];
+    quantidadeItens: number;
+    percentual: number;
 }
 
 export function useDashboard() {
@@ -36,39 +25,12 @@ export function useDashboard() {
         estoqueCritico: 0,
         pedidosAbertos: 0,
     });
-    const [itensCriticos, setItensCriticos] = useState<(Produto & { classeABC?: "A" | "B" | "C" })[]>([]);
+    const [itensCriticos, setItensCriticos] = useState<Produto[]>([]);
     const [movimentacoesRecentes, setMovimentacoesRecentes] = useState<Movimentacao[]>([]);
+    const [fluxoMovimentacoes, setFluxoMovimentacoes] = useState<FluxoMovimentacaoItem[]>([]);
+    const [temMovimentacoesNoPeriodo, setTemMovimentacoesNoPeriodo] = useState<boolean>(false);
+    const [distribuicaoCategorias, setDistribuicaoCategorias] = useState<CategoriaDistribuicaoItem[]>([]);
     const [userName, setUserName] = useState<string>("");
-    const [curvaABC, setCurvaABC] = useState<CurvaABCResumo>({
-        classes: {
-            A: {
-                classe: "A",
-                titulo: "Classe A",
-                qtdProdutos: 0,
-                percentualProdutos: 0,
-                valorTotal: 0,
-                percentualValor: 0,
-            },
-            B: {
-                classe: "B",
-                titulo: "Classe B",
-                qtdProdutos: 0,
-                percentualProdutos: 0,
-                valorTotal: 0,
-                percentualValor: 0,
-            },
-            C: {
-                classe: "C",
-                titulo: "Classe C",
-                qtdProdutos: 0,
-                percentualProdutos: 0,
-                valorTotal: 0,
-                percentualValor: 0,
-            },
-        },
-        produtosClassificados: [],
-        topItensClasseA: [],
-    });
 
     useEffect(() => {
         async function fetchDashboardData() {
@@ -89,7 +51,7 @@ export function useDashboard() {
 
                 const { data: produtos } = await supabase
                     .from("produtos")
-                    .select("id, nome, sku, quantidade, estoque_minimo, preco");
+                    .select("id, nome, sku, quantidade, estoque_minimo, preco, categorias(nome)");
 
                 const { count: pedidosCount } = await supabase
                     .from("pedidos")
@@ -98,111 +60,61 @@ export function useDashboard() {
 
                 const { data: movs } = await supabase
                     .from("movimentacoes")
-                    .select(`*, produtos (nome, sku)`)
+                    .select(`*, produtos (nome, sku), usuarios (nome)`)
                     .order("criada_em", { ascending: false })
                     .limit(5);
+
+                const now = new Date();
+                const diasTimeline: { key: string; diaMes: string }[] = [];
+                for (let i = 13; i >= 0; i--) {
+                    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                    diasTimeline.push({
+                        key: getOperationalDateKey(d),
+                        diaMes: getOperationalDayMonth(d),
+                    });
+                }
+
+                const dataInicioKey = diasTimeline[0].key;
+                const dataInicioIso = new Date(`${dataInicioKey}T00:00:00-03:00`).toISOString();
+
+                const { data: movsFluxo } = await supabase
+                    .from("movimentacoes")
+                    .select("tipo, quantidade, criada_em")
+                    .gte("criada_em", dataInicioIso);
 
                 if (produtos) {
                     let valorTotal = 0;
                     const criticos: Produto[] = [];
+                    const categoriasMap = new Map<string, { valorTotal: number; quantidadeItens: number }>();
 
-                    produtos.forEach((p) => {
-                        valorTotal += p.quantidade * p.preco;
-                        if (p.quantidade <= p.estoque_minimo) {
+                    produtos.forEach((p: any) => {
+                        const qtd = Number(p.quantidade || 0);
+                        const preco = Number(p.preco || 0);
+                        const subtotal = qtd * preco;
+                        valorTotal += subtotal;
+
+                        if (qtd <= Number(p.estoque_minimo || 0)) {
                             criticos.push(p);
                         }
+
+                        const catNome =
+                            (Array.isArray(p.categorias) ? p.categorias[0]?.nome : p.categorias?.nome) ||
+                            "Sem categoria";
+                        const atual = categoriasMap.get(catNome) || { valorTotal: 0, quantidadeItens: 0 };
+                        categoriasMap.set(catNome, {
+                            valorTotal: atual.valorTotal + subtotal,
+                            quantidadeItens: atual.quantidadeItens + qtd,
+                        });
                     });
 
-                    const produtosComValor: ProdutoCurvaABC[] = produtos
-                        .map((p) => ({
-                            ...p,
-                            valorTotal: p.quantidade * p.preco,
-                            percentualTotal: 0,
-                            percentualAcumulado: 0,
-                            classe: "C" as "A" | "B" | "C",
+                    const categoriasAgrupadas: CategoriaDistribuicaoItem[] = Array.from(categoriasMap.entries())
+                        .map(([categoria, dados]) => ({
+                            categoria,
+                            valorTotal: dados.valorTotal,
+                            quantidadeItens: dados.quantidadeItens,
+                            percentual: valorTotal > 0 ? Number(((dados.valorTotal / valorTotal) * 100).toFixed(1)) : 0,
                         }))
                         .sort((a, b) => b.valorTotal - a.valorTotal);
-
-                    const totalValorEstoque = produtosComValor.reduce((acc, p) => acc + p.valorTotal, 0);
-
-                    let acumuladoPerc = 0;
-                    const contagem = { A: 0, B: 0, C: 0 };
-                    const valorPorClasse = { A: 0, B: 0, C: 0 };
-
-                    produtosComValor.forEach((p) => {
-                        const perc = totalValorEstoque > 0 ? (p.valorTotal / totalValorEstoque) * 100 : 0;
-                        const acumuladoAnterior = acumuladoPerc;
-                        acumuladoPerc += perc;
-                        p.percentualTotal = Number(perc.toFixed(1));
-                        p.percentualAcumulado = Number(acumuladoPerc.toFixed(1));
-
-                        if (acumuladoAnterior < 70 || contagem.A === 0) {
-                            p.classe = "A";
-                            contagem.A += 1;
-                            valorPorClasse.A += p.valorTotal;
-                        } else if (acumuladoAnterior < 90) {
-                            p.classe = "B";
-                            contagem.B += 1;
-                            valorPorClasse.B += p.valorTotal;
-                        } else {
-                            p.classe = "C";
-                            contagem.C += 1;
-                            valorPorClasse.C += p.valorTotal;
-                        }
-                    });
-
-                    const totalProds = produtosComValor.length;
-
-                    setCurvaABC({
-                        classes: {
-                            A: {
-                                classe: "A",
-                                titulo: "Classe A",
-                                qtdProdutos: contagem.A,
-                                percentualProdutos:
-                                    totalProds > 0 ? Number(((contagem.A / totalProds) * 100).toFixed(1)) : 0,
-                                valorTotal: valorPorClasse.A,
-                                percentualValor:
-                                    totalValorEstoque > 0
-                                        ? Number(((valorPorClasse.A / totalValorEstoque) * 100).toFixed(1))
-                                        : 0,
-                            },
-                            B: {
-                                classe: "B",
-                                titulo: "Classe B",
-                                qtdProdutos: contagem.B,
-                                percentualProdutos:
-                                    totalProds > 0 ? Number(((contagem.B / totalProds) * 100).toFixed(1)) : 0,
-                                valorTotal: valorPorClasse.B,
-                                percentualValor:
-                                    totalValorEstoque > 0
-                                        ? Number(((valorPorClasse.B / totalValorEstoque) * 100).toFixed(1))
-                                        : 0,
-                            },
-                            C: {
-                                classe: "C",
-                                titulo: "Classe C",
-                                qtdProdutos: contagem.C,
-                                percentualProdutos:
-                                    totalProds > 0 ? Number(((contagem.C / totalProds) * 100).toFixed(1)) : 0,
-                                valorTotal: valorPorClasse.C,
-                                percentualValor:
-                                    totalValorEstoque > 0
-                                        ? Number(((valorPorClasse.C / totalValorEstoque) * 100).toFixed(1))
-                                        : 0,
-                            },
-                        },
-                        produtosClassificados: produtosComValor,
-                        topItensClasseA: produtosComValor.filter((p) => p.classe === "A").slice(0, 5),
-                    });
-
-                    const criticosComABC = criticos.map((c) => {
-                        const classificado = produtosComValor.find((p) => p.id === c.id);
-                        return {
-                            ...c,
-                            classeABC: classificado?.classe || "C",
-                        };
-                    });
 
                     setMetricas({
                         valorTotal,
@@ -211,8 +123,36 @@ export function useDashboard() {
                         pedidosAbertos: pedidosCount || 0,
                     });
 
-                    setItensCriticos(criticosComABC);
+                    setItensCriticos(criticos);
+                    setDistribuicaoCategorias(categoriasAgrupadas);
                 }
+
+                const timelineMap = new Map<string, { diaMes: string; entradas: number; saidas: number }>();
+                diasTimeline.forEach((dia) => {
+                    timelineMap.set(dia.key, { diaMes: dia.diaMes, entradas: 0, saidas: 0 });
+                });
+
+                let totalMovsNoPeriodo = 0;
+                (movsFluxo || []).forEach((m: any) => {
+                    const chaveData = getOperationalDateKey(m.criada_em);
+                    const entry = timelineMap.get(chaveData);
+                    if (entry) {
+                        totalMovsNoPeriodo++;
+                        if (m.tipo === "entrada") entry.entradas += Number(m.quantidade || 0);
+                        if (m.tipo === "saida") entry.saidas += Number(m.quantidade || 0);
+                    }
+                });
+
+                setTemMovimentacoesNoPeriodo(totalMovsNoPeriodo > 0);
+
+                const fluxoFormatado: FluxoMovimentacaoItem[] = Array.from(timelineMap.entries()).map(([data, v]) => ({
+                    data,
+                    diaMes: v.diaMes,
+                    entradas: v.entradas,
+                    saidas: v.saidas,
+                }));
+
+                setFluxoMovimentacoes(fluxoFormatado);
 
                 if (movs) {
                     setMovimentacoesRecentes(movs as unknown as Movimentacao[]);
@@ -227,5 +167,14 @@ export function useDashboard() {
         fetchDashboardData();
     }, []);
 
-    return { loading, metricas, itensCriticos, movimentacoesRecentes, userName, curvaABC };
+    return {
+        loading,
+        metricas,
+        itensCriticos,
+        movimentacoesRecentes,
+        userName,
+        fluxoMovimentacoes,
+        temMovimentacoesNoPeriodo,
+        distribuicaoCategorias,
+    };
 }

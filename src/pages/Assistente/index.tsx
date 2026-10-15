@@ -1,10 +1,9 @@
 import { BookText, Loader2, Send, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { useAssistente } from "../../hooks/useAssistente";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 import styles from "./styles.module.css";
 
 const QUICK_PROMPTS = [
@@ -154,11 +153,7 @@ export function Assistente() {
                             <div key={msg.id} className={`${styles.messageWrapper} ${styles[msg.sender]}`}>
                                 <div className={styles.messageContentWrapper}>
                                     <div className={styles.messageBubble}>
-                                        {msg.sender === "ai" ? (
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
-                                        ) : (
-                                            msg.text
-                                        )}
+                                        {msg.sender === "ai" ? <MarkdownRenderer content={msg.text} /> : msg.text}
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +195,7 @@ export function Assistente() {
                             rows={1}
                         />
                         <button type="submit" className={styles.sendButton} disabled={!inputValue.trim() || isLoading}>
-                            {isLoading ? <Loader2 size={20} className={styles.spinner} /> : <Send size={20} />}
+                            {isLoading ? <Loader2 size={20} /> : <Send size={20} />}
                         </button>
                     </form>
                 </div>

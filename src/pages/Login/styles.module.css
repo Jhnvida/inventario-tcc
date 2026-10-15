@@ -141,8 +141,6 @@
     color: var(--color-text-primary);
 
     background: var(--color-bg-base);
-
-    transition: all var(--transition-fast);
 }
 
 .input_field:focus {
@@ -163,21 +161,21 @@
     .login_layout {
         flex-direction: column;
     }
-    
+
     .login_left {
         flex: 0 0 auto;
         padding: 40px 32px;
     }
-    
+
     .login_left_content h1 {
         font-size: 32px;
     }
-    
+
     .login_right {
         align-items: flex-start;
         padding: 32px;
     }
-    
+
     .login_box {
         padding: 0;
     }

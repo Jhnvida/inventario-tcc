@@ -1,5 +1,4 @@
 import { Plus, Search } from "lucide-react";
-import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
@@ -107,25 +106,9 @@ export function Movimentacoes() {
                                     <th>Data</th>
                                 </tr>
                             </thead>
-                            <motion.tbody
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: {
-                                        opacity: 1,
-                                        transition: { staggerChildren: 0.05 },
-                                    },
-                                }}
-                            >
+                            <tbody>
                                 {movimentacoes.map((mov) => (
-                                    <motion.tr
-                                        key={mov.id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 },
-                                        }}
-                                    >
+                                    <tr key={mov.id}>
                                         <td>
                                             <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
                                                 {mov.tipo === "entrada" ? "Entrada" : "Saída"}
@@ -140,9 +123,9 @@ export function Movimentacoes() {
                                         </td>
                                         <td>{mov.usuarios?.nome || mov.usuarios?.email || "Não identificado"}</td>
                                         <td className="text-secondary">{formatDate(mov.criada_em)}</td>
-                                    </motion.tr>
+                                    </tr>
                                 ))}
-                            </motion.tbody>
+                            </tbody>
                         </table>
 
                         <div className="mobile-cards-list mobile-only">

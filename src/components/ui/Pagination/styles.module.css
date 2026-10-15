@@ -39,8 +39,6 @@
     color: var(--color-text-primary);
 
     background-color: var(--color-bg-base);
-
-    transition: all var(--transition-fast);
 }
 
 .pagination_btn:disabled {

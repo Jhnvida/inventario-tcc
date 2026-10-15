@@ -1,5 +1,4 @@
 import { Edit2, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
 import { useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -85,25 +84,9 @@ export function Usuarios() {
                                     <th style={{ textAlign: "right" }}>Ações</th>
                                 </tr>
                             </thead>
-                            <motion.tbody
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: {
-                                        opacity: 1,
-                                        transition: { staggerChildren: 0.05 },
-                                    },
-                                }}
-                            >
+                            <tbody>
                                 {usuarios.map((user) => (
-                                    <motion.tr
-                                        key={user.id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 },
-                                        }}
-                                    >
+                                    <tr key={user.id}>
                                         <td>
                                             <div className="fw500">{user.nome}</div>
                                             <div className="text-secondary" style={{ fontSize: "0.85em" }}>
@@ -129,9 +112,9 @@ export function Usuarios() {
                                                 </Button>
                                             </div>
                                         </td>
-                                    </motion.tr>
+                                    </tr>
                                 ))}
-                            </motion.tbody>
+                            </tbody>
                         </table>
 
                         <div className="mobile-cards-list mobile-only">

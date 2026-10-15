@@ -63,8 +63,6 @@
     border-radius: var(--radius-md);
 
     color: var(--color-text-secondary);
-
-    transition: all var(--transition-fast);
 }
 
 .close_btn:hover {

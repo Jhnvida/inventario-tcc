@@ -1,5 +1,4 @@
 import { Edit, Plus, Power, Search, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -128,25 +127,9 @@ export function Clientes() {
                                     <th className="text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <motion.tbody
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: {
-                                        opacity: 1,
-                                        transition: { staggerChildren: 0.04 },
-                                    },
-                                }}
-                            >
+                            <tbody>
                                 {clientes.map((cliente) => (
-                                    <motion.tr
-                                        key={cliente.id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 },
-                                        }}
-                                    >
+                                    <tr key={cliente.id}>
                                         <td>
                                             <div className="fw600">{cliente.nome}</div>
                                             {cliente.email && (
@@ -207,9 +190,9 @@ export function Clientes() {
                                                 <Trash2 size={16} style={{ color: "var(--color-danger-text)" }} />
                                             </Button>
                                         </td>
-                                    </motion.tr>
+                                    </tr>
                                 ))}
-                            </motion.tbody>
+                            </tbody>
                         </table>
 
                         <div className="mobile-cards-list mobile-only">

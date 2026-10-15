@@ -1,5 +1,4 @@
 import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -110,25 +109,9 @@ export function PedidosVenda() {
                                     <th className="text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <motion.tbody
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: {
-                                        opacity: 1,
-                                        transition: { staggerChildren: 0.05 },
-                                    },
-                                }}
-                            >
+                            <tbody>
                                 {pedidos.map((pedido) => (
-                                    <motion.tr
-                                        key={pedido.id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 },
-                                        }}
-                                    >
+                                    <tr key={pedido.id}>
                                         <td className="text-monospace fw600">
                                             #{pedido.numero || pedido.id.slice(0, 8)}
                                         </td>
@@ -191,9 +174,9 @@ export function PedidosVenda() {
                                                 )}
                                             </div>
                                         </td>
-                                    </motion.tr>
+                                    </tr>
                                 ))}
-                            </motion.tbody>
+                            </tbody>
                         </table>
 
                         <div className="mobile-cards-list mobile-only">

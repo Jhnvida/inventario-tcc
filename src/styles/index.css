@@ -41,8 +41,6 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 5%), 0 2px 4px -2px rgb(0 0 0 / 5%);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 5%), 0 4px 6px -4px rgb(0 0 0 / 5%);
     --shadow-card: 0 0 0 1px rgb(0 0 0 / 5%), 0 2px 4px rgb(0 0 0 / 3%);
-    --transition-fast: 150ms ease-in-out;
-    --transition: 200ms ease-in-out;
 }
 
 *,
@@ -146,10 +144,6 @@ ul {
     letter-spacing: 0.05em;
 
     background-color: var(--color-bg-subtle);
-}
-
-.data-table tbody tr {
-    transition: background-color var(--transition-fast);
 }
 
 .data-table tbody tr:hover td {

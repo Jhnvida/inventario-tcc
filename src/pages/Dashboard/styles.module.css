@@ -95,8 +95,6 @@
     color: var(--color-primary);
 
     background-color: transparent;
-
-    transition: all 0.15s ease;
 }
 
 .section_header_link:hover {
@@ -133,8 +131,6 @@
     color: var(--color-primary);
 
     background-color: rgb(13 148 136 / 10%);
-
-    transition: all 0.15s ease;
 }
 
 .repor_btn:hover {
@@ -240,8 +236,6 @@
     color: var(--color-text-primary);
 
     background-color: var(--color-bg-surface);
-
-    transition: all 0.15s ease;
 }
 
 .analises_link_btn:hover {

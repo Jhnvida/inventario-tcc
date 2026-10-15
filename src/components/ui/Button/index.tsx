@@ -1,7 +1,7 @@
-import { motion, type HTMLMotionProps } from "motion/react";
+import { type ButtonHTMLAttributes } from "react";
 import styles from "./styles.module.css";
 
-interface ButtonProps extends HTMLMotionProps<"button"> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: "primary" | "secondary" | "danger" | "ghost";
     fullWidth?: boolean;
 }
@@ -12,8 +12,8 @@ export function Button({ children, variant = "primary", fullWidth = false, class
         .join(" ");
 
     return (
-        <motion.button className={btnClasses} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} {...props}>
+        <button className={btnClasses} {...props}>
             {children}
-        </motion.button>
+        </button>
     );
 }

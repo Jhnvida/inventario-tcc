@@ -23,8 +23,6 @@
     background-color: var(--color-bg-surface);
     outline: none;
     box-shadow: var(--shadow-sm);
-
-    transition: all var(--transition-fast);
 }
 
 .input:focus {

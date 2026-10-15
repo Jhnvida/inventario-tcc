@@ -20,10 +20,9 @@ Sistema web de gestão de inventário focado no controle de produtos, movimenta�
     - [TypeScript](https://www.typescriptlang.org/)
     - [Vite](https://vitejs.dev/)
     - [React Router DOM](https://reactrouter.com/) para rotas
-    - [Motion](https://motion.dev/) para animações e transições fluidas
-    - [CSS Modules](https://github.com/css-modules/css-modules) para estilização
+    - [CSS Modules](https://github.com/css-modules/css-modules) e CSS Keyframes para estilização e animações nativas
     - [Lucide React](https://lucide.dev/) para ícones
-    - [React Markdown](https://github.com/remarkjs/react-markdown) e [Remark GFM](https://github.com/remarkjs/remark-gfm) para formatação das mensagens da IA
+    - [React Markdown](https://github.com/remarkjs/react-markdown) para formatação das mensagens da IA
 - **Backend & Serviços:**
     - [Supabase](https://supabase.com/) (Autenticação, Banco de Dados PostgreSQL e Stored Procedures via RPCs)
 - **Inteligência Artificial:**

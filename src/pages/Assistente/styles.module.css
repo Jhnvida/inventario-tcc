@@ -92,8 +92,6 @@
     border-radius: 24px;
 
     background-color: var(--color-bg-base);
-
-    transition: all var(--transition-fast);
 }
 
 .inputArea:focus-within {
@@ -119,8 +117,6 @@
     color: var(--color-text-secondary);
 
     background-color: transparent;
-
-    transition: all var(--transition-fast);
 }
 
 .libraryButton:hover {
@@ -168,8 +164,6 @@
     color: white;
 
     background-color: var(--color-primary);
-
-    transition: all var(--transition-fast);
 }
 
 .sendButton:disabled {
@@ -180,18 +174,7 @@
 }
 
 .sendButton:hover:not(:disabled) {
-    transform: scale(1.05);
     background-color: var(--color-primary-hover);
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.spinner {
-    animation: spin 1s linear infinite;
 }
 
 .loadingBubble {
@@ -211,31 +194,8 @@
     height: 6px;
     border-radius: 50%;
 
+    opacity: 0.7;
     background-color: var(--color-text-muted);
-
-    animation: typing 1.4s infinite ease-in-out both;
-}
-
-.typingIndicator span:nth-child(1) {
-    animation-delay: -0.32s;
-}
-
-.typingIndicator span:nth-child(2) {
-    animation-delay: -0.16s;
-}
-
-@keyframes typing {
-    0%,
-    80%,
-    100% {
-        transform: scale(0);
-        opacity: 0.5;
-    }
-
-    40% {
-        transform: scale(1);
-        opacity: 1;
-    }
 }
 
 .emptyStateContainer {
@@ -287,12 +247,9 @@
     text-align: left;
 
     background-color: var(--color-bg-base);
-
-    transition: all var(--transition-fast);
 }
 
 .quickPromptBtn:hover {
-    transform: translateY(-2px);
     border-color: var(--color-primary);
     background-color: var(--color-bg-subtle);
     box-shadow: var(--shadow-sm);
@@ -347,8 +304,6 @@
     text-align: left;
 
     background-color: var(--color-bg-surface);
-
-    transition: all var(--transition-fast);
 }
 
 .libraryItem:hover {

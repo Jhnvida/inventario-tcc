@@ -13,8 +13,6 @@
     line-height: 1.2;
 
     outline: none;
-
-    transition: all var(--transition-fast);
 }
 
 .button:focus-visible {

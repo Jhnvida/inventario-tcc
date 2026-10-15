@@ -12,8 +12,6 @@
     color: var(--color-text-secondary);
 
     background: transparent;
-
-    transition: background-color 0.2s;
 }
 
 .action_btn:hover {

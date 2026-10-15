@@ -63,8 +63,6 @@
     color: var(--color-text-secondary);
 
     background-color: var(--color-bg-surface);
-
-    transition: all 0.2s ease;
 }
 
 .tipo_toggle_btn:hover {

@@ -7,7 +7,6 @@ import {
     Package,
     ShoppingCart,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
@@ -35,19 +34,8 @@ export function Dashboard() {
                 <div className="loading-state">Carregando métricas operacionais...</div>
             ) : (
                 <>
-                    <motion.div
-                        className={styles.metrics_grid}
-                        initial="hidden"
-                        animate="visible"
-                        variants={{
-                            hidden: { opacity: 0 },
-                            visible: {
-                                opacity: 1,
-                                transition: { staggerChildren: 0.08 },
-                            },
-                        }}
-                    >
-                        <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+                    <div className={styles.metrics_grid}>
+                        <div>
                             <Card className={styles.metric_card} padding="medium">
                                 <div className={styles.metric_header}>
                                     <h3>Valor Total do Estoque</h3>
@@ -55,9 +43,9 @@ export function Dashboard() {
                                 </div>
                                 <div className={styles.metric_value}>{formatCurrency(metricas.valorTotal)}</div>
                             </Card>
-                        </motion.div>
+                        </div>
 
-                        <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+                        <div>
                             <Card className={styles.metric_card} padding="medium">
                                 <div className={styles.metric_header}>
                                     <h3>Total de Produtos</h3>
@@ -65,9 +53,9 @@ export function Dashboard() {
                                 </div>
                                 <div className={styles.metric_value}>{metricas.totalProdutos}</div>
                             </Card>
-                        </motion.div>
+                        </div>
 
-                        <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+                        <div>
                             <Card className={styles.metric_card} padding="medium">
                                 <div className={styles.metric_header}>
                                     <h3>Estoque Crítico</h3>
@@ -92,9 +80,9 @@ export function Dashboard() {
                                     {metricas.estoqueCritico}
                                 </div>
                             </Card>
-                        </motion.div>
+                        </div>
 
-                        <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+                        <div>
                             <Card className={styles.metric_card} padding="medium">
                                 <div className={styles.metric_header}>
                                     <h3>Pedidos em Aberto</h3>
@@ -102,8 +90,8 @@ export function Dashboard() {
                                 </div>
                                 <div className={styles.metric_value}>{metricas.pedidosAbertos}</div>
                             </Card>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
 
                     <div className={styles.critical_section}>
                         <div className={styles.section_header}>

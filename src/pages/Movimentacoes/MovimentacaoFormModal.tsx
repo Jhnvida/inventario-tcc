@@ -1,3 +1,4 @@
+import { AlertCircle, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -6,7 +7,6 @@ import { Select } from "../../components/ui/Select";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import type { Produto } from "../../types";
-import styles from "./styles.module.css";
 
 interface MovimentacaoFormModalProps {
     isOpen: boolean;
@@ -59,6 +59,18 @@ export function MovimentacaoFormModal({
         setLoading(true);
         setError("");
 
+        if (!formData.produto_id) {
+            setError("Selecione um produto.");
+            setLoading(false);
+            return;
+        }
+
+        if (formData.quantidade <= 0) {
+            setError("A quantidade deve ser maior que zero.");
+            setLoading(false);
+            return;
+        }
+
         const res = await createMovimentacao({
             produto_id: formData.produto_id,
             tipo: formData.tipo,
@@ -79,55 +91,79 @@ export function MovimentacaoFormModal({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Nova Movimentação Manual" width="medium">
-            <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && <div className="alert-error">{error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <AlertCircle size={15} className="shrink-0 text-red-600" />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-700">Tipo de Operação *</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                                formData.tipo === "entrada"
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                            }`}
+                            onClick={() => setFormData((prev) => ({ ...prev, tipo: "entrada" }))}
+                        >
+                            <ArrowUpRight size={15} />
+                            <span>Entrada (+ Estoque)</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                                formData.tipo === "saida"
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                            }`}
+                            onClick={() => setFormData((prev) => ({ ...prev, tipo: "saida" }))}
+                        >
+                            <ArrowDownRight size={15} />
+                            <span>Saída (- Estoque)</span>
+                        </button>
+                    </div>
+                </div>
 
                 <Select label="Produto" name="produto_id" value={formData.produto_id} onChange={handleChange} required>
                     <option value="">Selecione um produto...</option>
                     {produtos.map((p) => (
                         <option key={p.id} value={p.id}>
-                            {p.nome} ({p.sku})
+                            {p.nome} ({p.sku}) — Atual: {p.quantidade} un
                         </option>
                     ))}
                 </Select>
 
-                <div className={styles.grid2}>
-                    <Select
-                        label="Tipo de Movimentação"
-                        name="tipo"
-                        value={formData.tipo}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="entrada">Entrada</option>
-                        <option value="saida">Saída</option>
-                    </Select>
-
-                    <Input
-                        label="Quantidade"
-                        name="quantidade"
-                        type="number"
-                        min="1"
-                        value={formData.quantidade}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                <Input
+                    label="Quantidade Movimentada"
+                    name="quantidade"
+                    type="number"
+                    min="1"
+                    placeholder="Ex: 10"
+                    value={formData.quantidade || ""}
+                    onChange={handleChange}
+                    required
+                />
 
                 <Input
-                    label="Motivo (Opcional)"
+                    label="Motivo ou Justificativa (Opcional)"
                     name="motivo"
                     value={formData.motivo}
                     onChange={handleChange}
-                    placeholder="Ex: Ajuste de inventário, Devolução..."
+                    placeholder="Ex: Ajuste de inventário, reposição crítica, devolução..."
                 />
 
-                <div className={styles.form_actions}>
-                    <Button type="button" variant="ghost" onClick={onClose}>
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <Button type="button" variant="secondary" onClick={onClose}>
                         Cancelar
                     </Button>
                     <Button type="submit" variant="primary" disabled={loading}>
-                        {loading ? "Registrando..." : "Registrar Movimentação"}
+                        {loading ? "Registrando..." : "Confirmar Movimentação"}
                     </Button>
                 </div>
             </form>

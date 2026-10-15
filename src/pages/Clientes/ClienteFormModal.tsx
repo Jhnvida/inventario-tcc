@@ -1,4 +1,4 @@
-import { Building2, User } from "lucide-react";
+import { AlertCircle, Building2, User } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -7,7 +7,6 @@ import { useClientes } from "../../hooks/useClientes";
 import type { Cliente } from "../../types";
 import { formatCNPJ, formatCPF, formatTelefone, stripFormatting } from "../../utils/formatters";
 import { validarCNPJ, validarCPF } from "../../utils/validators";
-import styles from "./styles.module.css";
 
 interface ClienteFormModalProps {
     isOpen: boolean;
@@ -103,35 +102,24 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
             return;
         }
 
-        const docLimpo = stripFormatting(formData.documento);
-        if (docLimpo) {
-            if (tipoPessoa === "PF") {
-                if (!validarCPF(docLimpo)) {
-                    setError("CPF inválido. Verifique os 11 dígitos informados.");
-                    return;
-                }
-            } else {
-                if (!validarCNPJ(docLimpo)) {
-                    setError("CNPJ inválido. Verifique os 14 dígitos informados.");
-                    return;
-                }
+        const cleanDoc = stripFormatting(formData.documento);
+        if (cleanDoc) {
+            if (tipoPessoa === "PF" && !validarCPF(cleanDoc)) {
+                setError("O CPF informado é inválido. Verifique os dígitos digitados.");
+                return;
             }
-        }
-
-        if (formData.email.trim()) {
-            const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
-            if (!emailValido) {
-                setError("Informe um endereço de e-mail válido.");
+            if (tipoPessoa === "PJ" && !validarCNPJ(cleanDoc)) {
+                setError("O CNPJ informado é inválido. Verifique os dígitos digitados.");
                 return;
             }
         }
 
         setLoading(true);
 
-        const payload: Partial<Cliente> = {
+        const payload = {
             nome: formData.nome.trim(),
             tipo_pessoa: tipoPessoa,
-            documento: docLimpo || null,
+            documento: cleanDoc || null,
             email: formData.email.trim() || null,
             telefone: stripFormatting(formData.telefone) || null,
             cidade: formData.cidade.trim() || null,
@@ -151,101 +139,127 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Editar Cliente" : "Novo Cliente"} width="medium">
-            <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && <div className="alert-error">{error}</div>}
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={isEditing ? `Editar Cliente: ${clienteToEdit.nome}` : "Novo Cliente"}
+            width="large"
+        >
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <AlertCircle size={15} className="shrink-0 text-red-600" />
+                        <span>{error}</span>
+                    </div>
+                )}
 
-                <div className={styles.tipo_toggle_container}>
-                    <span className={styles.tipo_toggle_label}>Tipo de Cadastro</span>
-                    <div className={styles.tipo_toggle_group}>
+                <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-700">Classificação Cadastral *</label>
+                    <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
-                            className={`${styles.tipo_toggle_btn} ${tipoPessoa === "PF" ? styles.tipo_toggle_btn_active : ""}`}
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                                tipoPessoa === "PF"
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                            }`}
                             onClick={() => handleTipoPessoaChange("PF")}
                         >
-                            <User size={16} />
-                            Pessoa Física
+                            <User size={15} />
+                            <span>Pessoa Física (CPF)</span>
                         </button>
+
                         <button
                             type="button"
-                            className={`${styles.tipo_toggle_btn} ${tipoPessoa === "PJ" ? styles.tipo_toggle_btn_active : ""}`}
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                                tipoPessoa === "PJ"
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                            }`}
                             onClick={() => handleTipoPessoaChange("PJ")}
                         >
-                            <Building2 size={16} />
-                            Pessoa Jurídica
+                            <Building2 size={15} />
+                            <span>Pessoa Jurídica (CNPJ)</span>
                         </button>
                     </div>
                 </div>
 
-                <Input
-                    label={tipoPessoa === "PF" ? "Nome Completo *" : "Razão Social / Nome Fantasia *"}
-                    name="nome"
-                    value={formData.nome}
-                    onChange={handleChange}
-                    placeholder={tipoPessoa === "PF" ? "Ex: João da Silva" : "Ex: Comércio e Serviços LTDA"}
-                    required
-                />
-
-                <div className={styles.grid2}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label={tipoPessoa === "PF" ? "CPF" : "CNPJ"}
+                        label={tipoPessoa === "PJ" ? "Razão Social ou Nome Empresarial" : "Nome Completo"}
+                        name="nome"
+                        placeholder={tipoPessoa === "PJ" ? "Ex: Tech Solutions Ltda" : "Ex: Maria dos Santos"}
+                        value={formData.nome}
+                        onChange={handleChange}
+                        required
+                    />
+
+                    <Input
+                        label={tipoPessoa === "PJ" ? "CNPJ" : "CPF"}
                         name="documento"
+                        placeholder={tipoPessoa === "PJ" ? "00.000.000/0000-00" : "000.000.000-00"}
                         value={formData.documento}
                         onChange={handleChange}
-                        placeholder={tipoPessoa === "PF" ? "000.000.000-00" : "00.000.000/0000-00"}
-                    />
-                    <Input
-                        label="Telefone / Celular"
-                        name="telefone"
-                        value={formData.telefone}
-                        onChange={handleChange}
-                        placeholder="(00) 00000-0000"
                     />
                 </div>
 
-                <Input
-                    label="E-mail"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="cliente@exemplo.com"
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                        label="E-mail de Contato"
+                        name="email"
+                        type="email"
+                        placeholder="cliente@empresa.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                    />
 
-                <div className={styles.grid3}>
                     <Input
-                        label="Cidade"
-                        name="cidade"
-                        value={formData.cidade}
+                        label="Telefone / WhatsApp"
+                        name="telefone"
+                        placeholder="(00) 00000-0000"
+                        value={formData.telefone}
                         onChange={handleChange}
-                        placeholder="Ex: São Paulo"
                     />
-                    <Input
-                        label="Estado (UF)"
-                        name="estado"
-                        value={formData.estado}
-                        onChange={handleChange}
-                        placeholder="SP"
-                        maxLength={2}
-                    />
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-                        <div className={styles.checkbox_wrapper}>
-                            <input
-                                type="checkbox"
-                                id="cliente_ativo_checkbox"
-                                name="ativo"
-                                checked={formData.ativo}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="cliente_ativo_checkbox" className={styles.checkbox_label}>
-                                Cliente Ativo
-                            </label>
-                        </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                        <Input
+                            label="Cidade"
+                            name="cidade"
+                            placeholder="Ex: Ribeirão Preto"
+                            value={formData.cidade}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div>
+                        <Input
+                            label="Estado (UF)"
+                            name="estado"
+                            placeholder="SP"
+                            maxLength={2}
+                            value={formData.estado}
+                            onChange={handleChange}
+                        />
                     </div>
                 </div>
 
-                <div className={styles.form_actions}>
-                    <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+                <div className="flex items-center gap-2 pt-2">
+                    <input
+                        type="checkbox"
+                        id="cliente-ativo"
+                        name="ativo"
+                        checked={formData.ativo}
+                        onChange={handleChange}
+                        className="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <label htmlFor="cliente-ativo" className="text-sm font-medium text-slate-700 cursor-pointer">
+                        Cliente ativo para emissão de novos pedidos de venda
+                    </label>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <Button type="button" variant="secondary" onClick={onClose}>
                         Cancelar
                     </Button>
                     <Button type="submit" variant="primary" disabled={loading}>

@@ -1,12 +1,13 @@
-import { Edit2, Trash2 } from "lucide-react";
+import { AlertCircle, Edit2, Trash2, UserCog } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
+import { Skeleton } from "../../components/ui/Skeleton";
 import { useUsuarios, type Usuario } from "../../hooks/useUsuarios";
-import styles from "./styles.module.css";
 
 export function Usuarios() {
     const {
@@ -67,84 +68,87 @@ export function Usuarios() {
     }
 
     return (
-        <div className="page-container">
-            <PageHeader title="Gestão de Usuários" subtitle="Gerencie as informações dos usuários do sistema." />
+        <div className="space-y-6">
+            <PageHeader
+                title="Gestão de Usuários"
+                subtitle="Controle de operadores, administradores e dados de acesso ao sistema."
+            />
 
-            <div className="table-container">
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                 {loading ? (
-                    <div className="loading-state">Carregando usuários...</div>
+                    <div className="p-6 space-y-3">
+                        <Skeleton className="w-full h-10" />
+                        <Skeleton className="w-full h-10" />
+                        <Skeleton className="w-full h-10" />
+                    </div>
                 ) : usuarios.length === 0 ? (
-                    <div className="empty-state">Nenhum usuário encontrado.</div>
+                    <EmptyState
+                        icon={UserCog}
+                        title="Nenhum usuário localizado"
+                        description="Os usuários são criados a partir do serviço de autenticação do Supabase."
+                    />
                 ) : (
                     <>
-                        <table className="data-table hidden-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th style={{ textAlign: "right" }}>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {usuarios.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            <div className="fw500">{user.nome}</div>
-                                            <div className="text-secondary" style={{ fontSize: "0.85em" }}>
-                                                {user.email}
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: "right" }}>
-                                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => handleOpenEdit(user)}
-                                                    title="Editar Usuário"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => handleDelete(user.id, user.nome)}
-                                                    title="Excluir Usuário"
-                                                    style={{ color: "var(--color-danger-text)" }}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </div>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
+                                    <tr>
+                                        <th className="px-4 py-3">Operador & Identificação</th>
+                                        <th className="px-4 py-3">E-mail de Acesso</th>
+                                        <th className="px-4 py-3 text-right">Ações</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mobile-cards-list mobile-only">
-                            {usuarios.map((user) => (
-                                <div key={user.id} className="mobile-card">
-                                    <div className="mobile-card-header">
-                                        <div>
-                                            <div className="mobile-card-title">{user.nome}</div>
-                                            <div className="mobile-card-subtitle">{user.email}</div>
-                                        </div>
-                                    </div>
-                                    <div className="mobile-card-actions">
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => handleOpenEdit(user)}
-                                            title="Editar Usuário"
-                                        >
-                                            <Edit2 size={16} />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => handleDelete(user.id, user.nome)}
-                                            title="Excluir Usuário"
-                                            style={{ color: "var(--color-danger-text)" }}
-                                        >
-                                            <Trash2 size={16} />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {usuarios.map((user) => {
+                                        const initials = user.nome
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .slice(0, 2)
+                                            .join("")
+                                            .toUpperCase();
+                                        return (
+                                            <tr key={user.id} className="hover:bg-slate-50/60 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-medium text-xs flex items-center justify-center shrink-0">
+                                                            {initials || "U"}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-slate-900">
+                                                                {user.nome}
+                                                            </div>
+                                                            <span className="font-mono text-[11px] text-slate-400">
+                                                                ID: {user.id.substring(0, 8)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-600">{user.email}</td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <button
+                                                            type="button"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                            onClick={() => handleOpenEdit(user)}
+                                                            title="Editar nome do operador"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                            onClick={() => handleDelete(user.id, user.nome)}
+                                                            title="Excluir operador"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
 
                         <Pagination
@@ -161,43 +165,35 @@ export function Usuarios() {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => !isSubmitting && setIsModalOpen(false)}
-                title="Editar Usuário"
+                onClose={() => setIsModalOpen(false)}
+                title="Editar Nome do Operador"
                 width="small"
             >
-                {selectedUser && (
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <div className={styles.user_details}>
-                            <p>
-                                <strong>Email:</strong> {selectedUser.email}
-                            </p>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && (
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                            <AlertCircle size={15} className="shrink-0" />
+                            <span>{error}</span>
                         </div>
+                    )}
 
-                        <Input
-                            label="Nome"
-                            value={nome}
-                            onChange={(e) => setNome(e.target.value)}
-                            disabled={isSubmitting}
-                            autoFocus
-                        />
+                    <Input
+                        label="Nome Completo"
+                        value={nome}
+                        onChange={(e) => setNome(e.target.value)}
+                        required
+                        autoFocus
+                    />
 
-                        {error && <div className="alert-error">{error}</div>}
-
-                        <div className={styles.form_actions}>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setIsModalOpen(false)}
-                                disabled={isSubmitting}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? "Salvando..." : "Salvar Alterações"}
-                            </Button>
-                        </div>
-                    </form>
-                )}
+                    <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">
+                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit" variant="primary" disabled={isSubmitting}>
+                            {isSubmitting ? "Salvando..." : "Atualizar Nome"}
+                        </Button>
+                    </div>
+                </form>
             </Modal>
         </div>
     );

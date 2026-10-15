@@ -1,10 +1,10 @@
-import { BookText, Loader2, Send, Trash2 } from "lucide-react";
+import { ArrowRight, BookText, Bot, Loader2, Send, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { Button } from "../../components/ui/Button";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { useAssistente } from "../../hooks/useAssistente";
 import { MarkdownRenderer } from "./MarkdownRenderer";
-import styles from "./styles.module.css";
 
 const QUICK_PROMPTS = [
     "Qual é a previsão de esgotamento dos produtos com estoque baixo?",
@@ -109,39 +109,50 @@ export function Assistente() {
     const isInitialState = messages.length === 1 && messages[0].id === "initial";
 
     return (
-        <div className="page-container" style={{ height: "100%", overflow: "hidden" }}>
+        <div className="flex h-[calc(100vh-7rem)] flex-col">
             <PageHeader
-                title="Assistente"
-                subtitle="Consulte e interaja com os dados do seu inventário utilizando inteligência artificial."
+                title="Assistente de Gestão"
+                subtitle="Consulte indicadores, estoque crítico e histórico de movimentações com linguagem natural."
             >
                 {!isInitialState && (
-                    <button
-                        className="btn btn-secondary"
+                    <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={clearMessages}
-                        title="Limpar conversa"
-                        style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                        title="Limpar histórico da conversa"
+                        className="text-xs text-slate-600 hover:text-red-600 hover:border-red-200"
                     >
-                        <Trash2 size={16} />
-                        Limpar Histórico
-                    </button>
+                        <Trash2 size={16} className="text-slate-400 group-hover:text-red-500" />
+                        <span>Limpar Histórico</span>
+                    </Button>
                 )}
             </PageHeader>
 
-            <div className={styles.chatWrapper}>
-                <div className={styles.messagesContainer}>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/40">
                     {isInitialState && (
-                        <div className={styles.emptyStateContainer}>
-                            <h3>Como posso ajudar hoje?</h3>
-                            <p>Selecione uma sugestão ou digite sua pergunta abaixo.</p>
+                        <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center py-8 text-center">
+                            <h3 className="text-base font-semibold text-slate-900">
+                                Como posso ajudar com o estoque hoje?
+                            </h3>
+                            <p className="mt-1 text-xs text-slate-500 max-w-md">
+                                Escolha uma consulta frequente abaixo ou digite sua pergunta para verificação em tempo
+                                real.
+                            </p>
 
-                            <div className={styles.quickPrompts}>
+                            <div className="mt-5 w-full space-y-2">
                                 {QUICK_PROMPTS.map((prompt, idx) => (
                                     <button
                                         key={idx}
-                                        className={styles.quickPromptBtn}
+                                        type="button"
                                         onClick={() => handleQuickPrompt(prompt)}
+                                        className="group flex w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3.5 py-2.5 text-left text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
                                     >
-                                        {prompt}
+                                        <span>{prompt}</span>
+                                        <ArrowRight
+                                            size={15}
+                                            className="text-slate-400 group-hover:text-slate-700 shrink-0 ml-2 transition-transform"
+                                        />
                                     </button>
                                 ))}
                             </div>
@@ -149,81 +160,121 @@ export function Assistente() {
                     )}
 
                     {!isInitialState &&
-                        messages.map((msg) => (
-                            <div key={msg.id} className={`${styles.messageWrapper} ${styles[msg.sender]}`}>
-                                <div className={styles.messageContentWrapper}>
-                                    <div className={styles.messageBubble}>
-                                        {msg.sender === "ai" ? <MarkdownRenderer content={msg.text} /> : msg.text}
+                        messages.map((msg) => {
+                            const isAi = msg.sender === "ai";
+                            return (
+                                <div
+                                    key={msg.id}
+                                    className={`flex items-start gap-2.5 ${isAi ? "justify-start" : "justify-end"}`}
+                                >
+                                    {isAi && (
+                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 border border-slate-200 text-slate-600 mt-0.5">
+                                            <Bot className="h-3.5 w-3.5" />
+                                        </div>
+                                    )}
+
+                                    <div
+                                        className={`flex flex-col ${isAi ? "items-start max-w-[90%] sm:max-w-2xl" : "items-end max-w-[85%] sm:max-w-xl"}`}
+                                    >
+                                        <div
+                                            className={`rounded-lg px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${
+                                                isAi
+                                                    ? "border border-slate-200 bg-white text-slate-800"
+                                                    : "bg-slate-900 text-white font-normal"
+                                            }`}
+                                        >
+                                            {isAi ? (
+                                                <MarkdownRenderer content={msg.text} />
+                                            ) : (
+                                                <p className="whitespace-pre-wrap">{msg.text}</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
 
                     {isLoading && messages[messages.length - 1]?.sender === "user" && (
-                        <div className={`${styles.messageWrapper} ${styles.ai}`}>
-                            <div className={`${styles.messageBubble} ${styles.loadingBubble}`}>
-                                <div className={styles.typingIndicator}>
-                                    <span />
-                                    <span />
-                                    <span />
-                                </div>
+                        <div className="flex items-start gap-2.5 justify-start">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 border border-slate-200 text-slate-600 mt-0.5">
+                                <Bot className="h-3.5 w-3.5" />
+                            </div>
+                            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-normal text-slate-500">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-700" />
+                                <span>Consultando inventário e gerando resposta...</span>
                             </div>
                         </div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className={styles.inputContainer}>
-                    <form className={styles.inputArea} onSubmit={handleSend}>
+                <div className="border-t border-slate-200 bg-white p-3">
+                    <form
+                        onSubmit={handleSend}
+                        className="flex items-end gap-1.5 rounded-md border border-slate-300 bg-white p-1.5 focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all"
+                    >
                         <button
                             type="button"
-                            className={styles.libraryButton}
                             onClick={() => setIsLibraryOpen(true)}
-                            title="Biblioteca"
+                            title="Abrir Biblioteca de Consultas"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                         >
-                            <BookText size={20} />
+                            <BookText size={16} />
                         </button>
 
                         <textarea
                             ref={textareaRef}
-                            placeholder="Faça uma pergunta sobre o estoque..."
-                            className={styles.textarea}
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
                             disabled={isLoading}
+                            placeholder="Faça uma pergunta sobre o inventário, estoque crítico, movimentações..."
                             rows={1}
+                            className="max-h-36 flex-1 resize-none bg-transparent px-2 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
                         />
-                        <button type="submit" className={styles.sendButton} disabled={!inputValue.trim() || isLoading}>
-                            {isLoading ? <Loader2 size={20} /> : <Send size={20} />}
+
+                        <button
+                            type="submit"
+                            disabled={!inputValue.trim() || isLoading}
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 transition-colors cursor-pointer"
+                        >
+                            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={15} />}
                         </button>
                     </form>
                 </div>
             </div>
 
-            <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title="Biblioteca">
-                <div className={styles.libraryContainer}>
-                    <p className={styles.libraryDesc}>
-                        Selecione uma consulta para preencher o campo de mensagem e enviar ao assistente.
+            <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title="Biblioteca de Consultas">
+                <div className="space-y-4">
+                    <p className="text-xs text-slate-500">
+                        Selecione um prompt pré-configurado para preencher a pergunta no assistente:
                     </p>
 
-                    {PROMPT_LIBRARY.map((category, idx) => (
-                        <div key={idx} className={styles.libraryCategory}>
-                            <h4>{category.category}</h4>
-                            <div className={styles.libraryList}>
-                                {category.prompts.map((prompt, pIdx) => (
-                                    <button
-                                        key={pIdx}
-                                        type="button"
-                                        className={styles.libraryItem}
-                                        onClick={() => handleSelectPrompt(prompt)}
-                                    >
-                                        {prompt}
-                                    </button>
-                                ))}
+                    <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+                        {PROMPT_LIBRARY.map((category, idx) => (
+                            <div key={idx} className="space-y-1.5">
+                                <h4 className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                                    {category.category}
+                                </h4>
+                                <div className="space-y-1">
+                                    {category.prompts.map((prompt, pIdx) => (
+                                        <button
+                                            key={pIdx}
+                                            type="button"
+                                            onClick={() => handleSelectPrompt(prompt)}
+                                            className="group flex w-full items-center justify-between rounded-md border border-slate-200 bg-white p-2.5 text-left text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
+                                        >
+                                            <span>{prompt}</span>
+                                            <ArrowRight
+                                                size={15}
+                                                className="text-slate-400 group-hover:text-slate-700 shrink-0 ml-2"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </Modal>
         </div>

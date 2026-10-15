@@ -1,16 +1,17 @@
-import { Edit, Plus, Power, Search, Trash2 } from "lucide-react";
+import { Edit2, Plus, Power, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
+import { Skeleton } from "../../components/ui/Skeleton";
 import { useClientes, type FiltroStatusCliente, type FiltroTipoCliente } from "../../hooks/useClientes";
 import type { Cliente } from "../../types";
 import { formatDocumento, formatTelefone } from "../../utils/formatters";
 import { ClienteFormModal } from "./ClienteFormModal";
-import styles from "./styles.module.css";
 
 export function Clientes() {
     const {
@@ -69,208 +70,201 @@ export function Clientes() {
     }
 
     return (
-        <div className="page-container">
-            <PageHeader title="Clientes" subtitle="Gerencie sua carteira de clientes, dados cadastrais e situação.">
+        <div className="space-y-6">
+            <PageHeader
+                title="Carteira de Clientes"
+                subtitle="Gerencie os dados cadastrais, situação contratual e contatos de clientes PF e PJ."
+            >
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} style={{ marginRight: 8 }} />
-                    Novo Cliente
+                    <Plus size={18} />
+                    <span>Novo Cliente</span>
                 </Button>
             </PageHeader>
 
-            <div className={styles.filters_row}>
-                <div className={`search-wrapper ${styles.search_field}`}>
-                    <Search size={18} className="search-icon" />
+            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="relative sm:col-span-6">
+                    <Search
+                        size={15}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                    />
                     <Input
                         placeholder="Buscar por nome, documento, e-mail ou cidade..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="search-input"
+                        className="pl-8.5!"
                     />
                 </div>
-
-                <div className={styles.select_filter}>
-                    <Select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as FiltroTipoCliente)}>
-                        <option value="todos">Todos os tipos</option>
-                        <option value="PF">Pessoa Física</option>
-                        <option value="PJ">Pessoa Jurídica</option>
-                    </Select>
-                </div>
-
-                <div className={styles.select_filter}>
+                <div className="sm:col-span-3">
                     <Select
                         value={filtroStatus}
                         onChange={(e) => setFiltroStatus(e.target.value as FiltroStatusCliente)}
                     >
-                        <option value="todos">Todas as situações</option>
+                        <option value="todos">Todos os status</option>
                         <option value="ativos">Apenas Ativos</option>
                         <option value="inativos">Apenas Inativos</option>
                     </Select>
                 </div>
+                <div className="sm:col-span-3">
+                    <Select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as FiltroTipoCliente)}>
+                        <option value="todos">Pessoa Física e Jurídica</option>
+                        <option value="PF">Pessoa Física (PF)</option>
+                        <option value="PJ">Pessoa Jurídica (PJ)</option>
+                    </Select>
+                </div>
             </div>
 
-            <div className="table-container">
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                 {loading ? (
-                    <div className="loading-state">Carregando clientes...</div>
+                    <div className="p-6 space-y-3">
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                    </div>
                 ) : clientes.length === 0 ? (
-                    <div className="empty-state">Nenhum cliente encontrado.</div>
+                    <EmptyState
+                        title="Nenhum cliente encontrado"
+                        description={
+                            busca || filtroStatus !== "todos" || filtroTipo !== "todos"
+                                ? "Tente alterar os termos ou filtros de pesquisa."
+                                : "Cadastre o primeiro cliente da sua base comercial."
+                        }
+                        action={
+                            !busca && filtroStatus === "todos" && filtroTipo === "todos" ? (
+                                <Button size="sm" onClick={handleOpenCreate}>
+                                    <Plus size={16} />
+                                    <span>Cadastrar Cliente</span>
+                                </Button>
+                            ) : undefined
+                        }
+                    />
                 ) : (
                     <>
-                        <table className="data-table hidden-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Nome / Razão Social</th>
-                                    <th className="text-center">Tipo</th>
-                                    <th>CPF / CNPJ</th>
-                                    <th>Contato</th>
-                                    <th>Localização</th>
-                                    <th className="text-center">Situação</th>
-                                    <th className="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {clientes.map((cliente) => (
-                                    <tr key={cliente.id}>
-                                        <td>
-                                            <div className="fw600">{cliente.nome}</div>
-                                            {cliente.email && (
-                                                <div className={styles.text_secondary}>{cliente.email}</div>
-                                            )}
-                                        </td>
-                                        <td className="text-center">
-                                            <Badge variant={cliente.tipo_pessoa === "PJ" ? "draft" : "neutral"}>
-                                                {cliente.tipo_pessoa === "PJ" ? "PJ" : "PF"}
-                                            </Badge>
-                                        </td>
-                                        <td className="text-monospace">
-                                            {formatDocumento(cliente.documento, cliente.tipo_pessoa)}
-                                        </td>
-                                        <td>{cliente.telefone ? formatTelefone(cliente.telefone) : "-"}</td>
-                                        <td>
-                                            {cliente.cidade || cliente.estado ? (
-                                                <span>
-                                                    {cliente.cidade || "-"}
-                                                    {cliente.estado ? ` / ${cliente.estado}` : ""}
-                                                </span>
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </td>
-                                        <td className="text-center">
-                                            <Badge variant={cliente.ativo ? "success" : "critical"}>
-                                                {cliente.ativo ? "Ativo" : "Inativo"}
-                                            </Badge>
-                                        </td>
-                                        <td className={styles.actions_cell}>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleOpenEdit(cliente)}
-                                                title="Editar Cliente"
-                                            >
-                                                <Edit size={16} />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleToggleStatus(cliente)}
-                                                title={cliente.ativo ? "Inativar Cliente" : "Ativar Cliente"}
-                                            >
-                                                <Power
-                                                    size={16}
-                                                    style={{
-                                                        color: cliente.ativo
-                                                            ? "var(--color-warning-text, #f59e0b)"
-                                                            : "var(--color-success-text)",
-                                                    }}
-                                                />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleDelete(cliente)}
-                                                title="Excluir Cliente"
-                                            >
-                                                <Trash2 size={16} style={{ color: "var(--color-danger-text)" }} />
-                                            </Button>
-                                        </td>
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
+                                    <tr>
+                                        <th className="px-5 py-2.5">Cliente</th>
+                                        <th className="px-5 py-2.5">Documento</th>
+                                        <th className="px-5 py-2.5">Contato</th>
+                                        <th className="px-5 py-2.5">Cidade / UF</th>
+                                        <th className="px-5 py-2.5 text-center">Situação</th>
+                                        <th className="px-5 py-2.5 text-center">Ações</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mobile-cards-list mobile-only">
-                            {clientes.map((cliente) => (
-                                <div key={cliente.id} className="mobile-card">
-                                    <div className="mobile-card-header">
-                                        <div>
-                                            <div className="mobile-card-title">{cliente.nome}</div>
-                                            <div className="mobile-card-subtitle">
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {clientes.map((cliente) => (
+                                        <tr key={cliente.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <td className="px-5 py-3">
+                                                <div className="font-medium text-slate-900">{cliente.nome}</div>
+                                                <span className="text-[11px] text-slate-400">
+                                                    {cliente.tipo_pessoa === "PJ" ? "Pessoa Jurídica" : "Pessoa Física"}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3 font-mono text-slate-500">
                                                 {formatDocumento(cliente.documento, cliente.tipo_pessoa)}
-                                            </div>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <div className="text-slate-900 font-medium">
+                                                    {formatTelefone(cliente.telefone) || "-"}
+                                                </div>
+                                                {cliente.email && (
+                                                    <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-45">
+                                                        {cliente.email}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="px-5 py-3 text-slate-600">
+                                                {cliente.cidade ? `${cliente.cidade}/${cliente.estado || ""}` : "-"}
+                                            </td>
+                                            <td className="px-5 py-3 text-center">
+                                                <Badge variant={cliente.ativo ? "success" : "neutral"}>
+                                                    {cliente.ativo ? "Ativo" : "Inativo"}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                        onClick={() => handleOpenEdit(cliente)}
+                                                        title="Editar cliente"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                                                            cliente.ativo
+                                                                ? "text-slate-400 hover:text-amber-600 hover:bg-amber-50"
+                                                                : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                                                        }`}
+                                                        onClick={() => handleToggleStatus(cliente)}
+                                                        title={cliente.ativo ? "Inativar cliente" : "Ativar cliente"}
+                                                    >
+                                                        <Power size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                        onClick={() => handleDelete(cliente)}
+                                                        title="Excluir cliente"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {clientes.map((cliente) => (
+                                <div key={cliente.id} className="p-4 space-y-2.5">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                            <h4 className="font-medium text-slate-900 text-sm">{cliente.nome}</h4>
+                                            <span className="font-mono text-xs text-slate-500">
+                                                {formatDocumento(cliente.documento, cliente.tipo_pessoa)}
+                                            </span>
                                         </div>
-                                        <Badge variant={cliente.ativo ? "success" : "critical"}>
+                                        <Badge variant={cliente.ativo ? "success" : "neutral"}>
                                             {cliente.ativo ? "Ativo" : "Inativo"}
                                         </Badge>
                                     </div>
-                                    <div className="mobile-card-body">
-                                        <div className="mobile-card-row">
-                                            <span className="mobile-card-label">Tipo</span>
-                                            <span className="mobile-card-value">
-                                                <Badge variant={cliente.tipo_pessoa === "PJ" ? "draft" : "neutral"}>
-                                                    {cliente.tipo_pessoa === "PJ" ? "Pessoa Jurídica" : "Pessoa Física"}
-                                                </Badge>
+
+                                    <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-md">
+                                        <div>
+                                            <span className="text-slate-400 block">Contato</span>
+                                            <span className="font-medium text-slate-800">
+                                                {formatTelefone(cliente.telefone) || "-"}
                                             </span>
                                         </div>
-                                        {cliente.telefone && (
-                                            <div className="mobile-card-row">
-                                                <span className="mobile-card-label">Telefone</span>
-                                                <span className="mobile-card-value">
-                                                    {formatTelefone(cliente.telefone)}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {cliente.email && (
-                                            <div className="mobile-card-row">
-                                                <span className="mobile-card-label">E-mail</span>
-                                                <span className="mobile-card-value">{cliente.email}</span>
-                                            </div>
-                                        )}
-                                        {(cliente.cidade || cliente.estado) && (
-                                            <div className="mobile-card-row">
-                                                <span className="mobile-card-label">Localização</span>
-                                                <span className="mobile-card-value">
-                                                    {cliente.cidade || "-"}
-                                                    {cliente.estado ? ` / ${cliente.estado}` : ""}
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div>
+                                            <span className="text-slate-400 block">Localidade</span>
+                                            <span className="font-medium text-slate-800">
+                                                {cliente.cidade ? `${cliente.cidade}/${cliente.estado || ""}` : "-"}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div
-                                        className="mobile-card-body"
-                                        style={{
-                                            borderTop: "1px solid var(--color-border)",
-                                            paddingTop: "12px",
-                                            display: "flex",
-                                            gap: "8px",
-                                            justifyContent: "flex-end",
-                                        }}
-                                    >
-                                        <Button variant="ghost" onClick={() => handleOpenEdit(cliente)} title="Editar">
-                                            <Edit size={16} />
+
+                                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                                        <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(cliente)}>
+                                            <Edit2 size={15} />
+                                            <span>Editar</span>
                                         </Button>
                                         <Button
-                                            variant="ghost"
+                                            variant="secondary"
+                                            size="sm"
                                             onClick={() => handleToggleStatus(cliente)}
-                                            title={cliente.ativo ? "Inativar" : "Ativar"}
                                         >
-                                            <Power
-                                                size={16}
-                                                style={{
-                                                    color: cliente.ativo
-                                                        ? "var(--color-warning-text, #f59e0b)"
-                                                        : "var(--color-success-text)",
-                                                }}
-                                            />
+                                            <Power size={15} />
+                                            <span>{cliente.ativo ? "Inativar" : "Ativar"}</span>
                                         </Button>
-                                        <Button variant="ghost" onClick={() => handleDelete(cliente)} title="Excluir">
-                                            <Trash2 size={16} style={{ color: "var(--color-danger-text)" }} />
+                                        <Button variant="danger" size="sm" onClick={() => handleDelete(cliente)}>
+                                            <Trash2 size={15} />
+                                            <span>Excluir</span>
                                         </Button>
                                     </div>
                                 </div>
@@ -293,7 +287,9 @@ export function Clientes() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 clienteToEdit={clienteToEdit}
-                onSuccess={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                }}
             />
         </div>
     );

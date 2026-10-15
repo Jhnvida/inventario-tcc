@@ -1,16 +1,16 @@
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
 import { Select } from "../../components/ui/Select";
+import { Skeleton } from "../../components/ui/Skeleton";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
 import { formatDate } from "../../utils/formatters";
 import { MovimentacaoFormModal } from "./MovimentacaoFormModal";
-import styles from "./styles.module.css";
 
 export function Movimentacoes() {
     const location = useLocation();
@@ -38,8 +38,10 @@ export function Movimentacoes() {
 
     useEffect(() => {
         const state = location.state as { preselectedProdutoId?: string; abrirModal?: boolean } | null;
-        if (state?.abrirModal && state?.preselectedProdutoId) {
-            setPreselectedProdutoId(state.preselectedProdutoId);
+        if (state?.abrirModal) {
+            if (state?.preselectedProdutoId) {
+                setPreselectedProdutoId(state.preselectedProdutoId);
+            }
             setIsModalOpen(true);
             navigate(location.pathname, { replace: true, state: {} });
         }
@@ -52,25 +54,31 @@ export function Movimentacoes() {
     }
 
     return (
-        <div className="page-container">
-            <PageHeader title="Histórico de Movimentações" subtitle="Auditoria de entradas e saídas de estoque.">
+        <div className="space-y-6">
+            <PageHeader
+                title="Histórico de Movimentações"
+                subtitle="Auditoria imutável de todas as entradas e saídas físicas do estoque."
+            >
                 <Button onClick={() => setIsModalOpen(true)}>
-                    <Plus size={18} style={{ marginRight: 8 }} />
-                    Nova Movimentação
+                    <Plus size={18} />
+                    <span>Nova Movimentação</span>
                 </Button>
             </PageHeader>
 
-            <div className="filter-grid">
-                <div className="search-wrapper">
-                    <Search size={18} className="search-icon" />
+            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="relative sm:col-span-6">
+                    <Search
+                        size={15}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                    />
                     <Input
                         placeholder="Buscar por produto ou SKU..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="search-input"
+                        className="pl-8.5!"
                     />
                 </div>
-                <div>
+                <div className="sm:col-span-3">
                     <Select value={produtoFiltro} onChange={(e) => setProdutoFiltro(e.target.value)}>
                         <option value="">Todos os produtos</option>
                         {produtos.map((p) => (
@@ -80,86 +88,146 @@ export function Movimentacoes() {
                         ))}
                     </Select>
                 </div>
-                <div>
+                <div className="sm:col-span-3">
                     <Select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)}>
                         <option value="">Todos os tipos</option>
-                        <option value="entrada">Entradas</option>
-                        <option value="saida">Saídas</option>
+                        <option value="entrada">Apenas Entradas</option>
+                        <option value="saida">Apenas Saídas</option>
                     </Select>
                 </div>
             </div>
 
-            <div className="table-container">
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                 {loading ? (
-                    <div className="loading-state">Carregando histórico...</div>
+                    <div className="p-6 space-y-3">
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                    </div>
                 ) : movimentacoes.length === 0 ? (
-                    <div className="empty-state">Nenhuma movimentação encontrada.</div>
+                    <EmptyState
+                        title="Nenhuma movimentação encontrada"
+                        description={
+                            busca || tipoFiltro || produtoFiltro
+                                ? "Tente redefinir os filtros de busca para encontrar registros."
+                                : "Nenhuma entrada ou saída física foi registrada até o momento."
+                        }
+                        action={
+                            !busca && !tipoFiltro && !produtoFiltro ? (
+                                <Button size="sm" onClick={() => setIsModalOpen(true)}>
+                                    <Plus size={16} />
+                                    <span>Registrar Primeira Movimentação</span>
+                                </Button>
+                            ) : undefined
+                        }
+                    />
                 ) : (
                     <>
-                        <table className="data-table hidden-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Produto</th>
-                                    <th className="text-right">Qtd.</th>
-                                    <th>Responsável</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {movimentacoes.map((mov) => (
-                                    <tr key={mov.id}>
-                                        <td>
-                                            <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
-                                                {mov.tipo === "entrada" ? "Entrada" : "Saída"}
-                                            </Badge>
-                                        </td>
-                                        <td className="fw500">{mov.produtos?.nome || "-"}</td>
-                                        <td
-                                            className={`${mov.tipo === "entrada" ? styles.text_success : styles.text_danger} text-right fw600`}
-                                        >
-                                            {mov.tipo === "entrada" ? "+" : "-"}
-                                            {mov.quantidade}
-                                        </td>
-                                        <td>{mov.usuarios?.nome || mov.usuarios?.email || "Não identificado"}</td>
-                                        <td className="text-secondary">{formatDate(mov.criada_em)}</td>
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
+                                    <tr>
+                                        <th className="px-5 py-2.5">Tipo</th>
+                                        <th className="px-5 py-2.5">Produto & SKU</th>
+                                        <th className="px-5 py-2.5 text-right">Qtd. Movimentada</th>
+                                        <th className="px-5 py-2.5">Operador Responsável</th>
+                                        <th className="px-5 py-2.5">Data e Hora</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {movimentacoes.map((mov) => {
+                                        const isEntrada = mov.tipo === "entrada";
+                                        return (
+                                            <tr key={mov.id} className="hover:bg-slate-50/60 transition-colors">
+                                                <td className="px-5 py-3">
+                                                    <span
+                                                        className={`font-medium ${
+                                                            isEntrada ? "text-emerald-700" : "text-slate-700"
+                                                        }`}
+                                                    >
+                                                        {isEntrada ? "Entrada" : "Saída"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-5 py-3">
+                                                    <div className="font-medium text-slate-900">
+                                                        {mov.produtos?.nome || "-"}
+                                                    </div>
+                                                    <div className="font-mono text-slate-400 mt-0.5">
+                                                        {mov.produtos?.sku}
+                                                    </div>
+                                                    {mov.motivo && (
+                                                        <div className="text-slate-500 italic mt-0.5">
+                                                            "{mov.motivo}"
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-5 py-3 text-right">
+                                                    <span
+                                                        className={`font-semibold tabular-nums ${
+                                                            isEntrada ? "text-emerald-700" : "text-slate-900"
+                                                        }`}
+                                                    >
+                                                        {isEntrada ? "+" : "-"}
+                                                        {mov.quantidade} un
+                                                    </span>
+                                                </td>
+                                                <td className="px-5 py-3 text-slate-700 font-medium">
+                                                    {mov.usuarios?.nome || mov.usuarios?.email || "Operador"}
+                                                </td>
+                                                <td className="px-5 py-3 text-slate-500">
+                                                    {formatDate(mov.criada_em)}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
 
-                        <div className="mobile-cards-list mobile-only">
-                            {movimentacoes.map((mov) => (
-                                <div key={mov.id} className="mobile-card">
-                                    <div className="mobile-card-header">
-                                        <div className="mobile-card-title">{mov.produtos?.nome || "-"}</div>
-                                        <Badge variant={mov.tipo === "entrada" ? "success" : "critical"}>
-                                            {mov.tipo === "entrada" ? "Entrada" : "Saída"}
-                                        </Badge>
-                                    </div>
-                                    <div className="mobile-card-body">
-                                        <div className="mobile-card-row">
-                                            <span className="mobile-card-label">Quantidade</span>
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {movimentacoes.map((mov) => {
+                                const isEntrada = mov.tipo === "entrada";
+                                return (
+                                    <div key={mov.id} className="p-4 space-y-2.5">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <h4 className="font-medium text-slate-900 text-sm">
+                                                    {mov.produtos?.nome || "-"}
+                                                </h4>
+                                                <span className="font-mono text-xs text-slate-500">
+                                                    {mov.produtos?.sku}
+                                                </span>
+                                            </div>
                                             <span
-                                                className={`mobile-card-value ${mov.tipo === "entrada" ? styles.text_success : styles.text_danger}`}
+                                                className={`text-xs font-medium ${
+                                                    isEntrada ? "text-emerald-700" : "text-slate-700"
+                                                }`}
                                             >
-                                                {mov.tipo === "entrada" ? "+" : "-"}
-                                                {mov.quantidade}
+                                                {isEntrada ? "+ Entrada" : "- Saída"}
                                             </span>
                                         </div>
-                                        <div className="mobile-card-row">
-                                            <span className="mobile-card-label">Responsável</span>
-                                            <span className="mobile-card-value">
-                                                {mov.usuarios?.nome || mov.usuarios?.email || "Não identificado"}
+
+                                        <div className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-md">
+                                            <div className="text-slate-500">
+                                                <div>Por: {mov.usuarios?.nome || "Operador"}</div>
+                                                <div className="text-slate-400 mt-0.5">{formatDate(mov.criada_em)}</div>
+                                            </div>
+                                            <span
+                                                className={`font-semibold tabular-nums text-sm ${
+                                                    isEntrada ? "text-emerald-700" : "text-slate-900"
+                                                }`}
+                                            >
+                                                {isEntrada ? "+" : "-"}
+                                                {mov.quantidade} un
                                             </span>
                                         </div>
-                                        <div className="mobile-card-row">
-                                            <span className="mobile-card-label">Data</span>
-                                            <span className="mobile-card-value">{formatDate(mov.criada_em)}</span>
-                                        </div>
+
+                                        {mov.motivo && (
+                                            <p className="text-xs text-slate-500 italic px-1">"{mov.motivo}"</p>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <Pagination

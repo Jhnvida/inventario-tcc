@@ -1,8 +1,9 @@
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
 import { supabase } from "../../lib/supabase";
-import styles from "./styles.module.css";
 
 export function Login() {
     const navigate = useNavigate();
@@ -17,67 +18,76 @@ export function Login() {
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) throw error;
+            const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+            if (authError) throw authError;
             navigate("/");
-        } catch (err) {
-            setError("Algo deu errado!");
-            console.log(err);
+        } catch (err: any) {
+            console.error("Erro na autenticação:", err);
+            setError(err?.message || "E-mail ou senha inválidos. Verifique suas credenciais de acesso.");
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div className={styles.login_layout}>
-            <div className={styles.login_left}>
-                <div className={styles.login_left_content}>
-                    <h1>Inventário Inteligente</h1>
-                    <p>
-                        Acompanhe suas métricas, previna rupturas e otimize sua cadeia de suprimentos através de um
-                        controle de estoque centralizado e inteligente.
-                    </p>
+        <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 font-sans antialiased">
+            <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 p-6 sm:p-8 space-y-6">
+                <div className="flex flex-col items-center text-center space-y-2">
+                    <div>
+                        <h1 className="text-lg font-semibold tracking-tight text-slate-900">Gestão de Inventário</h1>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Informe suas credenciais para acessar o sistema.
+                        </p>
+                    </div>
                 </div>
 
-                <div className={styles.circle1}></div>
-                <div className={styles.circle2}></div>
-            </div>
-
-            <div className={styles.login_right}>
-                <div className={styles.login_box}>
-                    <h2>Acesse sua conta</h2>
-                    <p className={styles.login_subtitle}>Insira suas credenciais corporativas.</p>
-
-                    <form className={styles.login_form} onSubmit={handleLogin}>
-                        {error && <div className={styles.error_message}>{error}</div>}
-                        <div className={styles.form_group}>
-                            <label className={styles.form_label}>E-mail corporativo</label>
-                            <input
-                                type="email"
-                                placeholder="admin@empresa.com"
-                                className={styles.input_field}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
+                <form className="space-y-4" onSubmit={handleLogin}>
+                    {error && (
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2">
+                            <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" />
+                            <span>{error}</span>
                         </div>
-                        <div className={styles.form_group}>
-                            <label className={styles.form_label}>Senha</label>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className={styles.input_field}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <Button type="submit" disabled={loading} className={styles.submit_btn}>
-                            {loading ? "Entrando..." : "Entrar no Sistema"}
+                    )}
+
+                    <Input
+                        label="E-mail"
+                        type="email"
+                        placeholder="usuario@empresa.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        autoComplete="email"
+                    />
+
+                    <Input
+                        label="Senha"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                    />
+
+                    <div className="pt-2">
+                        <Button type="submit" disabled={loading} fullWidth variant="primary">
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Entrando...</span>
+                                </span>
+                            ) : (
+                                <span className="flex items-center justify-center gap-1.5">
+                                    <span>Entrar</span>
+                                    <ArrowRight size={15} />
+                                </span>
+                            )}
                         </Button>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
+
+            <p className="text-xs text-slate-400 mt-6 text-center">Sistema Web de Gestão Inteligente de Inventário</p>
         </div>
     );
 }

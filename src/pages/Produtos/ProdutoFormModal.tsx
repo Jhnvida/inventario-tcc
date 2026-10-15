@@ -1,3 +1,4 @@
+import { AlertCircle } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -5,7 +6,6 @@ import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
 import { useProdutos } from "../../hooks/useProdutos";
 import type { Categoria, Produto } from "../../types";
-import styles from "./styles.module.css";
 
 interface ProdutoFormModalProps {
     isOpen: boolean;
@@ -99,21 +99,34 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Editar Produto" : "Novo Produto"} width="large">
-            <form onSubmit={handleSubmit} className={styles.form_container}>
-                {error && <div className="alert-error">{error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <AlertCircle size={15} className="shrink-0 text-red-600" />
+                        <span>{error}</span>
+                    </div>
+                )}
 
-                <div className={styles.grid2}>
-                    <Input label="Nome do Produto" name="nome" value={formData.nome} onChange={handleChange} required />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="SKU (Código Único)"
+                        label="Nome do Produto"
+                        name="nome"
+                        placeholder="Ex: Teclado Mecânico USB"
+                        value={formData.nome}
+                        onChange={handleChange}
+                        required
+                    />
+                    <Input
+                        label="Código SKU"
                         name="sku"
+                        placeholder="Ex: TEC-MEC-01"
                         value={formData.sku}
                         onChange={handleChange}
                         required
                     />
                 </div>
 
-                <div className={styles.grid2}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Select label="Categoria" name="categoria_id" value={formData.categoria_id} onChange={handleChange}>
                         <option value="">Selecione uma categoria...</option>
                         {categorias.map((cat) => (
@@ -126,21 +139,22 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     <Input
                         label="Localização no Armazém"
                         name="localizacao"
+                        placeholder="Ex: Corredor B, Prateleira 4"
                         value={formData.localizacao}
                         onChange={handleChange}
                     />
                 </div>
 
-                <div className={styles.grid3}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Input
-                        label="Qtd. Atual"
+                        label="Qtd. Atual em Estoque"
                         name="quantidade"
                         type="number"
                         min="0"
                         value={formData.quantidade}
                         onChange={handleChange}
                         disabled={isEditing}
-                        title={isEditing ? "A quantidade só pode ser alterada via Movimentação ou Pedido" : ""}
+                        helperText={isEditing ? "Alterável apenas via movimentação" : undefined}
                     />
                     <Input
                         label="Estoque Mínimo"
@@ -163,12 +177,12 @@ export function ProdutoFormModal({ isOpen, onClose, produtoToEdit, categorias, o
                     />
                 </div>
 
-                <div className={styles.form_actions}>
-                    <Button type="button" variant="ghost" onClick={onClose}>
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <Button type="button" variant="secondary" onClick={onClose}>
                         Cancelar
                     </Button>
                     <Button type="submit" variant="primary" disabled={loading}>
-                        {loading ? "Salvando..." : "Salvar Produto"}
+                        {loading ? "Salvando..." : isEditing ? "Salvar Alterações" : "Cadastrar Produto"}
                     </Button>
                 </div>
             </form>

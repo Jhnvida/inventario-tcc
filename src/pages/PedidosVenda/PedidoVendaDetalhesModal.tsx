@@ -1,11 +1,10 @@
-import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Modal } from "../../components/ui/Modal";
 import type { PedidoVendaCompleto } from "../../hooks/usePedidosVenda";
 import { formatCurrency, formatDate } from "../../utils/formatters";
-import styles from "./styles.module.css";
 
 interface PedidoVendaDetalhesModalProps {
     isOpen: boolean;
@@ -60,6 +59,17 @@ export function PedidoVendaDetalhesModal({
 
     const isRascunho = pedido.status === "rascunho";
 
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case "concluido":
+                return <Badge variant="success">Concluído</Badge>;
+            case "cancelado":
+                return <Badge variant="critical">Cancelado</Badge>;
+            default:
+                return <Badge variant="neutral">Rascunho</Badge>;
+        }
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -67,115 +77,115 @@ export function PedidoVendaDetalhesModal({
             title={`Detalhes da Venda #${pedido.numero || pedido.id.slice(0, 8)}`}
             width="large"
         >
-            <div className={styles.detalhes_container}>
+            <div className="space-y-6">
                 {error && (
-                    <div className="alert-error" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <AlertCircle size={18} />
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <AlertCircle size={15} className="shrink-0 text-red-600" />
                         <span>{error}</span>
                     </div>
                 )}
 
-                <div className={styles.detalhes_header}>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg bg-slate-50 border border-slate-200">
                     <div>
-                        <p className={styles.detalhe_label}>Cliente</p>
-                        <p className={styles.detalhe_valor}>{pedido.clientes?.nome || "Não informado"}</p>
+                        <span className="text-xs text-slate-500 font-medium block">Cliente</span>
+                        <span className="text-sm font-semibold text-slate-900 truncate block mt-0.5">
+                            {pedido.clientes?.nome || "Consumidor Final"}
+                        </span>
+                        {pedido.clientes?.documento && (
+                            <span className="text-[11px] text-slate-400 font-mono block mt-0.5">
+                                {pedido.clientes.documento}
+                            </span>
+                        )}
                     </div>
                     <div>
-                        <p className={styles.detalhe_label}>Data da Venda</p>
-                        <p className={styles.detalhe_valor}>{formatDate(pedido.criado_em)}</p>
+                        <span className="text-xs text-slate-500 font-medium block">Data da Venda</span>
+                        <span className="text-sm font-semibold text-slate-900 block mt-0.5">
+                            {formatDate(pedido.criado_em)}
+                        </span>
                     </div>
                     <div>
-                        <p className={styles.detalhe_label}>Status</p>
-                        <Badge
-                            variant={
-                                pedido.status === "concluido"
-                                    ? "success"
-                                    : pedido.status === "cancelado"
-                                      ? "critical"
-                                      : "neutral"
-                            }
-                        >
-                            {pedido.status === "concluido"
-                                ? "Concluído"
-                                : pedido.status === "cancelado"
-                                  ? "Cancelado"
-                                  : "Rascunho"}
-                        </Badge>
+                        <span className="text-xs text-slate-500 font-medium block">Situação</span>
+                        <div className="mt-1">{getStatusBadge(pedido.status)}</div>
                     </div>
                     <div>
-                        <p className={styles.detalhe_label}>Valor Total</p>
-                        <p className={styles.detalhe_valor} style={{ color: "var(--color-primary)" }}>
+                        <span className="text-xs text-slate-500 font-medium block">Valor Faturado</span>
+                        <span className="text-sm font-semibold text-slate-900 block mt-0.5 tabular-nums">
                             {formatCurrency(pedido.valor_total)}
-                        </p>
+                        </span>
                     </div>
                 </div>
 
                 {pedido.observacoes && (
-                    <div
-                        style={{
-                            padding: "12px 16px",
-                            backgroundColor: "var(--color-surface)",
-                            borderRadius: "var(--radius-md)",
-                            border: "1px solid var(--color-border)",
-                        }}
-                    >
-                        <p className={styles.detalhe_label}>Observações</p>
-                        <p style={{ margin: 0, fontSize: "0.95rem" }}>{pedido.observacoes}</p>
+                    <div className="p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                        <strong className="font-semibold text-slate-900 block mb-0.5">Observações:</strong>
+                        <span>{pedido.observacoes}</span>
                     </div>
                 )}
 
-                <div className={`table-container ${styles.mt8}`}>
-                    <h3 className={styles.modal_subtitle} style={{ padding: "16px 16px 0", margin: 0 }}>
-                        Produtos Vendidos
-                    </h3>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>SKU</th>
-                                <th className="text-right">Quantidade</th>
-                                <th className="text-right">Preço Unitário</th>
-                                <th className="text-right">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pedido.itens_pedido_venda?.map((item) => (
-                                <tr key={item.id}>
-                                    <td className="fw500">{item.produtos?.nome}</td>
-                                    <td className="text-secondary">{item.produtos?.sku}</td>
-                                    <td className="text-right fw500">{item.quantidade}</td>
-                                    <td className="text-right">{formatCurrency(item.preco_unitario)}</td>
-                                    <td className="text-right fw600">
-                                        {formatCurrency(item.quantidade * item.preco_unitario)}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="space-y-2">
+                    <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Itens da Venda</h3>
+                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
+                                    <tr>
+                                        <th className="px-5 py-2.5">Produto & SKU</th>
+                                        <th className="px-5 py-2.5 text-right">Quantidade</th>
+                                        <th className="px-5 py-2.5 text-right">Preço Unitário</th>
+                                        <th className="px-5 py-2.5 text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {pedido.itens_pedido_venda?.map((item) => (
+                                        <tr key={item.id} className="hover:bg-slate-50/50">
+                                            <td className="px-5 py-3">
+                                                <div className="font-medium text-slate-900">{item.produtos?.nome}</div>
+                                                <div className="font-mono text-slate-500">{item.produtos?.sku}</div>
+                                            </td>
+                                            <td className="px-5 py-3 text-right font-medium text-slate-900 tabular-nums">
+                                                {item.quantidade} un
+                                            </td>
+                                            <td className="px-5 py-3 text-right text-slate-600 tabular-nums">
+                                                {formatCurrency(item.preco_unitario)}
+                                            </td>
+                                            <td className="px-5 py-3 text-right font-semibold text-slate-900 tabular-nums">
+                                                {formatCurrency(item.quantidade * item.preco_unitario)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                {isRascunho && (
-                    <div
-                        className={styles.form_actions}
-                        style={{ justifyContent: "space-between", alignItems: "center" }}
-                    >
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={handleCancelar}
-                            disabled={loading}
-                            style={{ color: "var(--color-danger-text)" }}
-                        >
-                            <XCircle size={18} className={styles.mr2} />
-                            Cancelar Venda
-                        </Button>
-
-                        <Button type="button" variant="primary" onClick={handleFinalizar} disabled={loading}>
-                            <CheckCircle size={18} className={styles.mr2} />
-                            {loading ? "Processando..." : "Finalizar Venda (Baixar Estoque)"}
-                        </Button>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                    <div>
+                        {isRascunho && (
+                            <p className="text-xs text-slate-500">
+                                A finalização dará baixa imediata no saldo físico dos produtos no estoque.
+                            </p>
+                        )}
                     </div>
-                )}
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
+                        <Button type="button" variant="secondary" onClick={onClose}>
+                            Fechar
+                        </Button>
+                        {isRascunho && (
+                            <>
+                                <Button type="button" variant="danger" disabled={loading} onClick={handleCancelar}>
+                                    <XCircle size={16} />
+                                    <span>Cancelar Venda</span>
+                                </Button>
+                                <Button type="button" variant="primary" disabled={loading} onClick={handleFinalizar}>
+                                    <CheckCircle2 size={16} />
+                                    <span>{loading ? "Processando Baixa..." : "Finalizar Venda"}</span>
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
         </Modal>
     );

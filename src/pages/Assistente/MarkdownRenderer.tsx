@@ -76,61 +76,121 @@ function parseMarkdownBlocks(text: string): Block[] {
     return blocks;
 }
 
+const markdownComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => (
+        <p className="mb-2 last:mb-0 text-xs sm:text-sm leading-relaxed text-slate-800">{children}</p>
+    ),
+    strong: ({ children }: { children?: React.ReactNode }) => (
+        <strong className="font-semibold text-slate-900">{children}</strong>
+    ),
+    ul: ({ children }: { children?: React.ReactNode }) => (
+        <ul className="my-2 ml-4 list-disc space-y-1 text-xs sm:text-sm text-slate-800">{children}</ul>
+    ),
+    ol: ({ children }: { children?: React.ReactNode }) => (
+        <ol className="my-2 ml-4 list-decimal space-y-1 text-xs sm:text-sm text-slate-800">{children}</ol>
+    ),
+    li: ({ children }: { children?: React.ReactNode }) => <li className="leading-relaxed">{children}</li>,
+    code: ({ children, className }: { children?: React.ReactNode; className?: string }) => {
+        const isInline = !className;
+        return isInline ? (
+            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs text-slate-800 border border-slate-200">
+                {children}
+            </code>
+        ) : (
+            <code className="block overflow-x-auto rounded-md bg-slate-900 p-2.5 font-mono text-xs text-slate-100 my-2">
+                {children}
+            </code>
+        );
+    },
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
+        <blockquote className="my-2 border-l-2 border-slate-400 pl-3 italic text-slate-600 text-xs sm:text-sm bg-slate-50 py-1 rounded-r-sm">
+            {children}
+        </blockquote>
+    ),
+};
+
 interface MarkdownRendererProps {
     content: string;
 }
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     if (!content.includes("|")) {
-        return <ReactMarkdown>{content}</ReactMarkdown>;
+        return <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>;
     }
 
     const blocks = parseMarkdownBlocks(content);
 
     return (
-        <>
+        <div className="space-y-2">
             {blocks.map((block, idx) => {
                 if (block.type === "markdown") {
-                    return <ReactMarkdown key={idx}>{block.content}</ReactMarkdown>;
+                    return (
+                        <ReactMarkdown key={idx} components={markdownComponents}>
+                            {block.content}
+                        </ReactMarkdown>
+                    );
                 }
 
                 return (
-                    <table key={idx}>
-                        <thead>
-                            <tr>
-                                {block.headers.map((header, hIdx) => (
-                                    <th key={hIdx} style={{ textAlign: block.alignments[hIdx] || "left" }}>
-                                        <ReactMarkdown
-                                            components={{
-                                                p: ({ children }) => <>{children}</>,
-                                            }}
+                    <div key={idx} className="my-2.5 overflow-x-auto rounded-md border border-slate-200 bg-white">
+                        <table className="w-full border-collapse text-left text-xs">
+                            <thead>
+                                <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-medium">
+                                    {block.headers.map((header, hIdx) => (
+                                        <th
+                                            key={hIdx}
+                                            className="px-3 py-2 font-medium"
+                                            style={{ textAlign: block.alignments[hIdx] || "left" }}
                                         >
-                                            {header}
-                                        </ReactMarkdown>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {block.rows.map((row, rIdx) => (
-                                <tr key={rIdx}>
-                                    {row.map((cell, cIdx) => (
-                                        <td key={cIdx} style={{ textAlign: block.alignments[cIdx] || "left" }}>
                                             <ReactMarkdown
                                                 components={{
                                                     p: ({ children }) => <>{children}</>,
+                                                    strong: ({ children }) => (
+                                                        <span className="font-semibold text-slate-900">{children}</span>
+                                                    ),
                                                 }}
                                             >
-                                                {cell}
+                                                {header}
                                             </ReactMarkdown>
-                                        </td>
+                                        </th>
                                     ))}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {block.rows.map((row, rIdx) => (
+                                    <tr key={rIdx} className="hover:bg-slate-50/60 transition-colors">
+                                        {row.map((cell, cIdx) => (
+                                            <td
+                                                key={cIdx}
+                                                className="px-3 py-2 text-slate-700"
+                                                style={{ textAlign: block.alignments[cIdx] || "left" }}
+                                            >
+                                                <ReactMarkdown
+                                                    components={{
+                                                        p: ({ children }) => <>{children}</>,
+                                                        strong: ({ children }) => (
+                                                            <span className="font-medium text-slate-900">
+                                                                {children}
+                                                            </span>
+                                                        ),
+                                                        code: ({ children }) => (
+                                                            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-800 border border-slate-200">
+                                                                {children}
+                                                            </code>
+                                                        ),
+                                                    }}
+                                                >
+                                                    {cell}
+                                                </ReactMarkdown>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 );
             })}
-        </>
+        </div>
     );
 }

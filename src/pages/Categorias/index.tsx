@@ -1,12 +1,13 @@
-import { Edit2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Edit2, Plus, Tags, Trash2 } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 import { Button } from "../../components/ui/Button";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
+import { Skeleton } from "../../components/ui/Skeleton";
 import { useCategorias } from "../../hooks/useCategorias";
-import styles from "./styles.module.css";
 
 export function Categorias() {
     const {
@@ -68,99 +69,91 @@ export function Categorias() {
         }
     }
 
+    function handleOpenCreate() {
+        setCategoriaEditando(null);
+        setNovaCategoria("");
+        setError(null);
+        setIsModalOpen(true);
+    }
+
+    function handleOpenEdit(cat: { id: string; nome: string }) {
+        setCategoriaEditando(cat);
+        setNovaCategoria(cat.nome);
+        setError(null);
+        setIsModalOpen(true);
+    }
+
     return (
-        <div className="page-container">
-            <PageHeader title="Categorias" subtitle="Gerencie as categorias de produtos do sistema.">
-                <Button
-                    onClick={() => {
-                        setCategoriaEditando(null);
-                        setIsModalOpen(true);
-                        setError(null);
-                        setNovaCategoria("");
-                    }}
-                >
-                    <Plus size={18} style={{ marginRight: 8 }} />
-                    Nova Categoria
+        <div className="space-y-6">
+            <PageHeader
+                title="Categorias de Produtos"
+                subtitle="Classificação taxonômica para organização dos itens no catálogo e relatórios."
+            >
+                <Button onClick={handleOpenCreate}>
+                    <Plus size={16} />
+                    <span>Nova Categoria</span>
                 </Button>
             </PageHeader>
 
-            <div className="table-container">
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                 {loading ? (
-                    <div className="loading-state">Carregando categorias...</div>
+                    <div className="p-6 space-y-3">
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                    </div>
                 ) : categorias.length === 0 ? (
-                    <div className="empty-state">Nenhuma categoria encontrada.</div>
+                    <EmptyState
+                        icon={Tags}
+                        title="Nenhuma categoria cadastrada"
+                        description="Crie categorias para agrupar e organizar os produtos do inventário."
+                        action={
+                            <Button size="sm" onClick={handleOpenCreate}>
+                                <Plus size={16} />
+                                <span>Criar Categoria</span>
+                            </Button>
+                        }
+                    />
                 ) : (
                     <>
-                        <table className="data-table hidden-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th style={{ textAlign: "right" }}>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {categorias.map((cat) => (
-                                    <tr key={cat.id}>
-                                        <td className="fw500">{cat.nome}</td>
-                                        <td style={{ textAlign: "right" }}>
-                                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => {
-                                                        setCategoriaEditando({ id: cat.id, nome: cat.nome });
-                                                        setNovaCategoria(cat.nome);
-                                                        setIsModalOpen(true);
-                                                        setError(null);
-                                                    }}
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => handleDelete(cat.id, cat.nome)}
-                                                    title="Excluir"
-                                                    style={{ color: "var(--color-danger-text)" }}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </div>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
+                                    <tr>
+                                        <th className="px-5 py-2.5">Nome da Categoria</th>
+                                        <th className="px-5 py-2.5 text-right">Ações</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mobile-cards-list mobile-only">
-                            {categorias.map((cat) => (
-                                <div key={cat.id} className="mobile-card">
-                                    <div className="mobile-card-header">
-                                        <div className="mobile-card-title">{cat.nome}</div>
-                                    </div>
-                                    <div className="mobile-card-actions">
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => {
-                                                setCategoriaEditando({ id: cat.id, nome: cat.nome });
-                                                setNovaCategoria(cat.nome);
-                                                setIsModalOpen(true);
-                                                setError(null);
-                                            }}
-                                            title="Editar"
-                                        >
-                                            <Edit2 size={16} />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => handleDelete(cat.id, cat.nome)}
-                                            title="Excluir"
-                                            style={{ color: "var(--color-danger-text)" }}
-                                        >
-                                            <Trash2 size={16} />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {categorias.map((cat) => (
+                                        <tr key={cat.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <td className="px-5 py-3">
+                                                <span className="font-medium text-slate-900">{cat.nome}</span>
+                                            </td>
+                                            <td className="px-5 py-3 text-right">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <button
+                                                        type="button"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                        onClick={() => handleOpenEdit(cat)}
+                                                        title="Editar categoria"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                        onClick={() => handleDelete(cat.id, cat.nome)}
+                                                        title="Excluir categoria"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
                         <Pagination
@@ -177,32 +170,33 @@ export function Categorias() {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => !isSubmitting && setIsModalOpen(false)}
+                onClose={() => setIsModalOpen(false)}
                 title={categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
                 width="small"
             >
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                            <AlertCircle size={15} className="shrink-0 text-red-600" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
                     <Input
                         label="Nome da Categoria"
+                        placeholder="Ex: Cabos e Conectores"
                         value={novaCategoria}
                         onChange={(e) => setNovaCategoria(e.target.value)}
-                        placeholder="Ex: Eletrônicos"
-                        disabled={isSubmitting}
-                        error={error || undefined}
+                        required
                         autoFocus
                     />
 
-                    <div className={styles.form_actions}>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setIsModalOpen(false)}
-                            disabled={isSubmitting}
-                        >
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Salvando..." : "Salvar"}
+                        <Button type="submit" variant="primary" disabled={isSubmitting}>
+                            {isSubmitting ? "Salvando..." : categoriaEditando ? "Salvar Alterações" : "Criar Categoria"}
                         </Button>
                     </div>
                 </form>

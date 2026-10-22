@@ -101,6 +101,7 @@ export function Layout() {
     ];
 
     const currentPath = location.pathname;
+    const isAssistente = currentPath.startsWith("/assistente");
     let pageTitle = "Dashboard";
     let sectionTitle = "Visão Geral";
 
@@ -257,8 +258,14 @@ export function Layout() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
-                    <div className="max-w-6xl mx-auto w-full">
+                <main
+                    className={`flex-1 min-h-0 bg-slate-50 ${
+                        isAssistente
+                            ? "overflow-hidden p-2 sm:p-3 lg:p-4 flex flex-col"
+                            : "overflow-y-auto p-4 sm:p-6 lg:p-8"
+                    }`}
+                >
+                    <div className={isAssistente ? "w-full h-full flex flex-col min-h-0" : "max-w-6xl mx-auto w-full"}>
                         <Outlet />
                     </div>
                 </main>

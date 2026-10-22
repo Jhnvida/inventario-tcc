@@ -34,6 +34,16 @@ const badgeStyles: Record<StepType, { bg: string; text: string; border: string }
     output: { bg: "bg-teal-50", text: "text-teal-700", border: "border-teal-300" },
 };
 
+export const stepTypeLabels: Record<StepType, string> = {
+    user_input: "Entrada do Usuário",
+    llm_decision: "Avaliação da IA",
+    tool_call: "Ferramenta",
+    db_query: "Consulta ao Banco",
+    computation: "Processamento",
+    llm_synthesis: "Síntese da Resposta",
+    output: "Resposta Final",
+};
+
 export function PipelineNode({ data }: { data: PipelineNodeData }) {
     const nodeData = data as PipelineNodeData;
     const { label, sublabel, stepType, status, durationMs, iconType = "bot", onSelect } = nodeData;
@@ -61,18 +71,14 @@ export function PipelineNode({ data }: { data: PipelineNodeData }) {
             <Handle
                 type="target"
                 position={Position.Left}
-                className="!h-3 !w-3 !-left-1.5 !border-2 !border-white !bg-slate-400 transition-colors group-hover:!bg-blue-500"
+                className="h-3! w-3! -left-1.5! border-2! border-white! bg-slate-400! transition-colors group-hover:bg-blue-500!"
             />
 
             <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                    <div
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg border ${badge.bg} ${badge.text} ${badge.border}`}
-                    >
-                        <Icon size={14} />
-                    </div>
+                <div className="flex items-center gap-1.5">
+                    <Icon size={14} className={badge.text} />
                     <span className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">
-                        {stepType.replace("_", " ")}
+                        {stepTypeLabels[stepType] || stepType}
                     </span>
                 </div>
 
@@ -90,7 +96,7 @@ export function PipelineNode({ data }: { data: PipelineNodeData }) {
                     )}
                     {isSuccess && durationMs === undefined && (
                         <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                            ok
+                            concluído
                         </span>
                     )}
                     {isError && (
@@ -113,7 +119,7 @@ export function PipelineNode({ data }: { data: PipelineNodeData }) {
             <Handle
                 type="source"
                 position={Position.Right}
-                className="!h-3 !w-3 !-right-1.5 !border-2 !border-white !bg-slate-400 transition-colors group-hover:!bg-blue-500"
+                className="h-3! w-3! -right-1.5! border-2! border-white! bg-slate-400! transition-colors group-hover:bg-blue-500!"
             />
         </div>
     );

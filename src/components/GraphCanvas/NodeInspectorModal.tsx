@@ -1,10 +1,17 @@
 import { Clock, Code2, Database, X } from "lucide-react";
-import type { PipelineNodeData } from "./CustomNodes";
+import { stepTypeLabels, type PipelineNodeData } from "./CustomNodes";
 
 interface NodeInspectorModalProps {
     nodeData: PipelineNodeData | null;
     onClose: () => void;
 }
+
+const statusLabels: Record<string, string> = {
+    waiting: "Aguardando",
+    running: "Executando",
+    success: "Concluído",
+    error: "Falha",
+};
 
 export function NodeInspectorModal({ nodeData, onClose }: NodeInspectorModalProps) {
     if (!nodeData) return null;
@@ -15,14 +22,12 @@ export function NodeInspectorModal({ nodeData, onClose }: NodeInspectorModalProp
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
             <div className="flex max-h-[85vh] w-full max-w-xl flex-col rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in-50 zoom-in-95">
                 <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 bg-slate-50/70">
-                    <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white">
-                            <Code2 size={15} />
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <Code2 size={16} className="text-slate-600" />
                         <div>
                             <h3 className="text-sm font-semibold text-slate-900">{label}</h3>
                             <p className="text-[11px] text-slate-500 uppercase tracking-wider font-mono">
-                                Tipo: {stepType}
+                                Tipo: {stepTypeLabels[stepType] || stepType}
                             </p>
                         </div>
                     </div>
@@ -49,7 +54,7 @@ export function NodeInspectorModal({ nodeData, onClose }: NodeInspectorModalProp
                                             : "bg-slate-200 text-slate-700"
                                 }`}
                             >
-                                {status.toUpperCase()}
+                                {statusLabels[status] || status}
                             </span>
                         </div>
 
@@ -57,7 +62,7 @@ export function NodeInspectorModal({ nodeData, onClose }: NodeInspectorModalProp
                             <span className="text-[11px] text-slate-500 font-medium block mb-1">Tempo de Execução</span>
                             <div className="flex items-center gap-1.5 font-mono text-slate-700 font-medium">
                                 <Clock size={13} className="text-slate-400" />
-                                <span>{durationMs !== undefined ? `${durationMs} ms` : "N/A"}</span>
+                                <span>{durationMs !== undefined ? `${durationMs} ms` : "Não informado"}</span>
                             </div>
                         </div>
                     </div>
@@ -78,7 +83,7 @@ export function NodeInspectorModal({ nodeData, onClose }: NodeInspectorModalProp
                             <div className="flex items-center gap-1.5 mb-1.5">
                                 <Database size={13} className="text-slate-500" />
                                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                                    Payload / Parâmetros Técnicos (JSON)
+                                    Dados e Parâmetros (JSON)
                                 </span>
                             </div>
                             <pre className="max-h-60 overflow-x-auto rounded-lg bg-slate-900 p-3.5 font-mono text-[11px] text-emerald-400 leading-relaxed">

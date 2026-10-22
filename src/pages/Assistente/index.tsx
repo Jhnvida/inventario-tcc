@@ -1,9 +1,8 @@
-import { ArrowRight, BookText, Bot, Loader2, Send, Trash2, Workflow } from "lucide-react";
+import { BookText, Loader2, Send, Trash2, Workflow } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ExecutionGraph } from "../../components/GraphCanvas/ExecutionGraph";
 import { Button } from "../../components/ui/Button";
 import { Modal } from "../../components/ui/Modal";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { ExecutionGraphProvider, useExecutionGraph } from "../../contexts/ExecutionGraphContext";
 import { useAssistente } from "../../hooks/useAssistente";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -129,75 +128,72 @@ function AssistenteContent() {
     const isInitialState = messages.length === 1 && messages[0].id === "initial";
 
     return (
-        <div className="flex h-[calc(100vh-7rem)] flex-col">
-            <PageHeader
-                title="Assistente de Gestão"
-                subtitle="Consulte indicadores, estoque crítico e histórico de movimentações com linguagem natural."
-            >
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant={isGraphOpen ? "primary" : "secondary"}
-                        size="sm"
-                        onClick={toggleGraph}
-                        title={isGraphOpen ? "Ocultar Grafo de Execução" : "Visualizar Grafo de Execução"}
-                        className="text-xs"
-                    >
-                        <Workflow size={15} />
-                        <span className="hidden sm:inline">
-                            {isGraphOpen ? "Ocultar Grafo" : "Visualizar Grafo da IA"}
-                        </span>
-                    </Button>
+        <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
+            <div className="mb-2 flex items-center justify-end gap-2 shrink-0">
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setIsLibraryOpen(true)}
+                    title="Biblioteca de Consultas"
+                    className="text-xs hidden sm:inline-flex"
+                >
+                    <BookText size={14} className="text-slate-500" />
+                    <span>Consultas</span>
+                </Button>
 
-                    {!isInitialState && (
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                                clearMessages();
-                                clearGraph();
-                            }}
-                            title="Limpar histórico da conversa"
-                            className="text-xs text-slate-600 hover:text-red-600 hover:border-red-200"
-                        >
-                            <Trash2 size={16} className="text-slate-400 group-hover:text-red-500" />
-                            <span>Limpar Histórico</span>
-                        </Button>
-                    )}
-                </div>
-            </PageHeader>
+                <Button
+                    variant={isGraphOpen ? "primary" : "secondary"}
+                    size="sm"
+                    onClick={toggleGraph}
+                    title={isGraphOpen ? "Ocultar Grafo" : "Visualizar Grafo"}
+                    className="text-xs"
+                >
+                    <Workflow size={14} />
+                    <span className="hidden sm:inline">{isGraphOpen ? "Ocultar Grafo" : "Grafo"}</span>
+                </Button>
+
+                {!isInitialState && (
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                            clearMessages();
+                            clearGraph();
+                        }}
+                        title="Limpar histórico"
+                        className="text-xs text-slate-600 hover:text-red-600 hover:border-red-200 transition-colors"
+                    >
+                        <Trash2 size={14} className="text-slate-400 group-hover:text-red-500" />
+                        <span className="hidden sm:inline">Limpar</span>
+                    </Button>
+                )}
+            </div>
 
             <div className="flex min-h-0 flex-1 gap-3 overflow-hidden">
                 <div
                     className={`flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition-all duration-200 ${
-                        isGraphOpen ? "w-full lg:w-[48%] xl:w-[44%]" : "w-full"
+                        isGraphOpen ? "w-full lg:w-[48%] xl:w-[45%]" : "w-full"
                     }`}
                 >
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/40">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/30">
                         {isInitialState && (
-                            <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center py-6 text-center">
-                                <h3 className="text-base font-semibold text-slate-900">
-                                    Como posso ajudar com o estoque hoje?
-                                </h3>
-                                <p className="mt-1 text-xs text-slate-500 max-w-md">
-                                    Escolha uma consulta frequente abaixo ou digite sua pergunta para verificação em
-                                    tempo real.
-                                </p>
-
-                                <div className="mt-5 w-full space-y-2">
-                                    {QUICK_PROMPTS.map((prompt, idx) => (
-                                        <button
-                                            key={idx}
-                                            type="button"
-                                            onClick={() => handleQuickPrompt(prompt)}
-                                            className="group flex w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3.5 py-2.5 text-left text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
-                                        >
-                                            <span>{prompt}</span>
-                                            <ArrowRight
-                                                size={15}
-                                                className="text-slate-400 group-hover:text-slate-700 shrink-0 ml-2 transition-transform"
-                                            />
-                                        </button>
-                                    ))}
+                            <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center p-4">
+                                <div className="w-full">
+                                    <p className="mb-3 text-xs font-medium text-slate-400 text-center sm:text-left">
+                                        Sugestões de consulta:
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        {QUICK_PROMPTS.map((prompt, idx) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => handleQuickPrompt(prompt)}
+                                                className="rounded-lg border border-slate-200 bg-white p-3 text-left text-xs text-slate-700 hover:border-slate-400 hover:text-slate-900 transition-colors cursor-pointer"
+                                            >
+                                                {prompt}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -206,60 +202,43 @@ function AssistenteContent() {
                             messages.map((msg) => {
                                 const isAi = msg.sender === "ai";
                                 return (
-                                    <div
-                                        key={msg.id}
-                                        className={`flex items-start gap-2.5 ${isAi ? "justify-start" : "justify-end"}`}
-                                    >
-                                        {isAi && (
-                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 border border-slate-200 text-slate-600 mt-0.5">
-                                                <Bot className="h-3.5 w-3.5" />
-                                            </div>
-                                        )}
-
+                                    <div key={msg.id} className={`flex ${isAi ? "justify-start" : "justify-end"}`}>
                                         <div
-                                            className={`flex flex-col ${isAi ? "items-start max-w-[92%]" : "items-end max-w-[85%]"}`}
+                                            className={`text-xs sm:text-sm leading-relaxed ${
+                                                isAi
+                                                    ? "max-w-[95%] sm:max-w-[90%] rounded-lg border border-slate-200 bg-white p-4 text-slate-800"
+                                                    : "max-w-[85%] sm:max-w-[75%] rounded-lg bg-slate-900 text-white px-4 py-2.5"
+                                            }`}
                                         >
-                                            <div
-                                                className={`rounded-lg px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${
-                                                    isAi
-                                                        ? "border border-slate-200 bg-white text-slate-800"
-                                                        : "bg-slate-900 text-white font-normal"
-                                                }`}
-                                            >
-                                                {isAi ? (
-                                                    <MarkdownRenderer content={msg.text} />
-                                                ) : (
-                                                    <p className="whitespace-pre-wrap">{msg.text}</p>
-                                                )}
-                                            </div>
+                                            {isAi ? (
+                                                <MarkdownRenderer content={msg.text} />
+                                            ) : (
+                                                <p className="whitespace-pre-wrap">{msg.text}</p>
+                                            )}
                                         </div>
                                     </div>
                                 );
                             })}
 
                         {isLoading && messages[messages.length - 1]?.sender === "user" && (
-                            <div className="flex items-start gap-2.5 justify-start">
-                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 border border-slate-200 text-slate-600 mt-0.5">
-                                    <Bot className="h-3.5 w-3.5" />
-                                </div>
-                                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-normal text-slate-500">
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-700" />
-                                    <span>Consultando inventário e gerando resposta...</span>
-                                </div>
+                            <div className="flex items-center gap-2 py-2 text-xs text-slate-500">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-600" />
+                                <span>Consultando estoque...</span>
                             </div>
                         )}
+
                         <div ref={messagesEndRef} />
                     </div>
 
                     {!isInitialState && !isLoading && (
-                        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-slate-200 bg-slate-50/75 px-3 py-1.5 text-xs">
-                            <span className="text-[11px] font-medium text-slate-400 shrink-0">Sugestões:</span>
+                        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-slate-100 bg-slate-50/60 px-3 sm:px-4 py-2 text-xs shrink-0">
+                            <span className="text-[11px] text-slate-400 shrink-0 mr-1">Sugestões:</span>
                             {SUGGESTIONS.map((sug, sIdx) => (
                                 <button
                                     key={sIdx}
                                     type="button"
                                     onClick={() => handleQuickPrompt(sug)}
-                                    className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+                                    className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 hover:border-slate-300 hover:text-slate-900 transition-colors cursor-pointer"
                                 >
                                     {sug}
                                 </button>
@@ -267,16 +246,16 @@ function AssistenteContent() {
                         </div>
                     )}
 
-                    <div className="border-t border-slate-200 bg-white p-3">
+                    <div className="border-t border-slate-200 bg-white p-2.5 sm:p-3 shrink-0">
                         <form
                             onSubmit={handleSend}
-                            className="flex items-end gap-1.5 rounded-md border border-slate-300 bg-white p-1.5 focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all"
+                            className="flex items-end gap-1.5 rounded-lg border border-slate-300 bg-white p-1.5 focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all"
                         >
                             <button
                                 type="button"
                                 onClick={() => setIsLibraryOpen(true)}
-                                title="Abrir Biblioteca de Consultas"
-                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                                title="Biblioteca de Consultas"
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                             >
                                 <BookText size={16} />
                             </button>
@@ -287,24 +266,25 @@ function AssistenteContent() {
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 disabled={isLoading}
-                                placeholder="Faça uma pergunta sobre o inventário, estoque crítico, movimentações..."
+                                placeholder="Pergunte sobre produtos, estoque crítico, movimentações..."
                                 rows={1}
-                                className="max-h-36 flex-1 resize-none bg-transparent px-2 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                                className="max-h-36 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
                             />
 
                             <button
                                 type="submit"
                                 disabled={!inputValue.trim() || isLoading}
+                                title="Enviar mensagem"
                                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 transition-colors cursor-pointer"
                             >
-                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={15} />}
+                                {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={14} />}
                             </button>
                         </form>
                     </div>
                 </div>
 
                 {isGraphOpen && (
-                    <div className="hidden min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white lg:flex lg:w-[52%] xl:w-[56%]">
+                    <div className="hidden min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white lg:flex lg:w-[52%] xl:w-[55%]">
                         <ExecutionGraph
                             steps={steps}
                             isRunning={isRunning}
@@ -319,9 +299,9 @@ function AssistenteContent() {
             <Modal
                 isOpen={isGraphOpen && typeof window !== "undefined" && window.innerWidth < 1024}
                 onClose={() => setIsGraphOpen(false)}
-                title="Grafo de Raciocínio & Execução da IA"
+                title="Grafo de Execução"
             >
-                <div className="h-[65vh] w-full">
+                <div className="h-[75vh] w-full">
                     <ExecutionGraph
                         steps={steps}
                         isRunning={isRunning}
@@ -335,7 +315,7 @@ function AssistenteContent() {
             <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title="Biblioteca de Consultas">
                 <div className="space-y-4">
                     <p className="text-xs text-slate-500">
-                        Selecione um prompt pré-configurado para preencher a pergunta no assistente:
+                        Selecione uma consulta para preencher a pergunta no assistente:
                     </p>
 
                     <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
@@ -350,13 +330,9 @@ function AssistenteContent() {
                                             key={pIdx}
                                             type="button"
                                             onClick={() => handleSelectPrompt(prompt)}
-                                            className="group flex w-full items-center justify-between rounded-md border border-slate-200 bg-white p-2.5 text-left text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
+                                            className="w-full rounded-md border border-slate-200 bg-white p-2.5 text-left text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
                                         >
-                                            <span>{prompt}</span>
-                                            <ArrowRight
-                                                size={15}
-                                                className="text-slate-400 group-hover:text-slate-700 shrink-0 ml-2"
-                                            />
+                                            {prompt}
                                         </button>
                                     ))}
                                 </div>

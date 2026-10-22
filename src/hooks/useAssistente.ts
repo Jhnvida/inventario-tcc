@@ -240,7 +240,7 @@ export function useAssistente() {
                         id: toolNodeId,
                         parentId: lastNodeId,
                         stepType: "tool_call",
-                        label: `Tool: ${readableName}`,
+                        label: `Ferramenta: ${readableName}`,
                         sublabel: JSON.stringify(args),
                         status: "running",
                         iconType: "tool",

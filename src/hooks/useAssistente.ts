@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { systemPrompt } from "../services/ai/prompts";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
 import { tools } from "../services/ai/tools";
+import { tracer } from "../services/ai/tracer";
 
 export type Message = {
     id: string;
@@ -153,6 +154,30 @@ export function useAssistente() {
         addUserMessage(text);
         setIsLoading(true);
 
+        const traceStartTime = performance.now();
+        tracer.startTrace(text);
+
+        tracer.updateStep({
+            id: "user-input",
+            stepType: "user_input",
+            label: "Entrada do Usuário",
+            sublabel: text,
+            status: "success",
+            iconType: "user",
+        });
+
+        const tDecisionStart = performance.now();
+        tracer.updateStep({
+            id: "llm-decision",
+            parentId: "user-input",
+            stepType: "llm_decision",
+            label: "Llama 3.2: Avaliação de Intenção",
+            sublabel: "Avaliando necessidade de consulta ao banco...",
+            status: "running",
+            iconType: "bot",
+        });
+
+        let lastNodeId = "llm-decision";
         const tempToolId = "temp-tool-msg";
 
         try {
@@ -178,6 +203,23 @@ export function useAssistente() {
 
             let response = await streamOllamaChat(historyRef.current, handleToken);
             let responseMessage = response.message;
+            const tDecisionMs = Math.round(performance.now() - tDecisionStart);
+
+            if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+                tracer.updateStep({
+                    id: "llm-decision",
+                    status: "success",
+                    durationMs: tDecisionMs,
+                    sublabel: `${responseMessage.tool_calls.length} consulta(s) necessária(s)`,
+                });
+            } else {
+                tracer.updateStep({
+                    id: "llm-decision",
+                    status: "success",
+                    durationMs: tDecisionMs,
+                    sublabel: "Resposta direta sem consultas adicionais",
+                });
+            }
 
             while (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
                 setUiFeedback(tempToolId, "Consultando dados no sistema...");
@@ -191,15 +233,67 @@ export function useAssistente() {
                     const readableName = functionName.replace(/_/g, " ");
                     setUiFeedback(tempToolId, `Consultando dados (${readableName})...`);
 
-                    const result = await handleFunctionCall({ name: functionName, args });
+                    const toolNodeId = `tool-${functionName}-${Date.now()}`;
+                    const tToolStart = performance.now();
+
+                    tracer.updateStep({
+                        id: toolNodeId,
+                        parentId: lastNodeId,
+                        stepType: "tool_call",
+                        label: `Tool: ${readableName}`,
+                        sublabel: JSON.stringify(args),
+                        status: "running",
+                        iconType: "tool",
+                        metadata: { functionName, args },
+                    });
+
+                    const result = await handleFunctionCall({ name: functionName, args }, toolNodeId);
+                    const tToolMs = Math.round(performance.now() - tToolStart);
+
+                    tracer.updateStep({
+                        id: toolNodeId,
+                        status: "success",
+                        durationMs: tToolMs,
+                        sublabel: `Concluído em ${tToolMs}ms`,
+                        metadata: {
+                            functionName,
+                            args,
+                            resultSummary: Array.isArray(result) ? `${result.length} registros` : result,
+                        },
+                    });
+
+                    lastNodeId = toolNodeId;
                     historyRef.current.push({ role: "tool", content: JSON.stringify(result) });
                 }
 
                 streamingMsgId = null;
                 currentStreamText = "";
 
+                const synthNodeId = `llm-synthesis-${Date.now()}`;
+                const tSynthStart = performance.now();
+
+                tracer.updateStep({
+                    id: synthNodeId,
+                    parentId: lastNodeId,
+                    stepType: "llm_synthesis",
+                    label: "Llama 3.2: Síntese e Formatação",
+                    sublabel: "Formatando tabelas e resposta determinística...",
+                    status: "running",
+                    iconType: "bot",
+                });
+
                 response = await streamOllamaChat(historyRef.current, handleToken);
                 responseMessage = response.message;
+                const tSynthMs = Math.round(performance.now() - tSynthStart);
+
+                tracer.updateStep({
+                    id: synthNodeId,
+                    status: "success",
+                    durationMs: tSynthMs,
+                    sublabel: `Síntese concluída em ${tSynthMs}ms`,
+                });
+
+                lastNodeId = synthNodeId;
             }
 
             removeUiFeedback(tempToolId);
@@ -214,9 +308,33 @@ export function useAssistente() {
                     addAiMessage(responseMessage.content);
                 }
             }
+
+            const totalPipelineMs = Math.round(performance.now() - traceStartTime);
+            tracer.updateStep({
+                id: "final-output",
+                parentId: lastNodeId,
+                stepType: "output",
+                label: "Resposta Entregue",
+                sublabel: `Concluído em ${(totalPipelineMs / 1000).toFixed(2)}s`,
+                status: "success",
+                iconType: "check",
+                durationMs: totalPipelineMs,
+            });
+            tracer.finishTrace(true, totalPipelineMs);
         } catch (error: any) {
             console.error("Erro no chat:", error);
             removeUiFeedback(tempToolId);
+
+            tracer.updateStep({
+                id: "error-node",
+                parentId: lastNodeId,
+                stepType: "output",
+                label: "Falha na Execução",
+                sublabel: error.message || "Erro desconhecido",
+                status: "error",
+                iconType: "alert",
+            });
+            tracer.finishTrace(false);
 
             let errorMessage = "Desculpe, ocorreu um erro de processamento.";
 
@@ -232,6 +350,7 @@ export function useAssistente() {
     }
 
     function clearMessages() {
+        tracer.clear();
         setMessages([
             {
                 id: "initial",

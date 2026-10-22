@@ -1,7 +1,8 @@
 import { supabase } from "../../lib/supabase";
+import { tracer } from "./tracer";
 
-const handlers: Record<string, (args: any) => Promise<any>> = {
-    consultar_produtos: async function (args) {
+const handlers: Record<string, (args: any, parentNodeId?: string) => Promise<any>> = {
+    consultar_produtos: async function (args, parentNodeId) {
         let query = supabase
             .from("produtos")
             .select("nome, sku, preco, quantidade, estoque_minimo, localizacao, categorias(nome)");
@@ -29,6 +30,19 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar produtos no banco de dados." };
         }
 
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-produtos-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: produtos",
+                sublabel: `SELECT ${data?.length || 0} produto(s) encontrado(s)`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "produtos", filtro: args, total_registros: data?.length },
+            });
+        }
+
         if (args.filtro_estoque === "baixo") {
             return data?.filter((p: any) => p.quantidade > 0 && p.quantidade <= p.estoque_minimo);
         }
@@ -40,7 +54,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         return data;
     },
 
-    consultar_resumo_estoque: async function () {
+    consultar_resumo_estoque: async function (_args?: any, parentNodeId?: string) {
         const { data, error } = await supabase.from("produtos").select("quantidade, estoque_minimo, preco");
 
         if (error) {
@@ -53,6 +67,19 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         const valorTotal = data?.reduce((acc, curr) => acc + curr.quantidade * curr.preco, 0) || 0;
         const estoqueBaixo = data?.filter((p) => p.quantidade <= p.estoque_minimo && p.quantidade > 0).length || 0;
         const estoqueZerado = data?.filter((p) => p.quantidade === 0).length || 0;
+
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-resumo-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: produtos (agregação)",
+                sublabel: `${totalUnicos} SKUs únicos | ${totalItens} itens totais`,
+                status: "success",
+                iconType: "database",
+                metadata: { totalUnicos, totalItens, valorTotal, estoqueBaixo, estoqueZerado },
+            });
+        }
 
         return { totalUnicos, totalItens, valorTotal, estoqueBaixo, estoqueZerado };
     },
@@ -147,7 +174,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         return ranking;
     },
 
-    analisar_previsao_ruptura: async function (args) {
+    analisar_previsao_ruptura: async function (args: any, parentNodeId?: string) {
         const diasHistorico = args.dias_historico && args.dias_historico > 0 ? Number(args.dias_historico) : 30;
         const limite = args.limite && args.limite > 0 ? Number(args.limite) : 5;
 
@@ -224,6 +251,31 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
                     statusRisco = "SEM_CONSUMO_REGISTRADO";
                 }
 
+                const { data: itensEmAberto } = await supabase
+                    .from("itens_pedido")
+                    .select("quantidade, pedidos!inner(id, status, fornecedores(razao_social, nome_fantasia))")
+                    .eq("produto_id", prod.id)
+                    .in("pedidos.status", ["rascunho", "enviado"]);
+
+                const qtdEmPedidosAbertos = (itensEmAberto || []).reduce(
+                    (acc: number, curr: any) => acc + (curr.quantidade || 0),
+                    0,
+                );
+
+                const pedidosInfo = (itensEmAberto || []).map((it: any) => {
+                    const forn =
+                        it.pedidos?.fornecedores?.nome_fantasia ||
+                        it.pedidos?.fornecedores?.razao_social ||
+                        "Fornecedor";
+                    return `${it.quantidade} un. (Status: ${it.pedidos?.status} | ${forn})`;
+                });
+
+                const saldoProjetado = prod.quantidade + qtdEmPedidosAbertos;
+                let diasAteRupturaProjetada: number | null = null;
+                if (consumoMedioDiario > 0) {
+                    diasAteRupturaProjetada = Math.floor(saldoProjetado / consumoMedioDiario);
+                }
+
                 return {
                     produto: prod.nome,
                     sku: prod.sku,
@@ -236,9 +288,58 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
                     dias_ate_ruptura: diasParaRuptura,
                     data_estimada_esgotamento: dataEstimadaEsgotamento,
                     status_risco: statusRisco,
+                    pedidos_em_andamento: {
+                        quantidade_a_receber: qtdEmPedidosAbertos,
+                        pedidos: pedidosInfo,
+                        saldo_projetado: saldoProjetado,
+                        dias_cobertura_projetada: diasAteRupturaProjetada,
+                    },
                 };
             }),
         );
+
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-rup-prod-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: produtos",
+                sublabel: `${produtos.length} produtos avaliados`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "produtos", total: produtos.length },
+            });
+            tracer.updateStep({
+                id: `db-rup-movs-${Date.now() + 1}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: movimentacoes",
+                sublabel: `Histórico de saídas (${diasHistorico} dias)`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "movimentacoes", tipo: "saida", dias: diasHistorico },
+            });
+            tracer.updateStep({
+                id: `db-rup-pedidos-${Date.now() + 2}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: itens_pedido",
+                sublabel: "Verificação de ordens de compra em aberto",
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "itens_pedido", status: ["rascunho", "enviado"] },
+            });
+            tracer.updateStep({
+                id: `calc-rup-${Date.now() + 3}`,
+                parentId: parentNodeId,
+                stepType: "computation",
+                label: "Cálculo Determinístico",
+                sublabel: "Consumo diário médio & Saldo projetado",
+                status: "success",
+                iconType: "calculator",
+                metadata: { formula: "consumo_medio = saidas / dias; saldo_projetado = estoque + pedidos" },
+            });
+        }
 
         return {
             periodo_base_dias: diasHistorico,
@@ -247,7 +348,160 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         };
     },
 
-    consultar_pedidos: async function (args) {
+    consultar_curva_abc: async function (args: any, parentNodeId?: string) {
+        const diasHistorico = args.dias_historico && args.dias_historico > 0 ? Number(args.dias_historico) : 90;
+        const limite = args.limite && args.limite > 0 ? Number(args.limite) : 10;
+
+        const dataLimite = new Date();
+        dataLimite.setDate(dataLimite.getDate() - diasHistorico);
+        const dataLimiteIso = dataLimite.toISOString();
+
+        const { data: movs, error: movError } = await supabase
+            .from("movimentacoes")
+            .select("produto_id, quantidade, motivo")
+            .eq("tipo", "saida")
+            .gte("criada_em", dataLimiteIso);
+
+        if (movError) {
+            console.error("Erro ao consultar movimentações para Curva ABC:", movError);
+            return { erro: "Falha ao calcular curva ABC." };
+        }
+
+        const { data: produtos, error: prodError } = await supabase
+            .from("produtos")
+            .select("id, nome, sku, preco, quantidade, estoque_minimo, localizacao");
+
+        if (prodError || !produtos) {
+            return { erro: "Falha ao consultar produtos para Curva ABC." };
+        }
+
+        const saidasPorProduto: Record<string, number> = {};
+        for (const m of movs || []) {
+            if (!m.produto_id) continue;
+            const mot = (m.motivo || "").toLowerCase();
+            if (/(perda|avaria|descarte|vencid|quebra)/i.test(mot)) continue;
+            saidasPorProduto[m.produto_id] = (saidasPorProduto[m.produto_id] || 0) + (m.quantidade || 0);
+        }
+
+        const itensComValor: Array<{
+            id: string;
+            nome: string;
+            sku: string;
+            preco_unitario: number;
+            estoque_atual: number;
+            localizacao: string;
+            quantidade_saida: number;
+            valor_movimentado: number;
+        }> = [];
+
+        for (const prod of produtos) {
+            const qtdSaida = saidasPorProduto[prod.id] || 0;
+            const valor = qtdSaida * (prod.preco || 0);
+            if (qtdSaida > 0) {
+                itensComValor.push({
+                    id: prod.id,
+                    nome: prod.nome,
+                    sku: prod.sku,
+                    preco_unitario: prod.preco,
+                    estoque_atual: prod.quantidade,
+                    localizacao: prod.localizacao || "Não informada",
+                    quantidade_saida: qtdSaida,
+                    valor_movimentado: Number(valor.toFixed(2)),
+                });
+            }
+        }
+
+        itensComValor.sort((a, b) => b.valor_movimentado - a.valor_movimentado);
+        const valorTotalPeriodo = itensComValor.reduce((acc, curr) => acc + curr.valor_movimentado, 0);
+
+        if (valorTotalPeriodo === 0) {
+            return {
+                mensagem: `Nenhuma saída comercial registrada nos últimos ${diasHistorico} dias.`,
+                periodo_dias: diasHistorico,
+                classificacao: [],
+            };
+        }
+
+        let acumulado = 0;
+        let contagemA = 0;
+        let contagemB = 0;
+        let contagemC = 0;
+
+        const resultadoClassificado = itensComValor.map((item, index) => {
+            acumulado += item.valor_movimentado;
+            const percIndividual = Number(((item.valor_movimentado / valorTotalPeriodo) * 100).toFixed(2));
+            const percAcumulado = Number(((acumulado / valorTotalPeriodo) * 100).toFixed(2));
+
+            let classe: "A" | "B" | "C" = "C";
+            if (percAcumulado <= 80 || (index === 0 && percAcumulado > 80)) {
+                classe = "A";
+                contagemA++;
+            } else if (percAcumulado <= 95) {
+                classe = "B";
+                contagemB++;
+            } else {
+                classe = "C";
+                contagemC++;
+            }
+
+            return {
+                ...item,
+                percentual_valor: percIndividual,
+                percentual_acumulado: percAcumulado,
+                classe_abc: classe,
+            };
+        });
+
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-abc-movs-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: movimentacoes",
+                sublabel: `${movs?.length || 0} saídas nos últimos ${diasHistorico} dias`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "movimentacoes", total: movs?.length },
+            });
+            tracer.updateStep({
+                id: `db-abc-prod-${Date.now() + 1}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: produtos",
+                sublabel: `${produtos?.length || 0} produtos e preços unitários`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "produtos", total: produtos?.length },
+            });
+            tracer.updateStep({
+                id: `calc-abc-${Date.now() + 2}`,
+                parentId: parentNodeId,
+                stepType: "computation",
+                label: "Algoritmo Curva ABC",
+                sublabel: `Classificação: ${contagemA} Classe A, ${contagemB} Classe B, ${contagemC} Classe C`,
+                status: "success",
+                iconType: "calculator",
+                metadata: {
+                    valor_total: valorTotalPeriodo,
+                    distribuicao: { classe_A: contagemA, classe_B: contagemB, classe_C: contagemC },
+                },
+            });
+        }
+
+        return {
+            periodo_dias: diasHistorico,
+            valor_total_movimentado: Number(valorTotalPeriodo.toFixed(2)),
+            total_produtos_com_giro: itensComValor.length,
+            distribuicao_resumo: {
+                classe_A: `${contagemA} itens (até 80% do valor total movimentado - controle crítico)`,
+                classe_B: `${contagemB} itens (~15% do valor movimentado - controle moderado)`,
+                classe_C: `${contagemC} itens (~5% do valor movimentado - controle simplificado)`,
+            },
+            produtos_mais_relevantes: resultadoClassificado.slice(0, limite),
+        };
+    },
+
+    consultar_pedidos: async function (args: any, parentNodeId?: string) {
         let query = supabase
             .from("pedidos")
             .select("id, status, valor_total, criado_em, fornecedores(razao_social, nome_fantasia)")
@@ -282,10 +536,23 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar pedidos." };
         }
 
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-pedidos-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: pedidos",
+                sublabel: `SELECT ${data?.length || 0} pedidos de compra`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "pedidos", filtro: args, total: data?.length },
+            });
+        }
+
         return data;
     },
 
-    consultar_pedidos_venda: async function (args) {
+    consultar_pedidos_venda: async function (args, parentNodeId) {
         let query = supabase
             .from("pedidos_venda")
             .select("id, numero, status, valor_total, criado_em, clientes(nome)")
@@ -302,11 +569,24 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar pedidos de venda." };
         }
 
+        if (parentNodeId) {
+            tracer.updateStep({
+                id: `db-pedidos-venda-${Date.now()}`,
+                parentId: parentNodeId,
+                stepType: "db_query",
+                label: "PostgreSQL: pedidos_venda",
+                sublabel: `SELECT ${data?.length || 0} pedidos de venda`,
+                status: "success",
+                iconType: "database",
+                metadata: { tabela: "pedidos_venda", filtro: args, total: data?.length },
+            });
+        }
+
         return data;
     },
 };
 
-export async function handleFunctionCall(call: any) {
+export async function handleFunctionCall(call: any, parentNodeId?: string) {
     const handler = handlers[call.name];
-    return handler ? handler(call.args) : { erro: "Ferramenta não encontrada." };
+    return handler ? handler(call.args, parentNodeId) : { erro: "Ferramenta não encontrada." };
 }

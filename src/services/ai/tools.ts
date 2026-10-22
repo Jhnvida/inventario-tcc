@@ -128,7 +128,7 @@ export const tools = [
         function: {
             name: "analisar_previsao_ruptura",
             description:
-                "Calcula a previsão de ruptura de estoque (consumo médio diário, dias restantes até zerar e data prevista de esgotamento) a partir do histórico real de movimentações de saída dos produtos.",
+                "Calcula a previsão determinística de ruptura de estoque (consumo médio diário, dias restantes até zerar, data prevista de esgotamento e pedidos de reposição em andamento) a partir do histórico real de saídas e compras pendentes.",
             parameters: {
                 type: "object",
                 properties: {
@@ -146,6 +146,27 @@ export const tools = [
                         type: "number",
                         description:
                             "Opcional. Quantidade de produtos a retornar na análise caso não especificado termo_busca (padrão: 5).",
+                    },
+                },
+            },
+        },
+    },
+    {
+        type: "function",
+        function: {
+            name: "consultar_curva_abc",
+            description:
+                "Classifica os produtos do estoque utilizando a metodologia da Curva ABC com base no valor financeiro movimentado (saídas x preço unitário). Identifica produtos Classe A (80% do valor acumulado), Classe B (15% seguintes) e Classe C (5% restantes).",
+            parameters: {
+                type: "object",
+                properties: {
+                    dias_historico: {
+                        type: "number",
+                        description: "Opcional. Número de dias de saídas para análise (padrão: 90 dias).",
+                    },
+                    limite: {
+                        type: "number",
+                        description: "Opcional. Quantidade máxima de produtos a listar detalhadamente (padrão: 10).",
                     },
                 },
             },

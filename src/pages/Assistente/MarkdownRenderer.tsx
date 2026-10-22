@@ -1,3 +1,5 @@
+import { Check, Copy, Download, Table } from "lucide-react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 interface TableBlock {
@@ -113,6 +115,141 @@ interface MarkdownRendererProps {
     content: string;
 }
 
+function formatCsvCell(cell: string): string {
+    const clean = cell.replace(/[*_`]/g, "").trim();
+    if (clean.includes(";") || clean.includes("\n") || clean.includes('"')) {
+        return `"${clean.replace(/"/g, '""')}"`;
+    }
+    return clean;
+}
+
+function TableRenderer({ block }: { block: TableBlock }) {
+    const [copied, setCopied] = useState(false);
+
+    function generateCsv(): string {
+        const headerLine = block.headers.map(formatCsvCell).join(";");
+        const rowLines = block.rows.map((row) => row.map(formatCsvCell).join(";"));
+        return [headerLine, ...rowLines].join("\r\n");
+    }
+
+    async function handleCopy() {
+        try {
+            await navigator.clipboard.writeText(generateCsv());
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Falha ao copiar CSV:", err);
+        }
+    }
+
+    function handleDownload() {
+        const csv = "\uFEFF" + generateCsv();
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `tabela_inventario_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    return (
+        <div className="my-2.5 overflow-hidden rounded-md border border-slate-200 bg-white shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-3 py-1.5 text-[11px] text-slate-500">
+                <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                    <Table size={13} className="text-slate-400" />
+                    <span>Dados tabulares</span>
+                    <span className="text-[10px] text-slate-400">({block.rows.length} linhas)</span>
+                </span>
+                <div className="flex items-center gap-1">
+                    <button
+                        type="button"
+                        onClick={handleCopy}
+                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+                        title="Copiar tabela formatada para Excel/CSV"
+                    >
+                        {copied ? (
+                            <>
+                                <Check size={12} className="text-emerald-600" />
+                                <span className="text-emerald-600 font-medium">Copiado</span>
+                            </>
+                        ) : (
+                            <>
+                                <Copy size={12} />
+                                <span>Copiar CSV</span>
+                            </>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDownload}
+                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+                        title="Baixar arquivo .CSV compatível com Excel"
+                    >
+                        <Download size={12} />
+                        <span>Baixar</span>
+                    </button>
+                </div>
+            </div>
+            <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-600 font-medium">
+                            {block.headers.map((header, hIdx) => (
+                                <th
+                                    key={hIdx}
+                                    className="px-3 py-2 font-medium"
+                                    style={{ textAlign: block.alignments[hIdx] || "left" }}
+                                >
+                                    <ReactMarkdown
+                                        components={{
+                                            p: ({ children }) => <>{children}</>,
+                                            strong: ({ children }) => (
+                                                <span className="font-semibold text-slate-900">{children}</span>
+                                            ),
+                                        }}
+                                    >
+                                        {header}
+                                    </ReactMarkdown>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {block.rows.map((row, rIdx) => (
+                            <tr key={rIdx} className="hover:bg-slate-50/60 transition-colors">
+                                {row.map((cell, cIdx) => (
+                                    <td
+                                        key={cIdx}
+                                        className="px-3 py-2 text-slate-700"
+                                        style={{ textAlign: block.alignments[cIdx] || "left" }}
+                                    >
+                                        <ReactMarkdown
+                                            components={{
+                                                p: ({ children }) => <>{children}</>,
+                                                strong: ({ children }) => (
+                                                    <span className="font-medium text-slate-900">{children}</span>
+                                                ),
+                                                code: ({ children }) => (
+                                                    <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-800 border border-slate-200">
+                                                        {children}
+                                                    </code>
+                                                ),
+                                            }}
+                                        >
+                                            {cell}
+                                        </ReactMarkdown>
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     if (!content.includes("|")) {
         return <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>;
@@ -131,65 +268,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     );
                 }
 
-                return (
-                    <div key={idx} className="my-2.5 overflow-x-auto rounded-md border border-slate-200 bg-white">
-                        <table className="w-full border-collapse text-left text-xs">
-                            <thead>
-                                <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-medium">
-                                    {block.headers.map((header, hIdx) => (
-                                        <th
-                                            key={hIdx}
-                                            className="px-3 py-2 font-medium"
-                                            style={{ textAlign: block.alignments[hIdx] || "left" }}
-                                        >
-                                            <ReactMarkdown
-                                                components={{
-                                                    p: ({ children }) => <>{children}</>,
-                                                    strong: ({ children }) => (
-                                                        <span className="font-semibold text-slate-900">{children}</span>
-                                                    ),
-                                                }}
-                                            >
-                                                {header}
-                                            </ReactMarkdown>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {block.rows.map((row, rIdx) => (
-                                    <tr key={rIdx} className="hover:bg-slate-50/60 transition-colors">
-                                        {row.map((cell, cIdx) => (
-                                            <td
-                                                key={cIdx}
-                                                className="px-3 py-2 text-slate-700"
-                                                style={{ textAlign: block.alignments[cIdx] || "left" }}
-                                            >
-                                                <ReactMarkdown
-                                                    components={{
-                                                        p: ({ children }) => <>{children}</>,
-                                                        strong: ({ children }) => (
-                                                            <span className="font-medium text-slate-900">
-                                                                {children}
-                                                            </span>
-                                                        ),
-                                                        code: ({ children }) => (
-                                                            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-800 border border-slate-200">
-                                                                {children}
-                                                            </code>
-                                                        ),
-                                                    }}
-                                                >
-                                                    {cell}
-                                                </ReactMarkdown>
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                );
+                return <TableRenderer key={idx} block={block} />;
             })}
         </div>
     );

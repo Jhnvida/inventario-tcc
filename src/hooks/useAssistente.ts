@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { systemPrompt } from "../services/ai/prompts";
+import { classifyQueryIntent, REFUSAL_MESSAGE, sanitizeAndValidateResponse } from "../services/ai/scopeGuardrail";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
 import { tools } from "../services/ai/tools";
-import { tracer } from "../services/ai/tracer";
 
 export type Message = {
     id: string;
@@ -26,6 +26,8 @@ export function useAssistente() {
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const historyRef = useRef<ChatMessage[]>([{ role: "system", content: systemPrompt }]);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const generationIdRef = useRef<number>(0);
 
     function addUserMessage(text: string) {
         historyRef.current.push({ role: "user", content: text });
@@ -33,7 +35,6 @@ export function useAssistente() {
     }
 
     function addAiMessage(text: string) {
-        historyRef.current.push({ role: "assistant", content: text });
         setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender: "ai" }]);
     }
 
@@ -42,7 +43,15 @@ export function useAssistente() {
     }
 
     function setUiFeedback(id: string, text: string) {
-        setMessages((prev) => [...prev, { id, text, sender: "ai" }]);
+        setMessages((prev) => {
+            const index = prev.findIndex((m) => m.id === id);
+            if (index >= 0) {
+                const next = [...prev];
+                next[index] = { ...next[index], text };
+                return next;
+            }
+            return [...prev, { id, text, sender: "ai" }];
+        });
     }
 
     function removeUiFeedback(id: string) {
@@ -52,16 +61,24 @@ export function useAssistente() {
     async function streamOllamaChat(
         chatHistory: ChatMessage[],
         onToken?: (token: string) => void,
+        signal?: AbortSignal,
+        enableTools = true,
     ): Promise<{ message: ChatMessage }> {
+        const bodyPayload: any = {
+            model: "llama3.2:3b",
+            messages: chatHistory,
+            stream: true,
+        };
+
+        if (enableTools) {
+            bodyPayload.tools = tools;
+        }
+
         const response = await fetch("http://localhost:11434/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "llama3.2:3b",
-                messages: chatHistory,
-                tools,
-                stream: true,
-            }),
+            body: JSON.stringify(bodyPayload),
+            signal,
         });
 
         if (!response.ok) {
@@ -80,6 +97,11 @@ export function useAssistente() {
         const toolCallsMap = new Map<number, any>();
 
         while (true) {
+            if (signal?.aborted) {
+                reader.cancel();
+                throw new DOMException("Operação cancelada pelo usuário", "AbortError");
+            }
+
             const { done, value } = await reader.read();
             if (done) break;
 
@@ -151,33 +173,25 @@ export function useAssistente() {
     }
 
     async function sendMessage(text: string) {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const currentController = new AbortController();
+        abortControllerRef.current = currentController;
+        const currentGenId = ++generationIdRef.current;
+
         addUserMessage(text);
         setIsLoading(true);
 
-        const traceStartTime = performance.now();
-        tracer.startTrace(text);
+        const intent = classifyQueryIntent(text);
 
-        tracer.updateStep({
-            id: "user-input",
-            stepType: "user_input",
-            label: "Entrada do Usuário",
-            sublabel: text,
-            status: "success",
-            iconType: "user",
-        });
+        if (intent === "OUT_OF_SCOPE") {
+            historyRef.current.push({ role: "assistant", content: REFUSAL_MESSAGE });
+            addAiMessage(REFUSAL_MESSAGE);
+            setIsLoading(false);
+            return;
+        }
 
-        const tDecisionStart = performance.now();
-        tracer.updateStep({
-            id: "llm-decision",
-            parentId: "user-input",
-            stepType: "llm_decision",
-            label: "Llama 3.2: Avaliação de Intenção",
-            sublabel: "Avaliando necessidade de consulta ao banco...",
-            status: "running",
-            iconType: "bot",
-        });
-
-        let lastNodeId = "llm-decision";
         const tempToolId = "temp-tool-msg";
 
         try {
@@ -185,6 +199,7 @@ export function useAssistente() {
             let currentStreamText = "";
 
             const handleToken = (token: string) => {
+                if (currentGenId !== generationIdRef.current) return;
                 removeUiFeedback(tempToolId);
                 if (!streamingMsgId) {
                     streamingMsgId = Date.now().toString();
@@ -201,31 +216,42 @@ export function useAssistente() {
                 }
             };
 
-            let response = await streamOllamaChat(historyRef.current, handleToken);
-            let responseMessage = response.message;
-            const tDecisionMs = Math.round(performance.now() - tDecisionStart);
+            const enableTools = intent === "IN_SCOPE";
+            let response = await streamOllamaChat(
+                historyRef.current,
+                handleToken,
+                currentController.signal,
+                enableTools,
+            );
+            if (currentGenId !== generationIdRef.current) return;
 
-            if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
-                tracer.updateStep({
-                    id: "llm-decision",
-                    status: "success",
-                    durationMs: tDecisionMs,
-                    sublabel: `${responseMessage.tool_calls.length} consulta(s) necessária(s)`,
-                });
-            } else {
-                tracer.updateStep({
-                    id: "llm-decision",
-                    status: "success",
-                    durationMs: tDecisionMs,
-                    sublabel: "Resposta direta sem consultas adicionais",
-                });
-            }
+            let responseMessage = response.message;
 
             while (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+                if (currentGenId !== generationIdRef.current) return;
+
+                const refusalCall = responseMessage.tool_calls.find(
+                    (tc: any) => tc.function?.name === "recusar_fora_do_escopo",
+                );
+                if (refusalCall) {
+                    removeUiFeedback(tempToolId);
+                    historyRef.current.push({ role: "assistant", content: REFUSAL_MESSAGE });
+                    if (streamingMsgId) {
+                        setMessages((prev) =>
+                            prev.map((m) => (m.id === streamingMsgId ? { ...m, text: REFUSAL_MESSAGE } : m)),
+                        );
+                    } else {
+                        addAiMessage(REFUSAL_MESSAGE);
+                    }
+                    setIsLoading(false);
+                    return;
+                }
+
                 setUiFeedback(tempToolId, "Consultando dados no sistema...");
                 historyRef.current.push(responseMessage);
 
                 for (const toolCall of responseMessage.tool_calls) {
+                    if (currentGenId !== generationIdRef.current) return;
                     const functionName = toolCall.function.name;
                     const functionArgs = toolCall.function.arguments;
                     const args = typeof functionArgs === "string" ? JSON.parse(functionArgs) : functionArgs;
@@ -233,108 +259,39 @@ export function useAssistente() {
                     const readableName = functionName.replace(/_/g, " ");
                     setUiFeedback(tempToolId, `Consultando dados (${readableName})...`);
 
-                    const toolNodeId = `tool-${functionName}-${Date.now()}`;
-                    const tToolStart = performance.now();
+                    const result = await handleFunctionCall({ name: functionName, args });
+                    if (currentGenId !== generationIdRef.current) return;
 
-                    tracer.updateStep({
-                        id: toolNodeId,
-                        parentId: lastNodeId,
-                        stepType: "tool_call",
-                        label: `Ferramenta: ${readableName}`,
-                        sublabel: JSON.stringify(args),
-                        status: "running",
-                        iconType: "tool",
-                        metadata: { functionName, args },
-                    });
-
-                    const result = await handleFunctionCall({ name: functionName, args }, toolNodeId);
-                    const tToolMs = Math.round(performance.now() - tToolStart);
-
-                    tracer.updateStep({
-                        id: toolNodeId,
-                        status: "success",
-                        durationMs: tToolMs,
-                        sublabel: `Concluído em ${tToolMs}ms`,
-                        metadata: {
-                            functionName,
-                            args,
-                            resultSummary: Array.isArray(result) ? `${result.length} registros` : result,
-                        },
-                    });
-
-                    lastNodeId = toolNodeId;
                     historyRef.current.push({ role: "tool", content: JSON.stringify(result) });
                 }
 
                 streamingMsgId = null;
                 currentStreamText = "";
 
-                const synthNodeId = `llm-synthesis-${Date.now()}`;
-                const tSynthStart = performance.now();
+                response = await streamOllamaChat(historyRef.current, handleToken, currentController.signal, true);
+                if (currentGenId !== generationIdRef.current) return;
 
-                tracer.updateStep({
-                    id: synthNodeId,
-                    parentId: lastNodeId,
-                    stepType: "llm_synthesis",
-                    label: "Llama 3.2: Síntese e Formatação",
-                    sublabel: "Formatando tabelas e resposta determinística...",
-                    status: "running",
-                    iconType: "bot",
-                });
-
-                response = await streamOllamaChat(historyRef.current, handleToken);
                 responseMessage = response.message;
-                const tSynthMs = Math.round(performance.now() - tSynthStart);
-
-                tracer.updateStep({
-                    id: synthNodeId,
-                    status: "success",
-                    durationMs: tSynthMs,
-                    sublabel: `Síntese concluída em ${tSynthMs}ms`,
-                });
-
-                lastNodeId = synthNodeId;
             }
 
+            if (currentGenId !== generationIdRef.current) return;
             removeUiFeedback(tempToolId);
 
             if (responseMessage.content) {
-                historyRef.current.push({ role: "assistant", content: responseMessage.content });
+                const sanitized = sanitizeAndValidateResponse(responseMessage.content);
+                historyRef.current.push({ role: "assistant", content: sanitized });
                 if (streamingMsgId) {
-                    setMessages((prev) =>
-                        prev.map((m) => (m.id === streamingMsgId ? { ...m, text: responseMessage.content } : m)),
-                    );
+                    setMessages((prev) => prev.map((m) => (m.id === streamingMsgId ? { ...m, text: sanitized } : m)));
                 } else {
-                    addAiMessage(responseMessage.content);
+                    addAiMessage(sanitized);
                 }
             }
-
-            const totalPipelineMs = Math.round(performance.now() - traceStartTime);
-            tracer.updateStep({
-                id: "final-output",
-                parentId: lastNodeId,
-                stepType: "output",
-                label: "Resposta Entregue",
-                sublabel: `Concluído em ${(totalPipelineMs / 1000).toFixed(2)}s`,
-                status: "success",
-                iconType: "check",
-                durationMs: totalPipelineMs,
-            });
-            tracer.finishTrace(true, totalPipelineMs);
         } catch (error: any) {
+            if (error.name === "AbortError" || currentGenId !== generationIdRef.current) {
+                return;
+            }
             console.error("Erro no chat:", error);
             removeUiFeedback(tempToolId);
-
-            tracer.updateStep({
-                id: "error-node",
-                parentId: lastNodeId,
-                stepType: "output",
-                label: "Falha na Execução",
-                sublabel: error.message || "Erro desconhecido",
-                status: "error",
-                iconType: "alert",
-            });
-            tracer.finishTrace(false);
 
             let errorMessage = "Desculpe, ocorreu um erro de processamento.";
 
@@ -345,12 +302,20 @@ export function useAssistente() {
 
             addErrorMessage(errorMessage);
         } finally {
-            setIsLoading(false);
+            if (currentGenId === generationIdRef.current) {
+                setIsLoading(false);
+            }
         }
     }
 
     function clearMessages() {
-        tracer.clear();
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+        generationIdRef.current++;
+        setIsLoading(false);
+        historyRef.current = [{ role: "system", content: systemPrompt }];
         setMessages([
             {
                 id: "initial",
@@ -358,7 +323,6 @@ export function useAssistente() {
                 sender: "ai",
             },
         ]);
-        historyRef.current = [{ role: "system", content: systemPrompt }];
     }
 
     return { messages, isLoading, sendMessage, clearMessages };

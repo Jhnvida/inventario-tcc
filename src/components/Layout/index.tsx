@@ -258,17 +258,25 @@ export function Layout() {
                     </div>
                 </header>
 
-                <main
-                    className={`flex-1 min-h-0 bg-slate-50 ${
-                        isAssistente
-                            ? "overflow-hidden p-2 sm:p-3 lg:p-4 flex flex-col"
-                            : "overflow-y-auto p-4 sm:p-6 lg:p-8"
-                    }`}
-                >
-                    <div className={isAssistente ? "w-full h-full flex flex-col min-h-0" : "max-w-6xl mx-auto w-full"}>
-                        <Outlet />
-                    </div>
-                </main>
+                <div className="flex-1 flex min-h-0 overflow-hidden relative">
+                    <main
+                        className={`flex-1 min-h-0 bg-slate-50 transition-all duration-300 ${
+                            isAssistente
+                                ? "overflow-hidden p-2 sm:p-3 lg:p-4 flex flex-col"
+                                : "overflow-y-auto p-4 sm:p-6 lg:p-8"
+                        }`}
+                    >
+                        <div
+                            className={
+                                isAssistente ? "w-full h-full flex flex-col min-h-0" : "max-w-6xl mx-auto w-full"
+                            }
+                        >
+                            <Outlet />
+                        </div>
+                    </main>
+
+                    <div id="app-sidebar-root" className="flex shrink-0 min-h-0 h-full" />
+                </div>
             </div>
         </div>
     );

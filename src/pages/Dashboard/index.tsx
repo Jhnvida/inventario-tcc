@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
+import { ArrowDownRight, ArrowLeftRight, ArrowRight, ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -167,20 +167,24 @@ export function Dashboard() {
                                                         -{deficit} un
                                                     </td>
                                                     <td className="px-5 py-3 text-right">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="secondary"
-                                                            onClick={() =>
-                                                                navigate("/movimentacoes", {
-                                                                    state: {
-                                                                        preselectedProdutoId: item.id,
-                                                                        abrirModal: true,
-                                                                    },
-                                                                })
-                                                            }
-                                                        >
-                                                            Repor
-                                                        </Button>
+                                                        <div className="flex items-center justify-end">
+                                                            <button
+                                                                type="button"
+                                                                className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                                onClick={() =>
+                                                                    navigate("/movimentacoes", {
+                                                                        state: {
+                                                                            preselectedProdutoId: item.id,
+                                                                            abrirModal: true,
+                                                                        },
+                                                                    })
+                                                                }
+                                                                title="Repor estoque"
+                                                                aria-label={`Repor estoque do produto ${item.nome}`}
+                                                            >
+                                                                <ArrowLeftRight size={16} />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

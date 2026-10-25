@@ -165,12 +165,12 @@ function TableRenderer({ block }: { block: TableBlock }) {
                     <button
                         type="button"
                         onClick={handleCopy}
-                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                         title="Copiar tabela formatada para Excel/CSV"
                     >
                         {copied ? (
                             <>
-                                <Check size={12} className="text-emerald-600" />
+                                <Check size={12} className="text-emerald-600 animate-scale-in" />
                                 <span className="text-emerald-600 font-medium">Copiado</span>
                             </>
                         ) : (
@@ -183,7 +183,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
                     <button
                         type="button"
                         onClick={handleDownload}
-                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-200 hover:text-slate-900 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                         title="Baixar arquivo .CSV compatível com Excel"
                     >
                         <Download size={12} />
@@ -217,7 +217,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {block.rows.map((row, rIdx) => (
-                            <tr key={rIdx} className="hover:bg-slate-50/60 transition-colors">
+                            <tr key={rIdx} className="hover:bg-slate-50/75 transition-colors duration-150 ease-out">
                                 {row.map((cell, cIdx) => (
                                     <td
                                         key={cIdx}

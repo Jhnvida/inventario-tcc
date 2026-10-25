@@ -126,7 +126,10 @@ export function Categorias() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {categorias.map((cat) => (
-                                        <tr key={cat.id} className="hover:bg-slate-50/60 transition-colors">
+                                        <tr
+                                            key={cat.id}
+                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                        >
                                             <td className="px-5 py-3">
                                                 <span className="font-medium text-slate-900">{cat.nome}</span>
                                             </td>
@@ -134,7 +137,7 @@ export function Categorias() {
                                                 <div className="flex items-center justify-end gap-1">
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() => handleOpenEdit(cat)}
                                                         title="Editar categoria"
                                                     >
@@ -142,7 +145,7 @@ export function Categorias() {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() => handleDelete(cat.id, cat.nome)}
                                                         title="Excluir categoria"
                                                     >
@@ -176,7 +179,7 @@ export function Categorias() {
             >
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                             <AlertCircle size={15} className="shrink-0 text-red-600" />
                             <span>{error}</span>
                         </div>

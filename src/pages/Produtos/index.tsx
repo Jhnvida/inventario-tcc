@@ -137,7 +137,10 @@ export function Produtos() {
                                     {produtos.map((produto) => {
                                         const isCritico = produto.quantidade <= produto.estoque_minimo;
                                         return (
-                                            <tr key={produto.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <tr
+                                                key={produto.id}
+                                                className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                            >
                                                 <td className="px-5 py-3">
                                                     <div className="font-medium text-slate-900">{produto.nome}</div>
                                                     {produto.localizacao && (
@@ -171,7 +174,7 @@ export function Produtos() {
                                                     <div className="flex items-center justify-center gap-1">
                                                         <button
                                                             type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                             onClick={() => handleOpenEdit(produto)}
                                                             title="Editar produto"
                                                         >
@@ -179,7 +182,7 @@ export function Produtos() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                             onClick={() => handleDelete(produto.id, produto.nome)}
                                                             title="Excluir produto"
                                                         >

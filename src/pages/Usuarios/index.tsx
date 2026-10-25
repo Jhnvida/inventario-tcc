@@ -107,7 +107,10 @@ export function Usuarios() {
                                             .join("")
                                             .toUpperCase();
                                         return (
-                                            <tr key={user.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <tr
+                                                key={user.id}
+                                                className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                            >
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2.5">
                                                         <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-medium text-xs flex items-center justify-center shrink-0">
@@ -128,7 +131,7 @@ export function Usuarios() {
                                                     <div className="flex items-center justify-end gap-1">
                                                         <button
                                                             type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                             onClick={() => handleOpenEdit(user)}
                                                             title="Editar nome do operador"
                                                         >
@@ -136,7 +139,7 @@ export function Usuarios() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                             onClick={() => handleDelete(user.id, user.nome)}
                                                             title="Excluir operador"
                                                         >
@@ -171,7 +174,7 @@ export function Usuarios() {
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                             <AlertCircle size={15} className="shrink-0" />
                             <span>{error}</span>
                         </div>

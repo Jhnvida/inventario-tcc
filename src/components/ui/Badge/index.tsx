@@ -23,7 +23,7 @@ export function Badge({ children, variant = "neutral", className = "" }: BadgePr
 
     return (
         <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border select-none ${style} ${className}`}
+            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border select-none transition-colors duration-150 ease-out ${style} ${className}`}
         >
             {children}
         </span>

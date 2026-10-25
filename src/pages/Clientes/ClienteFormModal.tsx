@@ -147,7 +147,7 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                         <AlertCircle size={15} className="shrink-0 text-red-600" />
                         <span>{error}</span>
                     </div>
@@ -158,7 +158,7 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
                                 tipoPessoa === "PF"
                                     ? "bg-slate-900 text-white border-slate-900"
                                     : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
@@ -171,7 +171,7 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
 
                         <button
                             type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
+                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
                                 tipoPessoa === "PJ"
                                     ? "bg-slate-900 text-white border-slate-900"
                                     : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"

@@ -143,7 +143,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                         <AlertCircle size={15} className="shrink-0 text-red-600" />
                         <span>{error}</span>
                     </div>
@@ -245,7 +245,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
 
                                     <button
                                         type="button"
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                         onClick={() => handleRemoverItem(idx)}
                                         title="Remover item"
                                     >

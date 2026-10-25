@@ -133,22 +133,25 @@ export function Layout() {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans antialiased">
-            {isMobile && isSidebarOpen && (
+            {isMobile && (
                 <div
-                    className="fixed inset-0 z-40 bg-slate-900/30 transition-opacity"
+                    className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs transition-opacity duration-280 ease-out ${
+                        isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+                    }`}
                     onClick={() => setSidebarOpen(false)}
+                    aria-hidden="true"
                 />
             )}
 
             <aside
-                className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col shrink-0 bg-white border-r border-slate-200 transition-all duration-200 ease-in-out ${
+                className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col shrink-0 bg-white border-r border-slate-200 transition-all duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     isSidebarOpen ? "w-60 translate-x-0" : isMobile ? "-translate-x-full w-60" : "w-16 translate-x-0"
                 }`}
             >
                 <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200">
                     <div className="flex items-center gap-2.5 overflow-hidden">
                         {isSidebarOpen && (
-                            <span className="text-sm font-semibold tracking-tight text-slate-900 truncate">
+                            <span className="text-sm font-semibold tracking-tight text-slate-900 truncate animate-fade-in">
                                 Gestão de Inventário
                             </span>
                         )}
@@ -157,9 +160,10 @@ export function Layout() {
                     {!isMobile && (
                         <button
                             type="button"
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                             onClick={() => setSidebarOpen(!isSidebarOpen)}
                             title={isSidebarOpen ? "Recolher menu lateral" : "Expandir menu lateral"}
+                            aria-label={isSidebarOpen ? "Recolher menu lateral" : "Expandir menu lateral"}
                         >
                             {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                         </button>
@@ -168,7 +172,7 @@ export function Layout() {
                     {isMobile && (
                         <button
                             type="button"
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                             onClick={() => setSidebarOpen(false)}
                             aria-label="Fechar menu"
                         >
@@ -181,7 +185,7 @@ export function Layout() {
                     {navSections.map((section) => (
                         <div key={section.title} className="space-y-1">
                             {isSidebarOpen && (
-                                <div className="px-2.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                                <div className="px-2.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 animate-fade-in">
                                     {section.title}
                                 </div>
                             )}
@@ -192,7 +196,7 @@ export function Layout() {
                                         to={item.path}
                                         title={!isSidebarOpen ? item.label : undefined}
                                         className={({ isActive }) =>
-                                            `flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-medium transition-colors ${
+                                            `flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-medium transition-all duration-150 ease-out active:scale-[0.99] ${
                                                 isActive
                                                     ? "bg-slate-100 text-slate-900 font-semibold"
                                                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -201,9 +205,11 @@ export function Layout() {
                                     >
                                         <item.icon
                                             size={16}
-                                            className="shrink-0 text-slate-500 group-hover:text-slate-900"
+                                            className="shrink-0 text-slate-500 group-hover:text-slate-900 transition-colors duration-150"
                                         />
-                                        {isSidebarOpen && <span className="truncate">{item.label}</span>}
+                                        {isSidebarOpen && (
+                                            <span className="truncate animate-fade-in">{item.label}</span>
+                                        )}
                                     </NavLink>
                                 ))}
                             </div>
@@ -218,7 +224,7 @@ export function Layout() {
                         {isMobile && (
                             <button
                                 type="button"
-                                className="p-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                 onClick={() => setSidebarOpen(true)}
                                 aria-label="Abrir menu"
                             >
@@ -239,7 +245,7 @@ export function Layout() {
                         </div>
 
                         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                            <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center border border-slate-200 select-none shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center border border-slate-200 select-none shrink-0 transition-colors duration-150">
                                 {userInitials || "U"}
                             </div>
                             <div className="hidden sm:flex flex-col text-left">
@@ -247,7 +253,7 @@ export function Layout() {
                             </div>
                             <button
                                 type="button"
-                                className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer ml-1"
+                                className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer ml-1"
                                 onClick={signOut}
                                 title="Encerrar sessão"
                                 aria-label="Sair"
@@ -260,7 +266,7 @@ export function Layout() {
 
                 <div className="flex-1 flex min-h-0 overflow-hidden relative">
                     <main
-                        className={`flex-1 min-h-0 bg-slate-50 transition-all duration-300 ${
+                        className={`flex-1 min-h-0 bg-slate-50 transition-all duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                             isAssistente
                                 ? "overflow-hidden p-2 sm:p-3 lg:p-4 flex flex-col"
                                 : "overflow-y-auto p-4 sm:p-6 lg:p-8"

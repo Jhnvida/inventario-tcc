@@ -138,7 +138,10 @@ export function Movimentacoes() {
                                     {movimentacoes.map((mov) => {
                                         const isEntrada = mov.tipo === "entrada";
                                         return (
-                                            <tr key={mov.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <tr
+                                                key={mov.id}
+                                                className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                            >
                                                 <td className="px-5 py-3">
                                                     <span
                                                         className={`font-medium ${

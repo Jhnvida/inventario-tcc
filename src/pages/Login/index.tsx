@@ -31,7 +31,7 @@ export function Login() {
 
     return (
         <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 font-sans antialiased">
-            <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 p-6 sm:p-8 space-y-6">
+            <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs animate-fade-in-up">
                 <div className="flex flex-col items-center text-center space-y-2">
                     <div>
                         <h1 className="text-lg font-semibold tracking-tight text-slate-900">Gestão de Inventário</h1>
@@ -43,7 +43,7 @@ export function Login() {
 
                 <form className="space-y-4" onSubmit={handleLogin}>
                     {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2">
+                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2 animate-fade-in">
                             <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" />
                             <span>{error}</span>
                         </div>

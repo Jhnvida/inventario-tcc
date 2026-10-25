@@ -108,7 +108,7 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                         <AlertCircle size={15} className="shrink-0 text-red-600" />
                         <span>{error}</span>
                     </div>

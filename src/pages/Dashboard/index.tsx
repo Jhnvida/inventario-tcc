@@ -147,7 +147,10 @@ export function Dashboard() {
                                             const isZerado = (item.quantidade || 0) === 0;
 
                                             return (
-                                                <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                                                <tr
+                                                    key={item.id}
+                                                    className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                                >
                                                     <td className="px-5 py-3">
                                                         <Badge variant={isZerado ? "critical" : "warning"}>
                                                             {isZerado ? "Zerado" : "Crítico"}
@@ -170,7 +173,7 @@ export function Dashboard() {
                                                         <div className="flex items-center justify-end">
                                                             <button
                                                                 type="button"
-                                                                className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                                className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                                 onClick={() =>
                                                                     navigate("/movimentacoes", {
                                                                         state: {
@@ -238,7 +241,10 @@ export function Dashboard() {
                                         {movimentacoesRecentes.map((mov) => {
                                             const isEntrada = mov.tipo === "entrada";
                                             return (
-                                                <tr key={mov.id} className="hover:bg-slate-50/60 transition-colors">
+                                                <tr
+                                                    key={mov.id}
+                                                    className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                                >
                                                     <td className="px-5 py-3">
                                                         <span
                                                             className={`inline-flex items-center gap-1 font-medium ${

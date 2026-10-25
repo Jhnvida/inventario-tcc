@@ -99,9 +99,9 @@ export function Assistente() {
                     {messages.map((msg) => {
                         if (msg.id === "temp-tool-msg") {
                             return (
-                                <div key={msg.id} className="flex justify-start">
+                                <div key={msg.id} className="flex justify-start animate-fade-in">
                                     <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-600 shadow-2xs">
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-500" />
+                                        <Loader2 className="h-3.5 w-3.5 text-slate-500 animate-spin" />
                                         <span>{msg.text}</span>
                                     </div>
                                 </div>
@@ -110,12 +110,15 @@ export function Assistente() {
 
                         const isAi = msg.sender === "ai";
                         return (
-                            <div key={msg.id} className={`flex ${isAi ? "justify-start" : "justify-end"}`}>
+                            <div
+                                key={msg.id}
+                                className={`flex ${isAi ? "justify-start" : "justify-end"} animate-fade-in-up`}
+                            >
                                 <div
                                     className={`text-xs sm:text-sm leading-relaxed ${
                                         isAi
-                                            ? "max-w-[95%] sm:max-w-[90%] rounded-lg border border-slate-200 bg-white p-4 text-slate-800"
-                                            : "max-w-[85%] sm:max-w-[75%] rounded-lg bg-slate-900 text-white px-4 py-2.5"
+                                            ? "max-w-[95%] sm:max-w-[90%] rounded-lg border border-slate-200 bg-white p-4 text-slate-800 shadow-2xs"
+                                            : "max-w-[85%] sm:max-w-[75%] rounded-lg bg-slate-900 text-white px-4 py-2.5 shadow-2xs"
                                     }`}
                                 >
                                     {isAi ? (
@@ -137,7 +140,7 @@ export function Assistente() {
                                         key={idx}
                                         type="button"
                                         onClick={() => handleQuickPrompt(prompt)}
-                                        className="rounded-lg border border-slate-200 bg-white p-3 text-left text-xs text-slate-700 hover:border-slate-400 hover:text-slate-900 transition-colors cursor-pointer"
+                                        className="rounded-lg border border-slate-200 bg-white p-3 text-left text-xs text-slate-700 hover:border-slate-400 hover:text-slate-900 hover:bg-slate-50/50 active:scale-[0.99] transition-all duration-150 ease-out cursor-pointer"
                                     >
                                         {prompt}
                                     </button>
@@ -147,8 +150,8 @@ export function Assistente() {
                     )}
 
                     {isLoading && messages[messages.length - 1]?.sender === "user" && (
-                        <div className="flex items-center gap-2 py-2 text-xs text-slate-500">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-600" />
+                        <div className="flex items-center gap-2 py-2 text-xs text-slate-500 animate-fade-in">
+                            <Loader2 className="h-3.5 w-3.5 text-slate-600 animate-spin" />
                             <span>Consultando estoque...</span>
                         </div>
                     )}
@@ -164,7 +167,7 @@ export function Assistente() {
                                 key={sIdx}
                                 type="button"
                                 onClick={() => handleQuickPrompt(sug)}
-                                className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 hover:border-slate-300 hover:text-slate-900 transition-colors cursor-pointer"
+                                className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 hover:border-slate-300 hover:text-slate-900 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
                             >
                                 {sug}
                             </button>
@@ -175,7 +178,7 @@ export function Assistente() {
                 <div className="border-t border-slate-200 bg-white p-2.5 sm:p-3 shrink-0">
                     <form
                         onSubmit={handleSend}
-                        className="rounded-lg border border-slate-300 bg-white focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all flex flex-col shadow-xs"
+                        className="rounded-lg border border-slate-300 bg-white focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all duration-150 ease-out flex flex-col shadow-xs"
                     >
                         <textarea
                             ref={textareaRef}
@@ -198,7 +201,7 @@ export function Assistente() {
                                             ? "Recolher Biblioteca de Consultas"
                                             : "Exibir Biblioteca de Consultas"
                                     }
-                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium active:scale-95 transition-all duration-150 ease-out cursor-pointer ${
                                         isLibraryOpen
                                             ? "bg-slate-200/90 text-slate-900 font-semibold"
                                             : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/70"
@@ -216,7 +219,7 @@ export function Assistente() {
                                         type="button"
                                         onClick={handleClearAll}
                                         title="Limpar histórico de conversa"
-                                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                     >
                                         <Trash2 size={13} />
                                         <span className="hidden sm:inline">Limpar</span>
@@ -229,7 +232,7 @@ export function Assistente() {
                                     type="submit"
                                     disabled={!inputValue.trim() || isLoading}
                                     title="Enviar mensagem (Enter)"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 transition-colors cursor-pointer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 active:scale-95 disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer"
                                 >
                                     {isLoading ? (
                                         <>

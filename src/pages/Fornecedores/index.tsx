@@ -119,7 +119,10 @@ export function Fornecedores() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {fornecedores.map((fornecedor) => (
-                                        <tr key={fornecedor.id} className="hover:bg-slate-50/60 transition-colors">
+                                        <tr
+                                            key={fornecedor.id}
+                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                        >
                                             <td className="px-5 py-3">
                                                 <div className="font-medium text-slate-900">
                                                     {fornecedor.razao_social}
@@ -143,7 +146,7 @@ export function Fornecedores() {
                                                 <div className="flex items-center justify-center gap-1">
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() => handleOpenEdit(fornecedor)}
                                                         title="Editar fornecedor"
                                                     >
@@ -151,7 +154,7 @@ export function Fornecedores() {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() =>
                                                             handleDelete(fornecedor.id, fornecedor.razao_social)
                                                         }

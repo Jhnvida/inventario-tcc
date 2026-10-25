@@ -3,6 +3,13 @@
 @layer base {
     :root {
         --font-family-base: "Inter", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, sans-serif;
+        --motion-duration-fast: 150ms;
+        --motion-duration-normal: 200ms;
+        --motion-duration-moderate: 280ms;
+        --motion-duration-slow: 400ms;
+        --motion-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+        --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+        --motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
@@ -31,5 +38,86 @@
 
     ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
+    }
+}
+
+@keyframes spin-smooth {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        transform: translateY(4px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes scale-in {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-spin-smooth {
+    animation: spin-smooth 1s linear infinite;
+}
+
+.animate-fade-in {
+    animation: fade-in var(--motion-duration-normal) var(--motion-ease-standard) forwards;
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up var(--motion-duration-normal) var(--motion-ease-standard) forwards;
+}
+
+.animate-scale-in {
+    animation: scale-in var(--motion-duration-fast) var(--motion-ease-standard) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }

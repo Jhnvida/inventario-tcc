@@ -79,7 +79,7 @@ export function PedidoVendaDetalhesModal({
         >
             <div className="space-y-6">
                 {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
                         <AlertCircle size={15} className="shrink-0 text-red-600" />
                         <span>{error}</span>
                     </div>
@@ -137,7 +137,10 @@ export function PedidoVendaDetalhesModal({
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {pedido.itens_pedido_venda?.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50/50">
+                                        <tr
+                                            key={item.id}
+                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                        >
                                             <td className="px-5 py-3">
                                                 <div className="font-medium text-slate-900">{item.produtos?.nome}</div>
                                                 <div className="font-mono text-slate-500">{item.produtos?.sku}</div>

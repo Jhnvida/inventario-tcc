@@ -12,10 +12,10 @@ interface ModalProps {
     width?: ModalWidth;
 }
 
-const widthStyles: Record<ModalWidth, string> = {
-    small: "sm:w-84 lg:w-88 xl:w-96",
-    medium: "sm:w-96 lg:w-[440px] xl:w-[480px]",
-    large: "sm:w-[500px] lg:w-[560px] xl:w-[640px]",
+const widthStyles: Record<ModalWidth, { mobile: string; desktop: string }> = {
+    small: { mobile: "w-full sm:w-84", desktop: "lg:w-88 xl:w-96" },
+    medium: { mobile: "w-full sm:w-96", desktop: "lg:w-[440px] xl:w-[480px]" },
+    large: { mobile: "w-full sm:w-[500px]", desktop: "lg:w-[560px] xl:w-[640px]" },
 };
 
 const activeModals = new Map<string, () => void>();
@@ -39,6 +39,10 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
     const [isVisible, setIsVisible] = useState(false);
     const [mountTarget, setMountTarget] = useState<HTMLElement | null>(null);
 
+    if (isOpen && !isRendered) {
+        setIsRendered(true);
+    }
+
     useEffect(() => {
         setMountTarget(document.getElementById("app-sidebar-root") || document.body);
     }, []);
@@ -49,9 +53,10 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
         if (isOpen) {
             registerOpenModal(modalId, onClose);
 
-            setIsRendered(true);
             const animFrame = requestAnimationFrame(() => {
-                setIsVisible(true);
+                requestAnimationFrame(() => {
+                    setIsVisible(true);
+                });
             });
 
             const handleKeyDown = (e: KeyboardEvent) => {
@@ -66,9 +71,10 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
         } else {
             unregisterModal(modalId);
             setIsVisible(false);
+
             timer = setTimeout(() => {
                 setIsRendered(false);
-            }, 300);
+            }, 280);
 
             return () => {
                 if (timer) clearTimeout(timer);
@@ -85,11 +91,12 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
     if (!isRendered) return null;
 
     const targetWidth = widthStyles[width] || widthStyles.medium;
+    const fullWidthClass = `${targetWidth.mobile} ${targetWidth.desktop}`;
 
     const content = (
         <>
             <div
-                className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs lg:hidden transition-opacity duration-300 ${
+                className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs lg:hidden transition-opacity duration-280 ease-out ${
                     isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
                 onClick={onClose}
@@ -97,18 +104,20 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
             />
 
             <aside
-                className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-xl transition-all duration-300 ease-in-out
-                lg:static lg:z-auto lg:h-full lg:shrink-0 lg:border-l lg:border-slate-200 lg:shadow-none ${
+                className={`fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-xl overflow-hidden transition-all duration-280 ease-[cubic-bezier(0.16,1,0.3,1)]
+                lg:static lg:z-auto lg:h-full lg:shrink-0 lg:shadow-none ${
                     isVisible
-                        ? `${targetWidth} translate-x-0 opacity-100`
-                        : "w-0 lg:w-0 translate-x-full lg:translate-x-0 opacity-0 pointer-events-none overflow-hidden"
+                        ? `${fullWidthClass} translate-x-0 opacity-100 lg:border-l lg:border-slate-200`
+                        : `${targetWidth.mobile} translate-x-full lg:translate-x-0 lg:w-0 opacity-0 pointer-events-none lg:border-l-0`
                 }`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex flex-col h-full w-full min-w-0">
+                <div
+                    className={`flex flex-col h-full ${fullWidthClass} min-w-0 transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                >
                     <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4 sm:px-6 bg-white">
                         <div className="flex items-center gap-2.5 min-w-0">
                             <h2 id="modal-title" className="text-sm font-semibold text-slate-900 truncate">
@@ -117,7 +126,7 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
                         </div>
                         <button
                             type="button"
-                            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer shrink-0"
+                            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 active:scale-95 transition-all duration-150 ease-out cursor-pointer shrink-0"
                             onClick={onClose}
                             title="Fechar painel"
                             aria-label="Fechar painel"

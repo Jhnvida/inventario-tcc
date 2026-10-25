@@ -22,7 +22,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         ref={ref}
                         id={selectId}
                         required={required}
-                        className={`h-9 w-full appearance-none rounded-md border bg-white px-3 pr-8 text-sm text-slate-900 transition-colors focus:outline-none disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer ${
+                        className={`h-9 w-full appearance-none rounded-md border bg-white px-3 pr-8 text-sm text-slate-900 focus:outline-none transition-all duration-150 ease-out disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer ${
                             error
                                 ? "border-red-400 bg-red-50/20 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-600"
                                 : "border-slate-300 hover:border-slate-400 focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
@@ -31,7 +31,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                     >
                         {children}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400 transition-colors duration-150">
                         <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                             <path
                                 fillRule="evenodd"
@@ -41,7 +41,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         </svg>
                     </div>
                 </div>
-                {error && <span className="text-xs text-red-600">{error}</span>}
+                {error && <span className="text-xs text-red-600 animate-fade-in">{error}</span>}
                 {!error && helperText && <span className="text-xs text-slate-500">{helperText}</span>}
             </div>
         );

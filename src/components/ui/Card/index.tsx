@@ -18,5 +18,11 @@ const paddingStyles: Record<CardPadding, string> = {
 export function Card({ children, className = "", padding = "medium" }: CardProps) {
     const padStyle = paddingStyles[padding] || paddingStyles.medium;
 
-    return <div className={`bg-white border border-slate-200 rounded-lg ${padStyle} ${className}`}>{children}</div>;
+    return (
+        <div
+            className={`bg-white border border-slate-200 rounded-lg transition-all duration-200 ease-out ${padStyle} ${className}`}
+        >
+            {children}
+        </div>
+    );
 }

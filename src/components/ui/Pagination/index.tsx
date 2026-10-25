@@ -35,7 +35,7 @@ export function Pagination({
             <div className="flex items-center gap-2">
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer select-none"
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer select-none"
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage <= 1 || disabled}
                     title="Página anterior"
@@ -51,7 +51,7 @@ export function Pagination({
 
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer select-none"
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer select-none"
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages || disabled}
                     title="Próxima página"

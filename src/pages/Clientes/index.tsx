@@ -153,7 +153,10 @@ export function Clientes() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {clientes.map((cliente) => (
-                                        <tr key={cliente.id} className="hover:bg-slate-50/60 transition-colors">
+                                        <tr
+                                            key={cliente.id}
+                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                        >
                                             <td className="px-5 py-3">
                                                 <div className="font-medium text-slate-900">{cliente.nome}</div>
                                                 <span className="text-[11px] text-slate-400">
@@ -185,7 +188,7 @@ export function Clientes() {
                                                 <div className="flex items-center justify-center gap-1">
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() => handleOpenEdit(cliente)}
                                                         title="Editar cliente"
                                                     >
@@ -193,7 +196,7 @@ export function Clientes() {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                                                        className={`p-1.5 rounded-md active:scale-95 transition-all duration-150 ease-out cursor-pointer ${
                                                             cliente.ativo
                                                                 ? "text-slate-400 hover:text-amber-600 hover:bg-amber-50"
                                                                 : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
@@ -205,7 +208,7 @@ export function Clientes() {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
                                                         onClick={() => handleDelete(cliente)}
                                                         title="Excluir cliente"
                                                     >

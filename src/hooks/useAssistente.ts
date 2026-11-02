@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { systemPrompt } from "../services/ai/prompts";
+import { getSystemPrompt } from "../services/ai/prompts";
 import { classifyQueryIntent, REFUSAL_MESSAGE, sanitizeAndValidateResponse } from "../services/ai/scopeGuardrail";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
 import { tools } from "../services/ai/tools";
@@ -25,7 +25,7 @@ export function useAssistente() {
         },
     ]);
     const [isLoading, setIsLoading] = useState(false);
-    const historyRef = useRef<ChatMessage[]>([{ role: "system", content: systemPrompt }]);
+    const historyRef = useRef<ChatMessage[]>([{ role: "system", content: getSystemPrompt() }]);
     const abortControllerRef = useRef<AbortController | null>(null);
     const generationIdRef = useRef<number>(0);
 
@@ -254,7 +254,15 @@ export function useAssistente() {
                     if (currentGenId !== generationIdRef.current) return;
                     const functionName = toolCall.function.name;
                     const functionArgs = toolCall.function.arguments;
-                    const args = typeof functionArgs === "string" ? JSON.parse(functionArgs) : functionArgs;
+                    let args = functionArgs;
+                    if (typeof functionArgs === "string") {
+                        try {
+                            args = JSON.parse(functionArgs);
+                        } catch (parseErr) {
+                            console.warn("Falha ao parsear argumentos da ferramenta:", functionArgs, parseErr);
+                            args = {};
+                        }
+                    }
 
                     const readableName = functionName.replace(/_/g, " ");
                     setUiFeedback(tempToolId, `Consultando dados (${readableName})...`);
@@ -315,7 +323,7 @@ export function useAssistente() {
         }
         generationIdRef.current++;
         setIsLoading(false);
-        historyRef.current = [{ role: "system", content: systemPrompt }];
+        historyRef.current = [{ role: "system", content: getSystemPrompt() }];
         setMessages([
             {
                 id: "initial",

@@ -23,15 +23,38 @@ export function formatCurrency(value: number) {
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
-export function formatDate(dateString: string) {
-    return new Intl.DateTimeFormat("pt-BR", {
-        timeZone: OPERATIONAL_TIMEZONE,
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(new Date(dateString));
+export function formatDate(dateString: string | null | undefined): string {
+    if (!dateString) return "-";
+    try {
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return String(dateString);
+        return new Intl.DateTimeFormat("pt-BR", {
+            timeZone: OPERATIONAL_TIMEZONE,
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(d);
+    } catch {
+        return String(dateString);
+    }
+}
+
+export function formatDateOnly(date: Date | string | null | undefined): string {
+    if (!date) return "-";
+    try {
+        const d = typeof date === "string" ? new Date(date) : date;
+        if (isNaN(d.getTime())) return String(date);
+        return new Intl.DateTimeFormat("pt-BR", {
+            timeZone: OPERATIONAL_TIMEZONE,
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        }).format(d);
+    } catch {
+        return String(date);
+    }
 }
 
 export function stripFormatting(value: string | null | undefined): string {

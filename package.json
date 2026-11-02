@@ -9,7 +9,7 @@
         "lint": "oxlint",
         "lint:css": "stylelint \"src/**/*.css\"",
         "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
-        "test": "node --test --experimental-strip-types \"src/tests/**/*.test.ts\"",
+        "test": "node --env-file=.env --test --experimental-strip-types \"src/tests/**/*.test.ts\"",
         "preview": "vite preview"
     },
     "dependencies": {

@@ -1,4 +1,5 @@
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/supabase.ts";
+import { formatDate, formatDateOnly } from "../../utils/formatters.ts";
 
 export const REFUSAL_MESSAGE =
     "Posso ajudar com informações e operações relacionadas ao inventário do sistema (produtos, estoque, movimentações, pedidos, fornecedores e relatórios). O que você gostaria de consultar?";
@@ -12,24 +13,24 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         };
     },
 
-    consultar_produtos: async function (args) {
+    consultar_produtos: async function (args: any = {}) {
         let query = supabase
             .from("produtos")
             .select("nome, sku, preco, quantidade, estoque_minimo, localizacao, categorias(nome)");
 
-        if (args.ordenacao === "quantidade_desc") {
+        if (args?.ordenacao === "quantidade_desc") {
             query = query.order("quantidade", { ascending: false });
-        } else if (args.ordenacao === "quantidade_asc") {
+        } else if (args?.ordenacao === "quantidade_asc") {
             query = query.order("quantidade", { ascending: true });
         } else {
             query = query.order("nome", { ascending: true });
         }
 
-        if (args.limite) {
+        if (args?.limite) {
             query = query.limit(args.limite);
         }
 
-        if (args.termo_busca) {
+        if (args?.termo_busca) {
             query = query.or(`nome.ilike.%${args.termo_busca}%,sku.ilike.%${args.termo_busca}%`);
         }
 
@@ -40,11 +41,11 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar produtos no banco de dados." };
         }
 
-        if (args.filtro_estoque === "baixo") {
+        if (args?.filtro_estoque === "baixo") {
             return data?.filter((p: any) => p.quantidade > 0 && p.quantidade <= p.estoque_minimo);
         }
 
-        if (args.filtro_estoque === "zerado") {
+        if (args?.filtro_estoque === "zerado") {
             return data?.filter((p: any) => p.quantidade === 0);
         }
 
@@ -74,6 +75,31 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         };
     },
 
+    consultar_categorias: async function (_args?: any) {
+        const { data, error } = await supabase.from("categorias").select("id, nome").order("nome", { ascending: true });
+
+        if (error) {
+            console.error("Erro na consulta de categorias:", error);
+            return { erro: "Falha ao consultar categorias no banco de dados." };
+        }
+
+        return data?.map((c) => ({ id: c.id, nome: c.nome })) || [];
+    },
+
+    consultar_fornecedores: async function (_args?: any) {
+        const { data, error } = await supabase
+            .from("fornecedores")
+            .select("id, razao_social, nome_fantasia, cnpj, telefone, email")
+            .order("nome_fantasia", { ascending: true });
+
+        if (error) {
+            console.error("Erro na consulta de fornecedores:", error);
+            return { erro: "Falha ao consultar fornecedores no banco de dados." };
+        }
+
+        return data || [];
+    },
+
     consultar_dados_gerais: async function () {
         const [catRes, fornRes] = await Promise.all([
             supabase.from("categorias").select("nome"),
@@ -86,70 +112,119 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         };
     },
 
-    consultar_movimentacoes: async function (args: any) {
+    consultar_movimentacoes: async function (args: any = {}) {
         let query = supabase
             .from("movimentacoes")
-            .select("id, tipo, quantidade, criado_em, produtos(nome, sku)")
-            .order("criado_em", { ascending: false })
-            .limit(args.limite || 5);
+            .select("id, tipo, quantidade, motivo, criada_em, produtos(nome, sku)")
+            .order("criada_em", { ascending: false })
+            .limit(args?.limite || 5);
 
-        if (args.tipo) {
-            query = query.eq("tipo", args.tipo);
+        if (args?.tipo) {
+            const tipoNormalizado = String(args.tipo)
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+            if (tipoNormalizado === "saida" || tipoNormalizado === "entrada") {
+                query = query.eq("tipo", tipoNormalizado);
+            }
+        }
+
+        if (args?.data_inicio) {
+            const dataInicio = args.data_inicio.includes("T") ? args.data_inicio : `${args.data_inicio}T00:00:00.000Z`;
+            query = query.gte("criada_em", dataInicio);
+        }
+
+        if (args?.data_fim) {
+            const dataFim = args.data_fim.includes("T") ? args.data_fim : `${args.data_fim}T23:59:59.999Z`;
+            query = query.lte("criada_em", dataFim);
         }
 
         const { data, error } = await query;
         if (error) {
             console.error("Erro na consulta de movimentações:", error);
-            return { erro: "Falha ao consultar movimentações." };
+            return { erro: "Falha ao consultar movimentações no banco de dados." };
         }
 
-        return data;
+        return (data || []).map((m: any) => ({
+            id: m.id,
+            tipo: m.tipo,
+            quantidade: m.quantidade,
+            motivo: m.motivo || "Não informado",
+            data: formatDate(m.criada_em),
+            produto_nome: m.produtos?.nome || "Produto não identificado",
+            produto_sku: m.produtos?.sku || "N/A",
+        }));
     },
 
-    consultar_produtos_mais_movimentados: async function (args: any) {
-        const dias = args.dias || 30;
-        const dataLimite = new Date();
-        dataLimite.setDate(dataLimite.getDate() - dias);
-
+    consultar_ranking_movimentacoes: async function (args: any = {}) {
         let query = supabase
             .from("movimentacoes")
-            .select("produto_id, quantidade, produtos(nome)")
-            .gte("criado_em", dataLimite.toISOString());
+            .select("produto_id, quantidade, tipo, criada_em, produtos(nome, sku)");
 
-        if (args.tipo) {
-            query = query.eq("tipo", args.tipo);
+        if (args?.tipo) {
+            const tipoNormalizado = String(args.tipo)
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+            if (tipoNormalizado === "saida" || tipoNormalizado === "entrada") {
+                query = query.eq("tipo", tipoNormalizado);
+            }
+        }
+
+        if (args?.data_inicio) {
+            const dataInicio = args.data_inicio.includes("T") ? args.data_inicio : `${args.data_inicio}T00:00:00.000Z`;
+            query = query.gte("criada_em", dataInicio);
+        } else if (args?.dias) {
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - args.dias);
+            query = query.gte("criada_em", dataLimite.toISOString());
+        }
+
+        if (args?.data_fim) {
+            const dataFim = args.data_fim.includes("T") ? args.data_fim : `${args.data_fim}T23:59:59.999Z`;
+            query = query.lte("criada_em", dataFim);
         }
 
         const { data, error } = await query;
         if (error) {
-            console.error("Erro na consulta de mais movimentados:", error);
-            return { erro: "Falha ao consultar histórico de movimentação." };
+            console.error("Erro na consulta de ranking de movimentações:", error);
+            return { erro: "Falha ao consultar ranking de movimentações." };
         }
 
-        const acumulador: Record<string, { nome: string; total: number }> = {};
+        const acumulador: Record<string, { nome: string; sku: string; total: number }> = {};
         data?.forEach((mov: any) => {
             const pId = mov.produto_id;
             const pNome = mov.produtos?.nome || "Desconhecido";
+            const pSku = mov.produtos?.sku || "N/A";
             if (!acumulador[pId]) {
-                acumulador[pId] = { nome: pNome, total: 0 };
+                acumulador[pId] = { nome: pNome, sku: pSku, total: 0 };
             }
             acumulador[pId].total += mov.quantidade;
         });
 
         const ranking = Object.values(acumulador)
             .sort((a, b) => b.total - a.total)
-            .slice(0, args.limite || 5);
+            .slice(0, args?.limite || 5);
 
         return {
-            periodo_dias: dias,
-            tipo_movimentacao: args.tipo || "todas",
+            tipo_movimentacao: args?.tipo || "todas",
+            periodo: {
+                data_inicio: args?.data_inicio ? formatDateOnly(args.data_inicio) : null,
+                data_fim: args?.data_fim ? formatDateOnly(args.data_fim) : null,
+            },
             ranking,
         };
     },
 
-    consultar_previsao_ruptura: async function (args: any) {
-        const diasHistorico = args.dias_historico || 30;
-        const limiteApenasCriticos = args.apenas_criticos ?? true;
+    consultar_produtos_mais_movimentados: async function (args: any) {
+        return handlers.consultar_ranking_movimentacoes(args);
+    },
+
+    analisar_previsao_ruptura: async function (args: any = {}) {
+        const diasHistorico = args?.dias_historico || args?.dias || 30;
+        const limiteApenasCriticos = args?.apenas_criticos ?? true;
 
         const dataInicioHistorico = new Date();
         dataInicioHistorico.setDate(dataInicioHistorico.getDate() - diasHistorico);
@@ -158,7 +233,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             .from("produtos")
             .select("id, nome, sku, quantidade, estoque_minimo, preco, localizacao, categorias(nome)");
 
-        if (args.termo_busca) {
+        if (args?.termo_busca) {
             queryProdutos = queryProdutos.or(`nome.ilike.%${args.termo_busca}%,sku.ilike.%${args.termo_busca}%`);
         }
 
@@ -169,7 +244,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         }
 
         let produtos = produtosData;
-        if (limiteApenasCriticos && !args.termo_busca) {
+        if (limiteApenasCriticos && !args?.termo_busca) {
             produtos = produtos.filter((p) => p.quantidade <= p.estoque_minimo);
         }
 
@@ -187,7 +262,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             .select("produto_id, quantidade")
             .eq("tipo", "saida")
             .in("produto_id", produtoIds)
-            .gte("criado_em", dataInicioHistorico.toISOString());
+            .gte("criada_em", dataInicioHistorico.toISOString());
 
         const saidasPorProduto: Record<string, number> = {};
         movsData?.forEach((m: any) => {
@@ -196,7 +271,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
 
         const { data: pedidosItensData } = await supabase
             .from("itens_pedido")
-            .select("produto_id, quantidade, pedidos!inner(status, id, data_pedido)")
+            .select("produto_id, quantidade, pedidos!inner(status, id, criado_em)")
             .in("produto_id", produtoIds);
 
         const pedidosEmAbertoPorProduto: Record<
@@ -234,7 +309,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
                     diasAteRupturaAtual = Math.floor(p.quantidade / consumoDiarioMedio);
                     const dataPrev = new Date();
                     dataPrev.setDate(dataPrev.getDate() + diasAteRupturaAtual);
-                    dataEstimadaRuptura = dataPrev.toISOString().split("T")[0];
+                    dataEstimadaRuptura = formatDateOnly(dataPrev);
                 } else {
                     diasAteRupturaAtual = null;
                     dataEstimadaRuptura = "Sem saídas no período (sem previsão de esgotamento)";
@@ -283,13 +358,17 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         return {
             periodo_base_dias: diasHistorico,
             total_produtos_analisados: resultados.length,
-            resultados,
+            resultados: resultados.slice(0, args?.limite || 5),
         };
     },
 
-    consultar_curva_abc: async function (args: any) {
-        const diasHistorico = args.dias || 90;
-        const limite = args.limite || 20;
+    consultar_previsao_ruptura: async function (args: any) {
+        return handlers.analisar_previsao_ruptura(args);
+    },
+
+    consultar_curva_abc: async function (args: any = {}) {
+        const diasHistorico = args?.dias_historico || args?.dias || 90;
+        const limite = args?.limite || 20;
 
         const dataInicio = new Date();
         dataInicio.setDate(dataInicio.getDate() - diasHistorico);
@@ -298,7 +377,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             .from("movimentacoes")
             .select("produto_id, quantidade")
             .eq("tipo", "saida")
-            .gte("criado_em", dataInicio.toISOString());
+            .gte("criada_em", dataInicio.toISOString());
 
         if (errMovs) {
             console.error("Erro ao buscar saídas para Curva ABC:", errMovs);
@@ -401,15 +480,15 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         };
     },
 
-    consultar_pedidos: async function (args: any) {
+    consultar_pedidos: async function (args: any = {}) {
         let query = supabase
             .from("pedidos")
             .select("id, status, valor_total, criado_em, fornecedores(razao_social, nome_fantasia)")
             .order("criado_em", { ascending: false })
-            .limit(args.limite || 5);
+            .limit(args?.limite || 5);
 
-        if (args.status) {
-            const st = args.status
+        if (args?.status) {
+            const st = String(args.status)
                 .toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
@@ -436,18 +515,24 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar pedidos." };
         }
 
-        return data;
+        return (data || []).map((p: any) => ({
+            id: p.id,
+            status: p.status,
+            valor_total: p.valor_total,
+            data: formatDate(p.criado_em),
+            fornecedor: p.fornecedores?.nome_fantasia || p.fornecedores?.razao_social || "Não informado",
+        }));
     },
 
-    consultar_pedidos_venda: async function (args: any) {
+    consultar_pedidos_venda: async function (args: any = {}) {
         let query = supabase
             .from("pedidos_venda")
-            .select("id, status, valor_total, criado_em, clientes(nome, cpf_cnpj)")
+            .select("id, numero, status, valor_total, criado_em, clientes(nome, documento)")
             .order("criado_em", { ascending: false })
-            .limit(args.limite || 5);
+            .limit(args?.limite || 5);
 
-        if (args.status) {
-            const st = args.status
+        if (args?.status) {
+            const st = String(args.status)
                 .toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
@@ -474,11 +559,31 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar pedidos de venda." };
         }
 
-        return data;
+        return (data || []).map((pv: any) => ({
+            id: pv.id,
+            numero: pv.numero,
+            status: pv.status,
+            valor_total: pv.valor_total,
+            data: formatDate(pv.criado_em),
+            cliente_nome: pv.clientes?.nome || "Não informado",
+            cliente_documento: pv.clientes?.documento || "Não informado",
+        }));
     },
 };
 
 export async function handleFunctionCall(call: any) {
+    if (!call || !call.name) {
+        return { erro: "Chamada de ferramenta inválida." };
+    }
     const handler = handlers[call.name];
-    return handler ? handler(call.args) : { erro: "Ferramenta não encontrada." };
+    if (!handler) {
+        console.warn(`Ferramenta solicitada não encontrada: ${call.name}`);
+        return { erro: `Ferramenta '${call.name}' não encontrada no sistema.` };
+    }
+    try {
+        return await handler(call.args || {});
+    } catch (err: any) {
+        console.error(`Erro ao executar ferramenta ${call.name}:`, err);
+        return { erro: `Erro ao executar consulta: ${err?.message || "falha interna"}` };
+    }
 }

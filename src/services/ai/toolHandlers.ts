@@ -4,6 +4,25 @@ import { formatDate, formatDateOnly } from "../../utils/formatters.ts";
 export const REFUSAL_MESSAGE =
     "Posso ajudar com informações e operações relacionadas ao inventário do sistema (produtos, estoque, movimentações, pedidos, fornecedores e relatórios). O que você gostaria de consultar?";
 
+export function ehPerdaOperacional(motivo: string | null | undefined): boolean {
+    if (!motivo) return false;
+    const m = motivo.toLowerCase();
+    const termosPerda = [
+        "avaria",
+        "perda",
+        "quebra",
+        "vencimento",
+        "vencido",
+        "descarte",
+        "danificado",
+        "furto",
+        "roubo",
+        "sinistro",
+        "deteriorado",
+    ];
+    return termosPerda.some((termo) => m.includes(termo));
+}
+
 const handlers: Record<string, (args: any) => Promise<any>> = {
     recusar_fora_do_escopo: async function (args) {
         return {
@@ -250,6 +269,9 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
 
         if (produtos.length === 0) {
             return {
+                periodo_base_dias: diasHistorico,
+                total_produtos_analisados: 0,
+                criterio_rn13: "Segregação ativa: perdas operacionais e avarias expurgadas do consumo regular",
                 mensagem: "Nenhum produto em situação crítica encontrado para o período ou critérios informados.",
                 resultados: [],
             };
@@ -259,14 +281,21 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
 
         const { data: movsData } = await supabase
             .from("movimentacoes")
-            .select("produto_id, quantidade")
+            .select("produto_id, quantidade, motivo")
             .eq("tipo", "saida")
             .in("produto_id", produtoIds)
             .gte("criada_em", dataInicioHistorico.toISOString());
 
         const saidasPorProduto: Record<string, number> = {};
+        const perdasExpurgadasPorProduto: Record<string, number> = {};
+
         movsData?.forEach((m: any) => {
-            saidasPorProduto[m.produto_id] = (saidasPorProduto[m.produto_id] || 0) + m.quantidade;
+            const qtd = Number(m.quantidade) || 0;
+            if (ehPerdaOperacional(m.motivo)) {
+                perdasExpurgadasPorProduto[m.produto_id] = (perdasExpurgadasPorProduto[m.produto_id] || 0) + qtd;
+            } else {
+                saidasPorProduto[m.produto_id] = (saidasPorProduto[m.produto_id] || 0) + qtd;
+            }
         });
 
         const { data: pedidosItensData } = await supabase
@@ -297,6 +326,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         const resultados = await Promise.all(
             produtos.map(async (p) => {
                 const totalSaidas = saidasPorProduto[p.id] || 0;
+                const totalPerdasExpurgadas = perdasExpurgadasPorProduto[p.id] || 0;
                 const consumoDiarioMedio = Number((totalSaidas / diasHistorico).toFixed(2));
 
                 let diasAteRupturaAtual: number | null = null;
@@ -341,6 +371,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
                     estoque_atual: p.quantidade,
                     estoque_minimo: p.estoque_minimo,
                     total_saidas_periodo: totalSaidas,
+                    perdas_expurgadas_rn13: totalPerdasExpurgadas,
                     consumo_diario_medio: consumoDiarioMedio,
                     dias_ate_esgotamento: diasAteRupturaAtual,
                     data_prevista_esgotamento: dataEstimadaRuptura,
@@ -358,6 +389,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         return {
             periodo_base_dias: diasHistorico,
             total_produtos_analisados: resultados.length,
+            criterio_rn13: "Segregação ativa: perdas operacionais e avarias expurgadas do consumo regular",
             resultados: resultados.slice(0, args?.limite || 5),
         };
     },

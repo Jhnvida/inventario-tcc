@@ -1,6 +1,6 @@
 # Inventário Inteligente — Gestão de Estoque com IA Local
 
-Sistema completo de gestão de inventário, controle de movimentações e pedidos de compra e venda, integrando uma arquitetura *Backend-as-a-Service* (BaaS) com Supabase e um assistente conversacional inteligente executado localmente via **Ollama** com suporte a *Function Calling*.
+Sistema completo de gestão de inventário, controle de movimentações e pedidos de compra e venda, integrando uma arquitetura _Backend-as-a-Service_ (BaaS) com Supabase e um assistente conversacional inteligente executado localmente via **Ollama** com suporte a _Function Calling_.
 
 ---
 
@@ -35,9 +35,9 @@ Sistema completo de gestão de inventário, controle de movimentações e pedido
 
 ## Visão Geral
 
-O **Inventário Inteligente** foi concebido para resolver desafios de controle operacional em estoques físicos, unificando catalogação, rastreabilidade de entradas e saídas, gestão de compras e faturamento de vendas. 
+O **Inventário Inteligente** foi concebido para resolver desafios de controle operacional em estoques físicos, unificando catalogação, rastreabilidade de entradas e saídas, gestão de compras e faturamento de vendas.
 
-O diferencial do sistema está na convergência entre a integridade transacional — garantida diretamente no banco de dados via Stored Procedures (RPCs) no PostgreSQL do Supabase — e uma interface de apoio à tomada de decisão assistida por Inteligência Artificial. Utilizando o Ollama com o modelo Llama 3.2 em execução local, o operador pode consultar métricas, alertas de ruptura e análises da curva ABC em linguagem natural com garantia determinística via chamadas de função (*Function Calling*).
+O diferencial do sistema está na convergência entre a integridade transacional — garantida diretamente no banco de dados via Stored Procedures (RPCs) no PostgreSQL do Supabase — e uma interface de apoio à tomada de decisão assistida por Inteligência Artificial. Utilizando o Ollama com o modelo Llama 3.2 em execução local, o operador pode consultar métricas, alertas de ruptura e análises da curva ABC em linguagem natural com garantia determinística via chamadas de função (_Function Calling_).
 
 ---
 
@@ -59,7 +59,7 @@ O diferencial do sistema está na convergência entre a integridade transacional
 O módulo de IA opera de forma local e privada através do Ollama, garantindo que os dados corporativos não trafeguem por APIs de terceiros:
 
 1. **Camada de Escopo e Guardrails:** Sanitiza as mensagens recebidas, impedindo tentativas de jailbreak e direcionando exclusivamente para o escopo de inventário.
-2. **Declaração de Ferramentas (Function Calling):** Mapeamento formal de funções de consulta (`consultar_produtos`, `consultar_movimentacoes`, `consultar_curva_abc`, `analisar_previsao_ruptura`, `consultar_pedidos`).
+2. **Declaração de Ferramentas (Function Calling):** Mapeamento formal de funções de consulta (`consultar_produtos`, `consultar_resumo_estoque`, `consultar_movimentacoes`, `consultar_curva_abc`, `analisar_previsao_ruptura`, `consultar_pedidos`, `consultar_pedidos_venda`).
 3. **Execução Determinística:** O modelo identifica a intenção e os parâmetros, delega a execução para os manipuladores internos do Supabase e formata a resposta final com clareza via Markdown.
 
 ---
@@ -67,6 +67,7 @@ O módulo de IA opera de forma local e privada através do Ollama, garantindo qu
 ## Tecnologias Utilizadas
 
 ### Frontend
+
 - **[React 19](https://react.dev/):** Biblioteca declarativa com suporte nativo ao React Compiler para máxima performance.
 - **[TypeScript](https://www.typescriptlang.org/):** Tipagem estática fim a fim em componentes, hooks e contratos de API.
 - **[Vite 8](https://vitejs.dev/):** Ferramenta de build de última geração com inicialização instantânea.
@@ -77,12 +78,15 @@ O módulo de IA opera de forma local e privada através do Ollama, garantindo qu
 - **[React Markdown](https://github.com/remarkjs/react-markdown):** Renderização segura de Markdown gerado pelo assistente de IA.
 
 ### Backend & Serviços
+
 - **[Supabase](https://supabase.com/):** Plataforma de backend com PostgreSQL, Supabase Auth para gestão de sessões e Stored Procedures RPCs para operações com integridade transacional (`registrar_movimentacao`, `receber_pedido`).
 
 ### Inteligência Artificial
+
 - **[Ollama](https://ollama.com/):** Runtime para execução de modelos de linguagem (Llama 3.2:3b) localmente no dispositivo via API HTTP.
 
 ### Testes & Qualidade
+
 - **Node.js Native Test Runner:** Testes automatizados executados com `node --test --experimental-strip-types`.
 - **[Oxlint](https://oxc.rs/):** Análise estática ultrarrápida para código TypeScript e componentes React.
 - **[Stylelint](https://stylelint.io/):** Padronização e validação das regras de folhas de estilo CSS.
@@ -139,35 +143,39 @@ cp .env.example .env
 
 Preencha as variáveis de acordo com as credenciais do seu projeto Supabase:
 
-| Variável | Descrição | Exemplo |
-|---|---|---|
-| `VITE_SUPABASE_URL` | URL do projeto Supabase | `https://seu-projeto.supabase.co` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave pública anônima do Supabase | `sua_chave_publica_aqui` |
+| Variável                        | Descrição                         | Exemplo                           |
+| ------------------------------- | --------------------------------- | --------------------------------- |
+| `VITE_SUPABASE_URL`             | URL do projeto Supabase           | `https://seu-projeto.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave pública anônima do Supabase | `sua_chave_publica_aqui`          |
 
 ---
 
 ## Instalação e Execução
 
 1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/Jhnvida/inventario-tcc.git
-   cd inventario-tcc
-   ```
+
+    ```bash
+    git clone https://github.com/Jhnvida/inventario-tcc.git
+    cd inventario-tcc
+    ```
 
 2. **Instale as dependências:**
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 3. **Inicie o modelo no Ollama (em um terminal separado):**
-   ```bash
-   ollama run llama3.2:3b
-   ```
+
+    ```bash
+    ollama run llama3.2:3b
+    ```
 
 4. **Inicie a aplicação em desenvolvimento:**
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run dev
+    ```
 
 5. **Acesse no navegador:**
    Abra [http://localhost:5173](http://localhost:5173).
@@ -183,39 +191,42 @@ npm test
 ```
 
 A suíte cobre:
+
 - Guardrails e camadas de sanitização contra tentativas de manipulação da IA.
 - Formatadores de data e localização para pt-BR.
-- Mapeamento e execução segura de manipuladores de ferramentas (*Tool Handlers*).
+- Mapeamento e execução segura de manipuladores de ferramentas (_Tool Handlers_).
 
 ---
 
 ## Scripts Disponíveis
 
-| Comando | Descrição |
-|---|---|
-| `npm run dev` | Inicia o servidor Vite de desenvolvimento com HMR. |
-| `npm run build` | Checagem de tipos (`tsc -b`) e compilação dos ativos de produção na pasta `dist/`. |
-| `npm test` | Executa a suíte completa de testes automatizados com o Node.js Test Runner. |
-| `npm run lint` | Valida as regras de lint do código via Oxlint. |
-| `npm run lint:css` | Verifica a conformidade das regras CSS via Stylelint. |
-| `npm run lint:css:fix` | Aplica correções automáticas nas regras de estilo. |
-| `npm run preview` | Inicia um servidor HTTP local para inspeção do build de produção. |
+| Comando                | Descrição                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `npm run dev`          | Inicia o servidor Vite de desenvolvimento com HMR.                                 |
+| `npm run build`        | Checagem de tipos (`tsc -b`) e compilação dos ativos de produção na pasta `dist/`. |
+| `npm test`             | Executa a suíte completa de testes automatizados com o Node.js Test Runner.        |
+| `npm run lint`         | Valida as regras de lint do código via Oxlint.                                     |
+| `npm run lint:css`     | Verifica a conformidade das regras CSS via Stylelint.                              |
+| `npm run lint:css:fix` | Aplica correções automáticas nas regras de estilo.                                 |
+| `npm run preview`      | Inicia um servidor HTTP local para inspeção do build de produção.                  |
 
 ---
 
 ## Módulos e Navegação
 
-| Rota | Módulo | Descrição |
-|---|---|---|
-| `/login` | Autenticação | Formulário de acesso ao sistema com credenciais Supabase Auth. |
-| `/` | Dashboard | Métricas principais, valor em estoque, alertas de ruptura e histórico recente. |
-| `/produtos` | Gestão de Produtos | Catálogo completo com busca, filtros por categoria e controle de estoque mínimo. |
-| `/movimentacoes` | Movimentações | Entradas e saídas de estoque com registro auditável e histórico com filtros. |
-| `/pedidos` | Pedidos de Compra | Emissão e acompanhamento de compras com recebimento atômico de mercadorias. |
-| `/fornecedores` | Fornecedores | Cadastro e consulta de fornecedores parceiros com CNPJ e contatos. |
-| `/categorias` | Categorias | Organização e taxonomia dos produtos cadastrados. |
-| `/usuarios` | Usuários | Administração de operadores com controle de acessos. |
-| `/assistente` | Assistente IA | Interface de chat para consultas determinísticas em linguagem natural via Ollama. |
+| Rota             | Módulo             | Descrição                                                                         |
+| ---------------- | ------------------ | --------------------------------------------------------------------------------- |
+| `/login`         | Autenticação       | Formulário de acesso ao sistema com credenciais Supabase Auth.                    |
+| `/`              | Dashboard          | Métricas principais, valor em estoque, alertas de ruptura e histórico recente.    |
+| `/produtos`      | Gestão de Produtos | Catálogo completo com busca, filtros por categoria e controle de estoque mínimo.  |
+| `/movimentacoes` | Movimentações      | Entradas e saídas de estoque com registro auditável e histórico com filtros.      |
+| `/pedidos`       | Pedidos de Compra  | Emissão e acompanhamento de compras com recebimento atômico de mercadorias.       |
+| `/pedidos-venda` | Pedidos de Venda   | Registro de orçamentos e pedidos com baixa automática no estoque físico.          |
+| `/clientes`      | Clientes           | Cadastro e acompanhamento de clientes (PF e PJ) com formatação de documentos.     |
+| `/fornecedores`  | Fornecedores       | Cadastro e consulta de fornecedores parceiros com CNPJ e contatos.                |
+| `/categorias`    | Categorias         | Organização e taxonomia dos produtos cadastrados.                                 |
+| `/usuarios`      | Usuários           | Administração de operadores com controle de acessos.                              |
+| `/assistente`    | Assistente IA      | Interface de chat para consultas determinísticas em linguagem natural via Ollama. |
 
 ---
 

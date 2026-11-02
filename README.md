@@ -1,115 +1,240 @@
-# Inventário Inteligente
+# Inventário Inteligente — Gestão de Estoque com IA Local
 
-Sistema web de gestão de inventário focado no controle de produtos, movimentações de estoque e pedidos de compra, aliado a uma interface de apoio à decisão baseada em inteligência artificial. O projeto adota uma arquitetura _Backend-as-a-Service_ (BaaS) com integridade transacional garantida diretamente no banco de dados e suporte à tomada de decisão através de um assistente local com _Function Calling_.
+Sistema completo de gestão de inventário, controle de movimentações e pedidos de compra e venda, integrando uma arquitetura *Backend-as-a-Service* (BaaS) com Supabase e um assistente conversacional inteligente executado localmente via **Ollama** com suporte a *Function Calling*.
 
-## Funcionalidades
+---
 
-- **Painel de Controle (Dashboard)**: Exibe indicadores em tempo real, incluindo valor total do estoque, total de itens cadastrados, alertas de estoque crítico e contagem de pedidos em aberto, além de tabelas com itens críticos e movimentações recentes.
-- **Gestão de Produtos**: Catálogo completo com busca textual e filtros por categoria, exibindo SKU, localização física, preço unitário, quantidade atual e limite de estoque mínimo, além de formulários para cadastro, edição e exclusão.
-- **Histórico de Movimentações**: Registro auditável de entradas e saídas de estoque com quantidade, motivo, data/hora e identificação do usuário responsável pela ação.
-- **Pedidos de Compra**: Criação e acompanhamento de pedidos de reposição vinculados a fornecedores e produtos, com cálculo automático do total e fluxo transacional de recebimento com atualização atômica de estoque.
-- **Pedidos de Venda**: Registro de vendas e orçamentos para clientes com múltiplos produtos, cálculo em tempo real e finalização com baixa atômica no estoque e geração de movimentação de saída.
-- **Cadastros de Apoio**: Gerenciamento de clientes (PF/PJ), fornecedores (razão social, CNPJ e contatos), categorias de materiais e usuários do sistema.
-- **Assistente Inteligente (IA)**: Chat conversacional integrado ao Ollama (modelo Llama 3.2) utilizando _Function Calling_ para consultar métricas, verificar níveis de estoque, listar movimentações e analisar pedidos de forma determinística e sem alucinações.
-- **Autenticação e Sessão**: Controle de acesso corporativo seguro com rotas privadas gerenciadas pelo Supabase Auth.
+[![React 19](https://img.shields.io/badge/React-19.2-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.3-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-BaaS-3FCF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Ollama](https://img.shields.io/badge/Ollama-Llama_3.2-black?style=flat&logo=ollama&logoColor=white)](https://ollama.com/)
+[![Node.js Tests](https://img.shields.io/badge/Tests-Node_Native-green?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Licença Privada](https://img.shields.io/badge/License-Privado-lightgrey?style=flat)](#licença)
+
+---
+
+## Sumário
+
+- [Visão Geral](#visão-geral)
+- [Funcionalidades Principais](#funcionalidades-principais)
+- [Arquitetura do Assistente de IA](#arquitetura-do-assistente-de-ia)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Pré-requisitos](#pré-requisitos)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Instalação e Execução](#instalação-e-execução)
+- [Executando os Testes](#executando-os-testes)
+- [Scripts Disponíveis](#scripts-disponíveis)
+- [Módulos e Navegação](#módulos-e-navegação)
+- [Padrões de Versionamento](#padrões-de-versionamento)
+- [Licença](#licença)
+
+---
+
+## Visão Geral
+
+O **Inventário Inteligente** foi concebido para resolver desafios de controle operacional em estoques físicos, unificando catalogação, rastreabilidade de entradas e saídas, gestão de compras e faturamento de vendas. 
+
+O diferencial do sistema está na convergência entre a integridade transacional — garantida diretamente no banco de dados via Stored Procedures (RPCs) no PostgreSQL do Supabase — e uma interface de apoio à tomada de decisão assistida por Inteligência Artificial. Utilizando o Ollama com o modelo Llama 3.2 em execução local, o operador pode consultar métricas, alertas de ruptura e análises da curva ABC em linguagem natural com garantia determinística via chamadas de função (*Function Calling*).
+
+---
+
+## Funcionalidades Principais
+
+- **Painel de Controle em Tempo Real (Dashboard):** Visão executiva consolidada com métricas de valor patrimonial total, volume de itens em estoque, alertas de estoque crítico, pedidos pendentes e tabela dinâmica de movimentações recentes.
+- **Catálogo Geral de Produtos:** Gestão completa (CRUD) com SKU, código de barras, localização física no almoxarifado, custo unitário, quantidade atual e limite de segurança (estoque mínimo).
+- **Rastreabilidade e Movimentações:** Auditoria de entradas e saídas de estoque, registrando tipo de movimentação, quantidade, justificativa, data/hora e identificação do usuário logado.
+- **Gestão de Pedidos de Compra:** Emissão e controle de pedidos vinculados a fornecedores parceiros, com cálculo automático e fluxo atômico de recebimento de mercadorias.
+- **Gestão de Pedidos de Venda:** Registro de pedidos e orçamentos para clientes com baixa automática no estoque físico e geração da respectiva movimentação de saída.
+- **Cadastros Auxiliares:** Módulos dedicados para Fornecedores (com CNPJ, razão social e canais de contato), Clientes (PF e PJ), Categorias de Materiais e Usuários com controle de perfil.
+- **Assistente Local com IA:** Interface conversacional com sugestões rápidas, histórico e ferramentas mapeadas para consulta analítica em linguagem natural.
+- **Controle de Acesso Seguro:** Autenticação gerenciada via Supabase Auth com rotas protegidas e isolamento de sessão.
+
+---
+
+## Arquitetura do Assistente de IA
+
+O módulo de IA opera de forma local e privada através do Ollama, garantindo que os dados corporativos não trafeguem por APIs de terceiros:
+
+1. **Camada de Escopo e Guardrails:** Sanitiza as mensagens recebidas, impedindo tentativas de jailbreak e direcionando exclusivamente para o escopo de inventário.
+2. **Declaração de Ferramentas (Function Calling):** Mapeamento formal de funções de consulta (`consultar_produtos`, `consultar_movimentacoes`, `consultar_curva_abc`, `analisar_previsao_ruptura`, `consultar_pedidos`).
+3. **Execução Determinística:** O modelo identifica a intenção e os parâmetros, delega a execução para os manipuladores internos do Supabase e formata a resposta final com clareza via Markdown.
+
+---
 
 ## Tecnologias Utilizadas
 
-- **Frontend:**
-    - [React 19](https://react.dev/) (com React Compiler)
-    - [TypeScript](https://www.typescriptlang.org/)
-    - [Vite](https://vitejs.dev/)
-    - [React Router DOM](https://reactrouter.com/) para rotas
-    - [CSS Modules](https://github.com/css-modules/css-modules) e CSS Keyframes para estilização e animações nativas
-    - [Lucide React](https://lucide.dev/) para ícones
-    - [React Markdown](https://github.com/remarkjs/react-markdown) para formatação das mensagens da IA
-- **Backend & Serviços:**
-    - [Supabase](https://supabase.com/) (Autenticação, Banco de Dados PostgreSQL e Stored Procedures via RPCs)
-- **Inteligência Artificial:**
-    - [Ollama](https://ollama.com/) (Execução local do modelo Llama 3.2 via API com suporte a chamadas de função)
-- **Ferramentas de Desenvolvimento:**
-    - [Oxlint](https://oxc.rs/) para análise estática e linting de código
-    - [Stylelint](https://stylelint.io/) para padronização e linting de estilos CSS
+### Frontend
+- **[React 19](https://react.dev/):** Biblioteca declarativa com suporte nativo ao React Compiler para máxima performance.
+- **[TypeScript](https://www.typescriptlang.org/):** Tipagem estática fim a fim em componentes, hooks e contratos de API.
+- **[Vite 8](https://vitejs.dev/):** Ferramenta de build de última geração com inicialização instantânea.
+- **[React Router DOM 7](https://reactrouter.com/):** Gerenciamento de rotas declarativas e guards de autenticação.
+- **[Tailwind CSS v4](https://tailwindcss.com/):** Motor de estilização atômica de alta performance integrado ao Vite.
+- **[GSAP](https://greensock.com/gsap/):** Biblioteca para animações fluidas, transições de interface e microinterações.
+- **[Lucide React](https://lucide.dev/):** Ícones modernos e consistentes.
+- **[React Markdown](https://github.com/remarkjs/react-markdown):** Renderização segura de Markdown gerado pelo assistente de IA.
+
+### Backend & Serviços
+- **[Supabase](https://supabase.com/):** Plataforma de backend com PostgreSQL, Supabase Auth para gestão de sessões e Stored Procedures RPCs para operações com integridade transacional (`registrar_movimentacao`, `receber_pedido`).
+
+### Inteligência Artificial
+- **[Ollama](https://ollama.com/):** Runtime para execução de modelos de linguagem (Llama 3.2:3b) localmente no dispositivo via API HTTP.
+
+### Testes & Qualidade
+- **Node.js Native Test Runner:** Testes automatizados executados com `node --test --experimental-strip-types`.
+- **[Oxlint](https://oxc.rs/):** Análise estática ultrarrápida para código TypeScript e componentes React.
+- **[Stylelint](https://stylelint.io/):** Padronização e validação das regras de folhas de estilo CSS.
+
+---
 
 ## Estrutura do Projeto
 
-A estrutura de pastas principal dentro de `src/` está organizada da seguinte forma:
+```text
+inventario-tcc/
+├── public/                 # Favicons e manifestos estáticos
+├── src/
+│   ├── assets/             # Recursos visuais e logotipos
+│   ├── components/         # Componentes reutilizáveis (Button, Modal, Input, Layout, etc.)
+│   ├── contexts/           # Provedores de contexto (AuthContext)
+│   ├── hooks/              # Hooks customizados (useProdutos, usePedidos, useDashboard, etc.)
+│   ├── lib/                # Configuração de clientes de API (Supabase)
+│   ├── pages/              # Telas da aplicação (Dashboard, Produtos, Movimentações, etc.)
+│   ├── services/           # Lógica de integração e ferramentas da IA (services/ai)
+│   ├── styles/             # Estilos globais e tokens de tema
+│   ├── tests/              # Testes unitários e de integração das ferramentas de IA
+│   ├── types/              # Definições de tipos TypeScript
+│   ├── utils/              # Formatadores de moeda, datas e tratamento de erros
+│   ├── App.tsx             # Configuração do roteador e provedores
+│   └── main.tsx            # Ponto de entrada da aplicação
+├── .env.example            # Modelo de variáveis de ambiente
+├── .oxlintrc.json          # Configuração do Oxlint
+├── .stylelintrc.json       # Configuração do Stylelint
+├── package.json            # Dependências e scripts do projeto
+├── tsconfig.json           # Configurações do compilador TypeScript
+└── vite.config.ts          # Configurações do Vite e Tailwind v4
+```
 
-- `/assets`: Recursos estáticos e imagens.
-- `/components`: Componentes reutilizáveis de interface (`Button`, `Modal`, `Input`, `Card`, `Badge`, `Select`, `PageHeader`) e estruturais (`Layout`, `PrivateRoute`).
-- `/contexts`: Contextos globais do React (ex: `AuthContext`).
-- `/hooks`: Hooks customizados para regras de negócio e integração com o Supabase (`useProdutos`, `usePedidos`, `useMovimentacoes`, `useFornecedores`, `useCategorias`, `useUsuarios`, `useDashboard`, `useAssistente`).
-- `/lib`: Configuração e inicialização de clientes externos (ex: cliente do Supabase).
-- `/pages`: Telas da aplicação (`Dashboard`, `Produtos`, `Movimentacoes`, `Pedidos`, `Fornecedores`, `Categorias`, `Usuarios`, `Assistente` e `Login`).
-- `/services`: Lógicas de integração e serviços especializados, contendo as definições de ferramentas, manipuladores e prompts da inteligência artificial (`services/ai`).
-- `/styles`: Estilos globais, variáveis de tema e reset CSS.
-- `/types`: Definições de tipos e interfaces do TypeScript para as entidades do sistema.
-- `/utils`: Funções utilitárias para formatação de moeda, datas, documentos e tratamento de erros do banco.
+---
 
 ## Pré-requisitos
 
-Antes de iniciar, você precisará ter instalado em sua máquina:
+Certifique-se de ter os seguintes softwares instalados em seu ambiente:
 
-- [Node.js](https://nodejs.org/en/) (recomendado versão 18 ou superior)
-- Um gerenciador de pacotes como `npm`, `yarn` ou `pnpm`
-- Uma conta no [Supabase](https://supabase.com/) com um projeto configurado (tabelas relacionais, autenticação e as funções RPC `registrar_movimentacao` e `receber_pedido`).
-- [Ollama](https://ollama.com/) instalado e em execução na máquina para utilizar as funcionalidades do Assistente de IA.
+- [Node.js](https://nodejs.org/) (versão 20.0.0 ou superior recomendada)
+- [npm](https://www.npmjs.com/) (gerenciador de pacotes padrão)
+- Uma conta no [Supabase](https://supabase.com/) com projeto e tabelas provisionadas
+- [Ollama](https://ollama.com/) instalado para as consultas inteligentes
 
-## Instalação e Configuração
+---
 
-1. Clone o repositório:
+## Variáveis de Ambiente
 
-    ```bash
-    git clone <url-do-repositorio>
-    ```
-
-2. Acesse a pasta do projeto:
-
-    ```bash
-    cd inventario-tcc
-    ```
-
-3. Instale as dependências:
-
-    ```bash
-    npm install
-    ```
-
-4. Configure as variáveis de ambiente:
-    - Crie um arquivo `.env` na raiz do projeto com base no arquivo `.env.example`:
-        ```bash
-        cp .env.example .env
-        ```
-    - Preencha o arquivo `.env` com as suas credenciais do Supabase:
-        ```env
-        VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-        VITE_SUPABASE_PUBLISHABLE_KEY=sua_chave_publica_do_supabase
-        ```
-
-5. Inicialize o modelo de linguagem no Ollama:
-
-    ```bash
-    ollama run llama3.2:3b
-    ```
-
-## Como Executar
-
-Para iniciar o servidor de desenvolvimento, execute o comando:
+Crie um arquivo `.env` na raiz do projeto copiando o modelo de `.env.example`:
 
 ```bash
-npm run dev
+cp .env.example .env
 ```
 
-Acesse a aplicação no seu navegador padrão (geralmente em `http://localhost:5173`).
+Preencha as variáveis de acordo com as credenciais do seu projeto Supabase:
 
-## Como Usar
+| Variável | Descrição | Exemplo |
+|---|---|---|
+| `VITE_SUPABASE_URL` | URL do projeto Supabase | `https://seu-projeto.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave pública anônima do Supabase | `sua_chave_publica_aqui` |
 
-- **Login (`/login`)**: Página de autenticação corporativa com validação de credenciais via Supabase Auth.
-- **Dashboard (`/`)**: Visão consolidada com cartões de métricas globais, lista de produtos com estoque em nível crítico e tabela de movimentações recentes.
-- **Produtos (`/produtos`)**: Painel de gerenciamento do estoque físico com busca por nome ou SKU, filtro por categoria e formulário modal para cadastro e alteração de itens.
-- **Movimentações (`/movimentacoes`)**: Tela para registro de entradas e saídas avulsas com motivo, além de tabela de histórico com filtros por tipo e produto.
-- **Pedidos (`/pedidos`)**: Módulo para emissão de pedidos de compra com fornecedores e itens múltiplos, permitindo marcar pedidos como recebidos para atualizar o estoque de forma automática.
-- **Fornecedores (`/fornecedores`)**: Cadastro e listagem de empresas parceiras com CNPJ, razão social, nome fantasia e canais de contato.
-- **Categorias (`/categorias`)**: Cadastro e gerenciamento de agrupamentos para classificação dos produtos.
-- **Usuários (`/usuarios`)**: Listagem de colaboradores com acesso ao sistema e edição de dados de perfil.
-- **Assistente (`/assistente`)**: Interface conversacional com sugestões rápidas e biblioteca de comandos para consulta em linguagem natural sobre valores, alertas de estoque baixo e histórico de movimentações.
+---
+
+## Instalação e Execução
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/Jhnvida/inventario-tcc.git
+   cd inventario-tcc
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
+
+3. **Inicie o modelo no Ollama (em um terminal separado):**
+   ```bash
+   ollama run llama3.2:3b
+   ```
+
+4. **Inicie a aplicação em desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Acesse no navegador:**
+   Abra [http://localhost:5173](http://localhost:5173).
+
+---
+
+## Executando os Testes
+
+A aplicação utiliza o test runner nativo do Node.js com execução direta de arquivos TypeScript:
+
+```bash
+npm test
+```
+
+A suíte cobre:
+- Guardrails e camadas de sanitização contra tentativas de manipulação da IA.
+- Formatadores de data e localização para pt-BR.
+- Mapeamento e execução segura de manipuladores de ferramentas (*Tool Handlers*).
+
+---
+
+## Scripts Disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia o servidor Vite de desenvolvimento com HMR. |
+| `npm run build` | Checagem de tipos (`tsc -b`) e compilação dos ativos de produção na pasta `dist/`. |
+| `npm test` | Executa a suíte completa de testes automatizados com o Node.js Test Runner. |
+| `npm run lint` | Valida as regras de lint do código via Oxlint. |
+| `npm run lint:css` | Verifica a conformidade das regras CSS via Stylelint. |
+| `npm run lint:css:fix` | Aplica correções automáticas nas regras de estilo. |
+| `npm run preview` | Inicia um servidor HTTP local para inspeção do build de produção. |
+
+---
+
+## Módulos e Navegação
+
+| Rota | Módulo | Descrição |
+|---|---|---|
+| `/login` | Autenticação | Formulário de acesso ao sistema com credenciais Supabase Auth. |
+| `/` | Dashboard | Métricas principais, valor em estoque, alertas de ruptura e histórico recente. |
+| `/produtos` | Gestão de Produtos | Catálogo completo com busca, filtros por categoria e controle de estoque mínimo. |
+| `/movimentacoes` | Movimentações | Entradas e saídas de estoque com registro auditável e histórico com filtros. |
+| `/pedidos` | Pedidos de Compra | Emissão e acompanhamento de compras com recebimento atômico de mercadorias. |
+| `/fornecedores` | Fornecedores | Cadastro e consulta de fornecedores parceiros com CNPJ e contatos. |
+| `/categorias` | Categorias | Organização e taxonomia dos produtos cadastrados. |
+| `/usuarios` | Usuários | Administração de operadores com controle de acessos. |
+| `/assistente` | Assistente IA | Interface de chat para consultas determinísticas em linguagem natural via Ollama. |
+
+---
+
+## Padrões de Versionamento
+
+Este repositório adota a convenção de [Conventional Commits](https://www.conventionalcommits.org/pt-br/):
+
+- `feat:` Novas funcionalidades no sistema ou ferramentas do assistente.
+- `fix:` Correções de bugs em regras de negócio ou interface.
+- `docs:` Alterações e melhorias na documentação técnica.
+- `style:` Ajustes puramente visuais ou de formatação sem impacto comportamental.
+- `refactor:` Refatorações de código e reorganização estrutural.
+- `perf:` Melhorias diretas de performance e tempo de resposta.
+- `test:` Inclusão ou manutenção de testes automatizados.
+- `build:` Modificações nas dependências ou configurações de empacotamento.
+- `chore:` Tarefas rotineiras de manutenção e infraestrutura.
+
+---
+
+## Licença
+
+Este projeto foi desenvolvido como trabalho acadêmico (TCC) e aplicação privada. Não possui licença pública de código aberto concedida para reprodução comercial. Todos os direitos reservados ao autor.

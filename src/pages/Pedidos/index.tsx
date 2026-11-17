@@ -32,28 +32,40 @@ export function Pedidos() {
         deletePedido,
     } = usePedidos();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeModal, setActiveModal] = useState<"none" | "details" | "form">("none");
     const [pedidoSelecionado, setPedidoSelecionado] = useState<PedidoCompleto | null>(null);
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [pedidoEditando, setPedidoEditando] = useState<PedidoCompleto | null>(null);
 
     function handleOpenCreate() {
+        setPedidoSelecionado(null);
         setPedidoEditando(null);
-        setIsFormModalOpen(true);
+        setActiveModal("form");
     }
 
     function handleOpenEdit(pedido: PedidoCompleto) {
+        setPedidoSelecionado(null);
         setPedidoEditando(pedido);
-        setIsFormModalOpen(true);
+        setActiveModal("form");
     }
 
     function handleOpenDetails(pedido: PedidoCompleto) {
+        setPedidoEditando(null);
         setPedidoSelecionado(pedido);
-        setIsModalOpen(true);
+        setActiveModal("details");
+    }
+
+    function handleCloseModals() {
+        setActiveModal("none");
+        setPedidoSelecionado(null);
+        setPedidoEditando(null);
     }
 
     async function handleDelete(id: string) {
         if (!window.confirm("Tem certeza que deseja excluir este pedido? Ação irreversível.")) return;
+
+        if (pedidoSelecionado?.id === id || pedidoEditando?.id === id) {
+            handleCloseModals();
+        }
 
         const res = await deletePedido(id);
         if (!res.success) {
@@ -136,7 +148,8 @@ export function Pedidos() {
                                     {pedidos.map((pedido) => (
                                         <tr
                                             key={pedido.id}
-                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
+                                            className="hover:bg-slate-50/75 transition-colors duration-150 ease-out cursor-pointer"
+                                            onClick={() => handleOpenDetails(pedido)}
                                         >
                                             <td className="px-5 py-3">
                                                 <span className="font-mono text-slate-500">
@@ -160,7 +173,7 @@ export function Pedidos() {
                                             <td className="px-5 py-3 text-center">
                                                 <StatusBadge status={pedido.status} />
                                             </td>
-                                            <td className="px-5 py-3">
+                                            <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                                                 <div className="flex items-center justify-center gap-1">
                                                     <IconButton
                                                         title="Ver Detalhes e Receber"
@@ -194,7 +207,11 @@ export function Pedidos() {
 
                         <div className="md:hidden divide-y divide-slate-100">
                             {pedidos.map((pedido) => (
-                                <div key={pedido.id} className="p-4 space-y-2.5">
+                                <div
+                                    key={pedido.id}
+                                    className="p-4 space-y-2.5 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                                    onClick={() => handleOpenDetails(pedido)}
+                                >
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
                                             <span className="font-mono text-xs text-slate-400">
@@ -214,7 +231,10 @@ export function Pedidos() {
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                                    <div
+                                        className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <Button variant="secondary" size="sm" onClick={() => handleOpenDetails(pedido)}>
                                             <Eye size={14} />
                                             <span>Detalhes</span>
@@ -245,17 +265,18 @@ export function Pedidos() {
             </Card>
 
             <PedidoFormModal
-                isOpen={isFormModalOpen}
-                onClose={() => setIsFormModalOpen(false)}
+                isOpen={activeModal === "form"}
+                onClose={handleCloseModals}
                 pedido={pedidoEditando}
                 onSave={salvarPedido}
             />
 
             <PedidoDetalhesModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={activeModal === "details"}
+                onClose={handleCloseModals}
                 pedido={pedidoSelecionado}
                 onReceberPedido={receberPedido}
+                onEditar={handleOpenEdit}
             />
         </div>
     );

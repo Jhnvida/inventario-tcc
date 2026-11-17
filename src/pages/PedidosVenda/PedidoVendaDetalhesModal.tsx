@@ -1,5 +1,5 @@
-import { CheckCircle2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Edit2, XCircle } from "lucide-react";
+import { useRef, useState } from "react";
 import { Alert } from "../../components/ui/Alert";
 import { StatusBadge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -14,6 +14,7 @@ interface PedidoVendaDetalhesModalProps {
     pedido: PedidoVendaCompleto | null;
     onFinalizarVenda: (id: string) => Promise<{ success: boolean; error?: string }>;
     onCancelarVenda: (id: string) => Promise<{ success: boolean; error?: string }>;
+    onEditar?: (pedido: PedidoVendaCompleto) => void;
 }
 
 export function PedidoVendaDetalhesModal({
@@ -22,20 +23,27 @@ export function PedidoVendaDetalhesModal({
     pedido,
     onFinalizarVenda,
     onCancelarVenda,
+    onEditar,
 }: PedidoVendaDetalhesModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const activePedidoRef = useRef<PedidoVendaCompleto | null>(pedido);
 
-    if (!pedido) return null;
+    if (pedido) {
+        activePedidoRef.current = pedido;
+    }
+
+    const currentPedido = pedido ?? activePedidoRef.current;
+    if (!currentPedido) return null;
 
     async function handleFinalizar() {
-        if (!pedido) return;
+        if (!currentPedido) return;
         if (!window.confirm("Deseja finalizar esta venda? O estoque dos produtos será baixado automaticamente."))
             return;
 
         setLoading(true);
         setError("");
-        const res = await onFinalizarVenda(pedido.id);
+        const res = await onFinalizarVenda(currentPedido.id);
         if (res.success) {
             onClose();
         } else {
@@ -45,12 +53,12 @@ export function PedidoVendaDetalhesModal({
     }
 
     async function handleCancelar() {
-        if (!pedido) return;
+        if (!currentPedido) return;
         if (!window.confirm("Tem certeza que deseja cancelar este pedido de venda?")) return;
 
         setLoading(true);
         setError("");
-        const res = await onCancelarVenda(pedido.id);
+        const res = await onCancelarVenda(currentPedido.id);
         if (res.success) {
             onClose();
         } else {
@@ -59,13 +67,13 @@ export function PedidoVendaDetalhesModal({
         setLoading(false);
     }
 
-    const isRascunho = pedido.status === "rascunho";
+    const isRascunho = currentPedido.status === "rascunho";
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={`Detalhes da Venda #${pedido.numero || pedido.id.slice(0, 8)}`}
+            title={`Detalhes da Venda #${currentPedido.numero || currentPedido.id.slice(0, 8)}`}
             subtitle="Conferência de itens e faturamento comercial para clientes"
             width="large"
         >
@@ -76,38 +84,38 @@ export function PedidoVendaDetalhesModal({
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Cliente</span>
                         <span className="text-sm font-semibold text-slate-900 truncate block mt-0.5">
-                            {pedido.clientes?.nome || "Consumidor Final"}
+                            {currentPedido.clientes?.nome || "Consumidor Final"}
                         </span>
-                        {pedido.clientes?.documento && (
+                        {currentPedido.clientes?.documento && (
                             <span className="text-[11px] text-slate-400 font-mono block mt-0.5">
-                                {pedido.clientes.documento}
+                                {currentPedido.clientes.documento}
                             </span>
                         )}
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Data da Venda</span>
                         <span className="text-sm font-semibold text-slate-900 block mt-0.5">
-                            {formatDate(pedido.criado_em)}
+                            {formatDate(currentPedido.criado_em)}
                         </span>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Situação</span>
                         <div className="mt-1">
-                            <StatusBadge status={pedido.status} />
+                            <StatusBadge status={currentPedido.status} />
                         </div>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Valor Faturado</span>
                         <span className="text-sm font-semibold text-slate-900 block mt-0.5 tabular-nums">
-                            {formatCurrency(pedido.valor_total)}
+                            {formatCurrency(currentPedido.valor_total)}
                         </span>
                     </div>
                 </div>
 
-                {pedido.observacoes && (
+                {currentPedido.observacoes && (
                     <div className="p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-700">
                         <strong className="font-semibold text-slate-900 block mb-0.5">Observações:</strong>
-                        <span>{pedido.observacoes}</span>
+                        <span>{currentPedido.observacoes}</span>
                     </div>
                 )}
 
@@ -125,7 +133,7 @@ export function PedidoVendaDetalhesModal({
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {pedido.itens_pedido_venda?.map((item) => (
+                                    {currentPedido.itens_pedido_venda?.map((item) => (
                                         <tr
                                             key={item.id}
                                             className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
@@ -166,6 +174,12 @@ export function PedidoVendaDetalhesModal({
                         </Button>
                         {isRascunho && (
                             <>
+                                {onEditar && (
+                                    <Button type="button" variant="secondary" onClick={() => onEditar(currentPedido)}>
+                                        <Edit2 size={15} />
+                                        <span>Editar Venda</span>
+                                    </Button>
+                                )}
                                 <Button type="button" variant="danger" disabled={loading} onClick={handleCancelar}>
                                     <XCircle size={15} />
                                     <span>Cancelar Venda</span>

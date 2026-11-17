@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { modalRegistry } from "./modalRegistry";
 
 export type ModalWidth = "small" | "medium" | "large";
 
@@ -19,10 +20,14 @@ const widthStyles: Record<ModalWidth, { mobile: string; desktop: string }> = {
     large: { mobile: "w-full sm:w-[520px]", desktop: "lg:w-[580px] xl:w-[640px]" },
 };
 
+export { modalRegistry };
+
 export function Modal({ isOpen, onClose, title, subtitle, children, width = "medium" }: ModalProps) {
+    const instanceId = useRef(`modal_${Math.random().toString(36).substring(2, 9)}`).current;
     const [isRendered, setIsRendered] = useState(isOpen);
     const [isVisible, setIsVisible] = useState(isOpen);
     const [mountTarget, setMountTarget] = useState<HTMLElement | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
     if (isOpen !== prevIsOpen) {
@@ -42,25 +47,58 @@ export function Modal({ isOpen, onClose, title, subtitle, children, width = "med
         setMountTarget(root || document.body);
     }, []);
 
+    const forceInstantClose = useCallback(() => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+        setIsVisible(false);
+        setIsRendered(false);
+    }, []);
+
     useEffect(() => {
-        let timer: ReturnType<typeof setTimeout> | undefined;
+        modalRegistry.register(instanceId, forceInstantClose);
+        return () => {
+            modalRegistry.unregister(instanceId);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [instanceId, forceInstantClose]);
+
+    useEffect(() => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
 
         if (isOpen) {
+            modalRegistry.notifyOpened(instanceId);
             setIsRendered(true);
-            timer = setTimeout(() => {
+            timerRef.current = setTimeout(() => {
                 setIsVisible(true);
             }, 20);
         } else {
+            modalRegistry.notifyClosed(instanceId);
             setIsVisible(false);
-            timer = setTimeout(() => {
+            const activeId = modalRegistry.getCurrentOpenModalId();
+            if (activeId && activeId !== instanceId) {
                 setIsRendered(false);
-            }, 280);
+            } else {
+                timerRef.current = setTimeout(() => {
+                    setIsRendered(false);
+                }, 280);
+            }
         }
 
         return () => {
-            if (timer) clearTimeout(timer);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
         };
-    }, [isOpen]);
+    }, [isOpen, instanceId]);
 
     useEffect(() => {
         if (!isOpen) return;

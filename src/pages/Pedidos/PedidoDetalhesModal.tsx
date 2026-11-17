@@ -1,5 +1,5 @@
-import { CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Edit2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { Alert } from "../../components/ui/Alert";
 import { StatusBadge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -13,19 +13,32 @@ interface PedidoDetalhesModalProps {
     onClose: () => void;
     pedido: PedidoCompleto | null;
     onReceberPedido: (id: string) => Promise<{ success: boolean; error?: string }>;
+    onEditar?: (pedido: PedidoCompleto) => void;
 }
 
-export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }: PedidoDetalhesModalProps) {
+export function PedidoDetalhesModal({
+    isOpen,
+    onClose,
+    pedido,
+    onReceberPedido,
+    onEditar,
+}: PedidoDetalhesModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const activePedidoRef = useRef<PedidoCompleto | null>(pedido);
 
-    if (!pedido) return null;
+    if (pedido) {
+        activePedidoRef.current = pedido;
+    }
+
+    const currentPedido = pedido ?? activePedidoRef.current;
+    if (!currentPedido) return null;
 
     async function handleReceber() {
-        if (!pedido) return;
+        if (!currentPedido) return;
         setLoading(true);
         setError("");
-        const res = await onReceberPedido(pedido.id);
+        const res = await onReceberPedido(currentPedido.id);
         if (res.success) {
             onClose();
         } else {
@@ -34,13 +47,13 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
         setLoading(false);
     }
 
-    const isRecebivel = pedido.status === "enviado";
+    const isRecebivel = currentPedido.status === "enviado";
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={`Detalhes do Pedido #${pedido.id.substring(0, 8)}`}
+            title={`Detalhes do Pedido #${currentPedido.id.substring(0, 8)}`}
             subtitle="Consulta e conferência de materiais enviados pelo fornecedor"
             width="large"
         >
@@ -51,25 +64,25 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Fornecedor</span>
                         <span className="text-sm font-semibold text-slate-900 truncate block mt-0.5">
-                            {pedido.fornecedores?.razao_social || "Desconhecido"}
+                            {currentPedido.fornecedores?.razao_social || "Desconhecido"}
                         </span>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Data de Criação</span>
                         <span className="text-sm font-semibold text-slate-900 block mt-0.5">
-                            {formatDate(pedido.criado_em)}
+                            {formatDate(currentPedido.criado_em)}
                         </span>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Situação</span>
                         <div className="mt-1">
-                            <StatusBadge status={pedido.status} />
+                            <StatusBadge status={currentPedido.status} />
                         </div>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Valor Total</span>
                         <span className="text-sm font-semibold text-slate-900 block mt-0.5 tabular-nums">
-                            {formatCurrency(pedido.valor_total)}
+                            {formatCurrency(currentPedido.valor_total)}
                         </span>
                     </div>
                 </div>
@@ -88,7 +101,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {pedido.itens_pedido?.map((item) => (
+                                    {currentPedido.itens_pedido?.map((item) => (
                                         <tr
                                             key={item.id}
                                             className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
@@ -123,10 +136,16 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
                         <Button type="button" variant="secondary" onClick={onClose}>
                             Fechar
                         </Button>
+                        {onEditar && currentPedido.status !== "concluido" && currentPedido.status !== "cancelado" && (
+                            <Button type="button" variant="secondary" onClick={() => onEditar(currentPedido)}>
+                                <Edit2 size={15} />
+                                <span>Editar Pedido</span>
+                            </Button>
+                        )}
                         {isRecebivel && (
                             <Button type="button" variant="primary" disabled={loading} onClick={handleReceber}>
                                 <CheckCircle2 size={16} />

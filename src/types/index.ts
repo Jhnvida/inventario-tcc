@@ -97,3 +97,17 @@ export interface DashboardMetricas {
     estoqueCritico: number;
     pedidosAbertos: number;
 }
+
+export type UsuarioStatus = "pendente" | "ativo" | "inativo" | "recusado";
+export type UsuarioPerfil = "admin" | "operador";
+
+export interface Usuario {
+    id: string;
+    nome: string;
+    email: string;
+    perfil: UsuarioPerfil | string;
+    status: UsuarioStatus;
+    aprovado_em?: string | null;
+    aprovado_por?: string | null;
+    criado_em: string;
+}

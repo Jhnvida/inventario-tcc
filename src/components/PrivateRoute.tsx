@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Skeleton } from "./ui/Skeleton";
 
 export function PrivateRoute() {
-    const { user, loading } = useAuth();
+    const { user, usuario, loading, signOut } = useAuth();
 
     if (loading) {
         return (
@@ -19,6 +19,11 @@ export function PrivateRoute() {
 
     if (!user) {
         return <Navigate to="/login" replace />;
+    }
+
+    if (usuario && usuario.status !== "ativo") {
+        signOut();
+        return <Navigate to="/login" state={{ statusBloqueado: usuario.status }} replace />;
     }
 
     return <Outlet />;

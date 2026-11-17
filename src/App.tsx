@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Assistente } from "./pages/Assistente";
+import { Cadastro } from "./pages/Cadastro";
 import { Categorias } from "./pages/Categorias";
 import { Clientes } from "./pages/Clientes";
 import { Dashboard } from "./pages/Dashboard";
@@ -20,6 +21,7 @@ export function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/cadastro" element={<Cadastro />} />
 
                     <Route element={<PrivateRoute />}>
                         <Route path="/" element={<Layout />}>

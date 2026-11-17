@@ -1,18 +1,31 @@
 import { ArrowRight, Lock, Mail } from "lucide-react";
-import { useState, type SubmitEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, type SubmitEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { supabase } from "../../lib/supabase";
+import { translateAuthError } from "../../utils/errors";
 
 export function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const state = location.state as { statusBloqueado?: string } | null;
+        if (state?.statusBloqueado === "pendente") {
+            setError("Seu cadastro foi realizado com sucesso, mas ainda está aguardando aprovação de um administrador.");
+        } else if (state?.statusBloqueado === "recusado") {
+            setError("O acesso desta conta foi recusado pela administração do sistema.");
+        } else if (state?.statusBloqueado === "inativo") {
+            setError("Esta conta está temporariamente inativada. Contate o administrador.");
+        }
+    }, [location.state]);
 
     async function handleLogin(e: SubmitEvent) {
         e.preventDefault();
@@ -20,12 +33,49 @@ export function Login() {
         setError(null);
 
         try {
-            const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: email.trim().toLowerCase(),
+                password,
+            });
+
             if (authError) throw authError;
+
+            if (!data.user) {
+                throw new Error("Não foi possível autenticar o usuário.");
+            }
+
+            const { data: usuarioDb, error: userError } = await supabase
+                .from("usuarios")
+                .select("status, perfil, nome")
+                .eq("id", data.user.id)
+                .maybeSingle();
+
+            if (userError) {
+                console.error("Erro ao validar perfil:", userError);
+            }
+
+            if (usuarioDb?.status === "pendente") {
+                await supabase.auth.signOut();
+                setError("Seu cadastro está com o status Pendente. Aguarde a aprovação do administrador para acessar o sistema.");
+                return;
+            }
+
+            if (usuarioDb?.status === "recusado") {
+                await supabase.auth.signOut();
+                setError("Sua solicitação de acesso foi recusada pela administração do sistema.");
+                return;
+            }
+
+            if (usuarioDb?.status === "inativo") {
+                await supabase.auth.signOut();
+                setError("Sua conta de operador está inativada. Contate um administrador para restabelecer seu acesso.");
+                return;
+            }
+
             navigate("/");
         } catch (err: any) {
             console.error("Erro na autenticação:", err);
-            setError(err?.message || "E-mail ou senha inválidos. Verifique suas credenciais de acesso.");
+            setError(translateAuthError(err));
         } finally {
             setLoading(false);
         }
@@ -82,6 +132,13 @@ export function Login() {
                         </Button>
                     </div>
                 </form>
+
+                <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+                    Ainda não tem acesso?{" "}
+                    <Link to="/cadastro" className="font-medium text-slate-900 hover:underline">
+                        Solicitar cadastro
+                    </Link>
+                </div>
             </Card>
 
             <p className="text-xs text-slate-400 mt-6 text-center">Sistema Web de Gestão Inteligente de Inventário</p>

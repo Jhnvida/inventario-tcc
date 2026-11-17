@@ -1,7 +1,8 @@
 import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
-import { Button } from "../../components/ui/Button";
+import { StatusBadge } from "../../components/ui/Badge";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -65,22 +66,18 @@ export function Produtos() {
                 subtitle="Gerencie as mercadorias, parametrizações e níveis de estoque."
             >
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={16} />
                     <span>Novo Produto</span>
                 </Button>
             </PageHeader>
 
-            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 flex flex-col sm:flex-row items-center gap-3">
-                <div className="relative flex-1 w-full">
-                    <Search
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    />
+            <Card padding="small" className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex-1 w-full">
                     <Input
+                        startIcon={<Search size={15} />}
                         placeholder="Buscar por nome ou SKU..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="pl-8.5!"
                     />
                 </div>
                 <div className="w-full sm:w-64 shrink-0">
@@ -93,9 +90,9 @@ export function Produtos() {
                         ))}
                     </Select>
                 </div>
-            </div>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -110,10 +107,11 @@ export function Produtos() {
                                 ? "Tente ajustar os filtros de busca ou categoria para localizar itens."
                                 : "Comece cadastrando o primeiro produto do seu estoque."
                         }
+                        border="none"
                         action={
                             !busca && !categoriaFiltro ? (
                                 <Button size="sm" onClick={handleOpenCreate}>
-                                    <Plus size={16} />
+                                    <Plus size={15} />
                                     <span>Adicionar Produto</span>
                                 </Button>
                             ) : undefined
@@ -135,6 +133,7 @@ export function Produtos() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {produtos.map((produto) => {
+                                        const isZerado = produto.quantidade === 0;
                                         const isCritico = produto.quantidade <= produto.estoque_minimo;
                                         return (
                                             <tr
@@ -157,14 +156,25 @@ export function Produtos() {
                                                     {formatCurrency(produto.preco)}
                                                 </td>
                                                 <td className="px-5 py-3 text-right">
-                                                    <div className="inline-flex flex-col items-end">
-                                                        <span
-                                                            className={`font-semibold tabular-nums ${
-                                                                isCritico ? "text-red-600" : "text-slate-900"
-                                                            }`}
-                                                        >
-                                                            {produto.quantidade} un
-                                                        </span>
+                                                    <div className="inline-flex flex-col items-end gap-0.5">
+                                                        <div className="flex items-center gap-1.5">
+                                                            {isZerado ? (
+                                                                <StatusBadge status="zerado" />
+                                                            ) : isCritico ? (
+                                                                <StatusBadge status="critico" />
+                                                            ) : null}
+                                                            <span
+                                                                className={`font-semibold tabular-nums ${
+                                                                    isZerado
+                                                                        ? "text-red-600"
+                                                                        : isCritico
+                                                                          ? "text-amber-600"
+                                                                          : "text-slate-900"
+                                                                }`}
+                                                            >
+                                                                {produto.quantidade} un
+                                                            </span>
+                                                        </div>
                                                         <span className="text-[11px] text-slate-400 tabular-nums">
                                                             mín: {produto.estoque_minimo}
                                                         </span>
@@ -172,22 +182,21 @@ export function Produtos() {
                                                 </td>
                                                 <td className="px-5 py-3">
                                                     <div className="flex items-center justify-center gap-1">
-                                                        <button
-                                                            type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                            onClick={() => handleOpenEdit(produto)}
+                                                        <IconButton
                                                             title="Editar produto"
+                                                            aria-label={`Editar produto ${produto.nome}`}
+                                                            onClick={() => handleOpenEdit(produto)}
                                                         >
-                                                            <Edit2 size={16} />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                            onClick={() => handleDelete(produto.id, produto.nome)}
+                                                            <Edit2 size={15} />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            variant="danger"
                                                             title="Excluir produto"
+                                                            aria-label={`Excluir produto ${produto.nome}`}
+                                                            onClick={() => handleDelete(produto.id, produto.nome)}
                                                         >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                            <Trash2 size={15} />
+                                                        </IconButton>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -199,6 +208,7 @@ export function Produtos() {
 
                         <div className="md:hidden divide-y divide-slate-100">
                             {produtos.map((produto) => {
+                                const isZerado = produto.quantidade === 0;
                                 const isCritico = produto.quantidade <= produto.estoque_minimo;
                                 return (
                                     <div key={produto.id} className="p-4 space-y-3">
@@ -207,7 +217,11 @@ export function Produtos() {
                                                 <h4 className="font-medium text-slate-900 text-sm">{produto.nome}</h4>
                                                 <span className="font-mono text-xs text-slate-500">{produto.sku}</span>
                                             </div>
-                                            {isCritico && <Badge variant="critical">Crítico</Badge>}
+                                            {isZerado ? (
+                                                <StatusBadge status="zerado" />
+                                            ) : isCritico ? (
+                                                <StatusBadge status="critico" />
+                                            ) : null}
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-md">
@@ -221,7 +235,11 @@ export function Produtos() {
                                                 <span className="text-slate-400 block">Estoque</span>
                                                 <span
                                                     className={`font-semibold tabular-nums ${
-                                                        isCritico ? "text-red-600" : "text-slate-800"
+                                                        isZerado
+                                                            ? "text-red-600"
+                                                            : isCritico
+                                                              ? "text-amber-600"
+                                                              : "text-slate-800"
                                                     }`}
                                                 >
                                                     {produto.quantidade} / {produto.estoque_minimo} un
@@ -235,7 +253,7 @@ export function Produtos() {
                                                 size="sm"
                                                 onClick={() => handleOpenEdit(produto)}
                                             >
-                                                <Edit2 size={15} />
+                                                <Edit2 size={14} />
                                                 <span>Editar</span>
                                             </Button>
                                             <Button
@@ -243,7 +261,7 @@ export function Produtos() {
                                                 size="sm"
                                                 onClick={() => handleDelete(produto.id, produto.nome)}
                                             >
-                                                <Trash2 size={15} />
+                                                <Trash2 size={14} />
                                                 <span>Excluir</span>
                                             </Button>
                                         </div>
@@ -262,7 +280,7 @@ export function Produtos() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
             <ProdutoFormModal
                 isOpen={isModalOpen}

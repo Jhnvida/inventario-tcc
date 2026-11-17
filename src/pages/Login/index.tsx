@@ -1,7 +1,9 @@
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { supabase } from "../../lib/supabase";
 
@@ -31,27 +33,21 @@ export function Login() {
 
     return (
         <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 font-sans antialiased">
-            <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs animate-fade-in-up">
-                <div className="flex flex-col items-center text-center space-y-2">
-                    <div>
-                        <h1 className="text-lg font-semibold tracking-tight text-slate-900">Gestão de Inventário</h1>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                            Informe suas credenciais para acessar o sistema.
-                        </p>
-                    </div>
+            <Card padding="large" className="w-full max-w-sm space-y-6 shadow-xs animate-fade-in-up">
+                <div className="text-center space-y-1.5">
+                    <h1 className="text-lg font-semibold tracking-tight text-slate-900">Gestão de Inventário</h1>
+                    <p className="text-xs text-slate-500">
+                        Informe suas credenciais para acessar a plataforma.
+                    </p>
                 </div>
 
                 <form className="space-y-4" onSubmit={handleLogin}>
-                    {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2 animate-fade-in">
-                            <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" />
-                            <span>{error}</span>
-                        </div>
-                    )}
+                    {error && <Alert variant="error">{error}</Alert>}
 
                     <Input
                         label="E-mail"
                         type="email"
+                        startIcon={<Mail size={15} />}
                         placeholder="usuario@empresa.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -62,6 +58,7 @@ export function Login() {
                     <Input
                         label="Senha"
                         type="password"
+                        startIcon={<Lock size={15} />}
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -85,7 +82,7 @@ export function Login() {
                         </Button>
                     </div>
                 </form>
-            </div>
+            </Card>
 
             <p className="text-xs text-slate-400 mt-6 text-center">Sistema Web de Gestão Inteligente de Inventário</p>
         </div>

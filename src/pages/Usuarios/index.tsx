@@ -1,13 +1,18 @@
-import { AlertCircle, Edit2, Trash2, UserCog } from "lucide-react";
-import { useState, type SubmitEvent } from "react";
-import { Button } from "../../components/ui/Button";
+import { Edit2, Search, Trash2, UserCog, X } from "lucide-react";
+import { useState } from "react";
+import { Avatar } from "../../components/ui/Avatar";
+import { Badge } from "../../components/ui/Badge";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
-import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { useAuth } from "../../contexts/AuthContext";
 import { useUsuarios, type Usuario } from "../../hooks/useUsuarios";
+import { formatDate } from "../../utils/formatters";
+import { UsuarioFormModal } from "./UsuarioFormModal";
 
 export function Usuarios() {
     const {
@@ -18,53 +23,40 @@ export function Usuarios() {
         totalPaginas,
         itensPorPagina,
         loading,
-        updateUsuario,
+        busca,
+        setBusca,
+        recarregar,
         deleteUsuario,
     } = useUsuarios();
 
+    const { user: currentUser } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const [nome, setNome] = useState("");
-    const [error, setError] = useState<string | null>(null);
+    const [userToEdit, setUserToEdit] = useState<Usuario | null>(null);
 
     function handleOpenEdit(user: Usuario) {
-        setSelectedUser(user);
-        setNome(user.nome);
-        setError(null);
+        setUserToEdit(user);
         setIsModalOpen(true);
     }
 
-    async function handleDelete(id: string, nome: string) {
-        if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nome}"? Essa ação é irreversível.`)) return;
-
-        const res = await deleteUsuario(id);
-        if (!res.success) {
-            alert("Erro ao excluir usuário. Ele pode estar vinculado a registros no banco.");
-        }
+    function handleSuccess() {
+        setIsModalOpen(false);
+        recarregar();
     }
 
-    async function handleSubmit(e: SubmitEvent) {
-        e.preventDefault();
-        if (!selectedUser) return;
-        if (!nome.trim()) {
-            setError("O nome é obrigatório.");
+    async function handleDelete(user: Usuario) {
+        if (currentUser && currentUser.id === user.id) {
+            alert("Operação não permitida: você não pode excluir o seu próprio usuário conectado ao sistema.");
             return;
         }
 
-        setIsSubmitting(true);
-        setError(null);
-
-        const res = await updateUsuario(selectedUser.id, { nome: nome.trim() });
-
-        if (res.success) {
-            setIsModalOpen(false);
-        } else {
-            setError("Erro ao atualizar usuário.");
+        if (!window.confirm(`Tem certeza que deseja excluir o usuário "${user.nome}"? Essa ação é irreversível.`)) {
+            return;
         }
 
-        setIsSubmitting(false);
+        const res = await deleteUsuario(user.id);
+        if (!res.success) {
+            alert(res.error || "Erro ao excluir operador.");
+        }
     }
 
     return (
@@ -74,51 +66,82 @@ export function Usuarios() {
                 subtitle="Controle de operadores, administradores e dados de acesso ao sistema."
             />
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="small" className="flex items-center gap-3">
+                <div className="flex-1 w-full">
+                    <Input
+                        startIcon={<Search size={15} />}
+                        placeholder="Buscar por operador ou e-mail..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        endIcon={
+                            busca ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setBusca("")}
+                                    className="p-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                                    title="Limpar busca"
+                                    aria-label="Limpar busca"
+                                >
+                                    <X size={14} />
+                                </button>
+                            ) : undefined
+                        }
+                    />
+                </div>
+            </Card>
+
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
-                        <Skeleton className="w-full h-10" />
-                        <Skeleton className="w-full h-10" />
-                        <Skeleton className="w-full h-10" />
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
+                        <Skeleton className="w-full h-9" />
                     </div>
                 ) : usuarios.length === 0 ? (
                     <EmptyState
                         icon={UserCog}
-                        title="Nenhum usuário localizado"
-                        description="Os usuários são criados a partir do serviço de autenticação do Supabase."
+                        title={busca ? "Nenhum usuário encontrado" : "Nenhum usuário localizado"}
+                        description={
+                            busca
+                                ? "Tente alterar os termos de pesquisa para localizar o operador."
+                                : "Os usuários são provisionados a partir do serviço de autenticação do Supabase."
+                        }
+                        border="none"
+                        action={
+                            busca ? (
+                                <Button variant="secondary" size="sm" onClick={() => setBusca("")}>
+                                    <span>Limpar busca</span>
+                                </Button>
+                            ) : undefined
+                        }
                     />
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs">
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
                                 <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
                                     <tr>
-                                        <th className="px-4 py-3">Operador & Identificação</th>
-                                        <th className="px-4 py-3">E-mail de Acesso</th>
-                                        <th className="px-4 py-3 text-right">Ações</th>
+                                        <th className="px-5 py-2.5">Operador & Identificação</th>
+                                        <th className="px-5 py-2.5">E-mail de Acesso</th>
+                                        <th className="px-5 py-2.5">Data de Cadastro</th>
+                                        <th className="px-5 py-2.5 text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {usuarios.map((user) => {
-                                        const initials = user.nome
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .slice(0, 2)
-                                            .join("")
-                                            .toUpperCase();
+                                        const isCurrent = currentUser?.id === user.id;
                                         return (
                                             <tr
                                                 key={user.id}
                                                 className="hover:bg-slate-50/75 transition-colors duration-150 ease-out"
                                             >
-                                                <td className="px-4 py-3">
+                                                <td className="px-5 py-3">
                                                     <div className="flex items-center gap-2.5">
-                                                        <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-medium text-xs flex items-center justify-center shrink-0">
-                                                            {initials || "U"}
-                                                        </div>
+                                                        <Avatar name={user.nome} size="sm" />
                                                         <div>
-                                                            <div className="font-medium text-slate-900">
-                                                                {user.nome}
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="font-medium text-slate-900">{user.nome}</span>
+                                                                {isCurrent && <Badge variant="primary">Você</Badge>}
                                                             </div>
                                                             <span className="font-mono text-[11px] text-slate-400">
                                                                 ID: {user.id.substring(0, 8)}
@@ -126,25 +149,32 @@ export function Usuarios() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-slate-600">{user.email}</td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        <button
-                                                            type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
+                                                <td className="px-5 py-3 text-slate-600">{user.email}</td>
+                                                <td className="px-5 py-3 text-slate-500 font-medium tabular-nums">
+                                                    {formatDate(user.criado_em)}
+                                                </td>
+                                                <td className="px-5 py-3 text-center">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <IconButton
+                                                            title="Editar operador"
+                                                            aria-label={`Editar ${user.nome}`}
                                                             onClick={() => handleOpenEdit(user)}
-                                                            title="Editar nome do operador"
                                                         >
-                                                            <Edit2 size={16} />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                            onClick={() => handleDelete(user.id, user.nome)}
-                                                            title="Excluir operador"
+                                                            <Edit2 size={15} />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            variant="danger"
+                                                            title={
+                                                                isCurrent
+                                                                    ? "Você não pode excluir o seu próprio usuário"
+                                                                    : "Excluir operador"
+                                                            }
+                                                            aria-label={`Excluir ${user.nome}`}
+                                                            disabled={isCurrent}
+                                                            onClick={() => handleDelete(user)}
                                                         >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                            <Trash2 size={15} />
+                                                        </IconButton>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -152,6 +182,69 @@ export function Usuarios() {
                                     })}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {usuarios.map((user) => {
+                                const isCurrent = currentUser?.id === user.id;
+                                return (
+                                    <div key={user.id} className="p-4 space-y-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                <Avatar name={user.nome} size="sm" />
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-medium text-slate-900 text-sm truncate">
+                                                            {user.nome}
+                                                        </h4>
+                                                        {isCurrent && <Badge variant="primary">Você</Badge>}
+                                                    </div>
+                                                    <span className="text-xs text-slate-500 block truncate">
+                                                        {user.email}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className="font-mono text-[11px] text-slate-400 shrink-0">
+                                                ID: {user.id.substring(0, 8)}
+                                            </span>
+                                        </div>
+
+                                        {user.criado_em && (
+                                            <div className="text-xs text-slate-400">
+                                                Cadastrado em:{" "}
+                                                <span className="text-slate-600 font-medium">
+                                                    {formatDate(user.criado_em)}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => handleOpenEdit(user)}
+                                            >
+                                                <Edit2 size={14} />
+                                                <span>Editar</span>
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                disabled={isCurrent}
+                                                title={
+                                                    isCurrent
+                                                        ? "Você não pode excluir o seu próprio usuário"
+                                                        : "Excluir operador"
+                                                }
+                                                onClick={() => handleDelete(user)}
+                                            >
+                                                <Trash2 size={14} />
+                                                <span>Excluir</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <Pagination
@@ -164,40 +257,14 @@ export function Usuarios() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
-            <Modal
+            <UsuarioFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title="Editar Nome do Operador"
-                width="small"
-            >
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                            <AlertCircle size={15} className="shrink-0" />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <Input
-                        label="Nome Completo"
-                        value={nome}
-                        onChange={(e) => setNome(e.target.value)}
-                        required
-                        autoFocus
-                    />
-
-                    <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">
-                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
-                            Cancelar
-                        </Button>
-                        <Button type="submit" variant="primary" disabled={isSubmitting}>
-                            {isSubmitting ? "Salvando..." : "Atualizar Nome"}
-                        </Button>
-                    </div>
-                </form>
-            </Modal>
+                usuarioToEdit={userToEdit}
+                onSuccess={handleSuccess}
+            />
         </div>
     );
 }

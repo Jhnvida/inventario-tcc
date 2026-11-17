@@ -10,6 +10,7 @@ export function useCategorias() {
     const [totalCategorias, setTotalCategorias] = useState(0);
     const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [busca, setBusca] = useState("");
 
     const fetchCategorias = useCallback(
         async (paginaAlvo = pagina) => {
@@ -18,11 +19,17 @@ export function useCategorias() {
                 const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
                 const to = from + ITENS_POR_PAGINA - 1;
 
-                const { data, count, error } = await supabase
+                let query = supabase
                     .from("categorias")
-                    .select("*", { count: "exact" })
-                    .order("nome")
-                    .range(from, to);
+                    .select("*", { count: "exact" });
+
+                if (busca.trim()) {
+                    query = query.ilike("nome", `%${busca.trim()}%`);
+                }
+
+                query = query.order("nome", { ascending: true }).range(from, to);
+
+                const { data, count, error } = await query;
 
                 if (error) throw error;
 
@@ -42,12 +49,17 @@ export function useCategorias() {
                 setLoading(false);
             }
         },
-        [pagina],
+        [pagina, busca],
     );
 
     useEffect(() => {
         fetchCategorias(pagina);
     }, [fetchCategorias, pagina]);
+
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
 
     async function deleteCategoria(id: string) {
         try {
@@ -93,6 +105,8 @@ export function useCategorias() {
         totalPaginas: Math.ceil(totalCategorias / ITENS_POR_PAGINA),
         itensPorPagina: ITENS_POR_PAGINA,
         loading,
+        busca,
+        setBusca: handleSetBusca,
         recarregar: () => fetchCategorias(pagina),
         deleteCategoria,
         createCategoria,

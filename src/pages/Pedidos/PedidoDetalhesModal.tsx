@@ -1,7 +1,9 @@
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
+import { Alert } from "../../components/ui/Alert";
+import { StatusBadge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { Modal } from "../../components/ui/Modal";
 import type { PedidoCompleto } from "../../hooks/usePedidos";
 import { formatCurrency, formatDate } from "../../utils/formatters";
@@ -34,33 +36,16 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
 
     const isRecebivel = pedido.status === "enviado";
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "concluido":
-                return <Badge variant="success">Concluído</Badge>;
-            case "enviado":
-                return <Badge variant="warning">Enviado</Badge>;
-            case "cancelado":
-                return <Badge variant="critical">Cancelado</Badge>;
-            default:
-                return <Badge variant="neutral">Rascunho</Badge>;
-        }
-    };
-
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={`Detalhes do Pedido #${pedido.id.substring(0, 8)}`}
+            subtitle="Consulta e conferência de materiais enviados pelo fornecedor"
             width="large"
         >
             <div className="space-y-6">
-                {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                        <AlertCircle size={15} className="shrink-0 text-red-600" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                {error && <Alert variant="error">{error}</Alert>}
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg bg-slate-50 border border-slate-200">
                     <div>
@@ -77,7 +62,9 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Situação</span>
-                        <div className="mt-1">{getStatusBadge(pedido.status)}</div>
+                        <div className="mt-1">
+                            <StatusBadge status={pedido.status} />
+                        </div>
                     </div>
                     <div>
                         <span className="text-xs text-slate-500 font-medium block">Valor Total</span>
@@ -89,7 +76,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
 
                 <div className="space-y-2">
                     <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Itens do Pedido</h3>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Card padding="none" className="overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs border-collapse">
                                 <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
@@ -124,7 +111,7 @@ export function PedidoDetalhesModal({ isOpen, onClose, pedido, onReceberPedido }
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </Card>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">

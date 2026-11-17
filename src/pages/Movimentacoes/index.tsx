@@ -1,7 +1,8 @@
-import { Plus, Search } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -60,25 +61,21 @@ export function Movimentacoes() {
                 subtitle="Auditoria imutável de todas as entradas e saídas físicas do estoque."
             >
                 <Button onClick={() => setIsModalOpen(true)}>
-                    <Plus size={18} />
+                    <Plus size={16} />
                     <span>Nova Movimentação</span>
                 </Button>
             </PageHeader>
 
-            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <div className="relative sm:col-span-6">
-                    <Search
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    />
+            <Card padding="small" className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex-1 w-full">
                     <Input
+                        startIcon={<Search size={15} />}
                         placeholder="Buscar por produto ou SKU..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="pl-8.5!"
                     />
                 </div>
-                <div className="sm:col-span-3">
+                <div className="w-full sm:w-60 shrink-0">
                     <Select value={produtoFiltro} onChange={(e) => setProdutoFiltro(e.target.value)}>
                         <option value="">Todos os produtos</option>
                         {produtos.map((p) => (
@@ -88,16 +85,16 @@ export function Movimentacoes() {
                         ))}
                     </Select>
                 </div>
-                <div className="sm:col-span-3">
+                <div className="w-full sm:w-48 shrink-0">
                     <Select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)}>
                         <option value="">Todos os tipos</option>
                         <option value="entrada">Apenas Entradas</option>
                         <option value="saida">Apenas Saídas</option>
                     </Select>
                 </div>
-            </div>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -112,10 +109,11 @@ export function Movimentacoes() {
                                 ? "Tente redefinir os filtros de busca para encontrar registros."
                                 : "Nenhuma entrada ou saída física foi registrada até o momento."
                         }
+                        border="none"
                         action={
                             !busca && !tipoFiltro && !produtoFiltro ? (
                                 <Button size="sm" onClick={() => setIsModalOpen(true)}>
-                                    <Plus size={16} />
+                                    <Plus size={15} />
                                     <span>Registrar Primeira Movimentação</span>
                                 </Button>
                             ) : undefined
@@ -144,10 +142,15 @@ export function Movimentacoes() {
                                             >
                                                 <td className="px-5 py-3">
                                                     <span
-                                                        className={`font-medium ${
+                                                        className={`inline-flex items-center gap-1 font-medium ${
                                                             isEntrada ? "text-emerald-700" : "text-slate-700"
                                                         }`}
                                                     >
+                                                        {isEntrada ? (
+                                                            <ArrowDownRight size={15} className="text-emerald-600" />
+                                                        ) : (
+                                                            <ArrowUpRight size={15} className="text-slate-500" />
+                                                        )}
                                                         {isEntrada ? "Entrada" : "Saída"}
                                                     </span>
                                                 </td>
@@ -202,7 +205,7 @@ export function Movimentacoes() {
                                                 </span>
                                             </div>
                                             <span
-                                                className={`text-xs font-medium ${
+                                                className={`text-xs font-semibold ${
                                                     isEntrada ? "text-emerald-700" : "text-slate-700"
                                                 }`}
                                             >
@@ -243,7 +246,7 @@ export function Movimentacoes() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
             <MovimentacaoFormModal
                 isOpen={isModalOpen}

@@ -1,6 +1,7 @@
-import { AlertCircle, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
-import { Button } from "../../components/ui/Button";
+import { Alert } from "../../components/ui/Alert";
+import { Button, IconButton } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { Select } from "../../components/ui/Select";
@@ -44,7 +45,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
         if (pedido) {
             setFornecedorId(pedido.fornecedor_id);
             setStatus(pedido.status);
-            if (pedido.itens_pedido) {
+            if (pedido.itens_pedido && pedido.itens_pedido.length > 0) {
                 setItens(
                     pedido.itens_pedido.map((ip) => ({
                         produto_id: ip.produto_id,
@@ -52,6 +53,8 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                         preco_unitario: ip.preco_unitario,
                     })),
                 );
+            } else {
+                setItens([]);
             }
         } else {
             setFornecedorId("");
@@ -139,15 +142,11 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
             isOpen={isOpen}
             onClose={onClose}
             title={pedido ? `Editar Pedido #${pedido.id.substring(0, 8)}` : "Novo Pedido de Compra"}
+            subtitle="Monte uma ordem de fornecimento para repor itens no almoxarifado"
             width="large"
         >
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                        <AlertCircle size={15} className="shrink-0 text-red-600" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                {error && <Alert variant="error">{error}</Alert>}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Select
@@ -185,7 +184,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                             Itens do Pedido
                         </h3>
                         <Button type="button" variant="secondary" size="sm" onClick={handleAdicionarItem}>
-                            <Plus size={16} />
+                            <Plus size={15} />
                             <span>Adicionar Item</span>
                         </Button>
                     </div>
@@ -199,7 +198,7 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                             {itens.map((item, idx) => (
                                 <div
                                     key={idx}
-                                    className="p-3 rounded-md bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-3"
+                                    className="p-3 rounded-md bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-3 shadow-2xs"
                                 >
                                     <div className="flex-1 w-full">
                                         <Select
@@ -243,14 +242,14 @@ export function PedidoFormModal({ isOpen, onClose, pedido, onSave }: PedidoFormM
                                         {formatCurrency(item.quantidade * item.preco_unitario)}
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                        onClick={() => handleRemoverItem(idx)}
+                                    <IconButton
+                                        variant="danger"
                                         title="Remover item"
+                                        aria-label="Remover item"
+                                        onClick={() => handleRemoverItem(idx)}
                                     >
-                                        <Trash2 size={16} />
-                                    </button>
+                                        <Trash2 size={15} />
+                                    </IconButton>
                                 </div>
                             ))}
                         </div>

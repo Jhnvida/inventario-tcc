@@ -1,13 +1,16 @@
-import { AlertCircle, Edit2, Plus, Tags, Trash2 } from "lucide-react";
-import { useState, type SubmitEvent } from "react";
-import { Button } from "../../components/ui/Button";
+import { Edit2, Plus, Search, Tags, Trash2, X } from "lucide-react";
+import { useState } from "react";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
-import { Modal } from "../../components/ui/Modal";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { useCategorias } from "../../hooks/useCategorias";
+import type { Categoria } from "../../types";
+import { formatDate } from "../../utils/formatters";
+import { CategoriaFormModal } from "./CategoriaFormModal";
 
 export function Categorias() {
     const {
@@ -18,40 +21,28 @@ export function Categorias() {
         totalPaginas,
         itensPorPagina,
         loading,
+        busca,
+        setBusca,
+        recarregar,
         deleteCategoria,
-        createCategoria,
-        updateCategoria,
     } = useCategorias();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [categoriaEditando, setCategoriaEditando] = useState<{ id: string; nome: string } | null>(null);
-    const [novaCategoria, setNovaCategoria] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [categoriaToEdit, setCategoriaToEdit] = useState<Categoria | null>(null);
 
-    async function handleSubmit(e: SubmitEvent) {
-        e.preventDefault();
-        if (!novaCategoria.trim()) {
-            setError("O nome da categoria é obrigatório.");
-            return;
-        }
+    function handleOpenCreate() {
+        setCategoriaToEdit(null);
+        setIsModalOpen(true);
+    }
 
-        setIsSubmitting(true);
-        setError(null);
+    function handleOpenEdit(cat: Categoria) {
+        setCategoriaToEdit(cat);
+        setIsModalOpen(true);
+    }
 
-        const res = categoriaEditando
-            ? await updateCategoria(categoriaEditando.id, novaCategoria.trim())
-            : await createCategoria(novaCategoria.trim());
-
-        if (res.success) {
-            setIsModalOpen(false);
-            setNovaCategoria("");
-            setCategoriaEditando(null);
-        } else {
-            setError(res.error || "Erro ao salvar categoria.");
-        }
-
-        setIsSubmitting(false);
+    function handleSuccess() {
+        setIsModalOpen(false);
+        recarregar();
     }
 
     async function handleDelete(id: string, nome: string) {
@@ -65,22 +56,8 @@ export function Categorias() {
 
         const res = await deleteCategoria(id);
         if (!res.success) {
-            alert(res.error);
+            alert(res.error || "Erro ao excluir categoria.");
         }
-    }
-
-    function handleOpenCreate() {
-        setCategoriaEditando(null);
-        setNovaCategoria("");
-        setError(null);
-        setIsModalOpen(true);
-    }
-
-    function handleOpenEdit(cat: { id: string; nome: string }) {
-        setCategoriaEditando(cat);
-        setNovaCategoria(cat.nome);
-        setError(null);
-        setIsModalOpen(true);
     }
 
     return (
@@ -95,7 +72,31 @@ export function Categorias() {
                 </Button>
             </PageHeader>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="small" className="flex items-center gap-3">
+                <div className="flex-1 w-full">
+                    <Input
+                        startIcon={<Search size={15} />}
+                        placeholder="Buscar por nome da categoria..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        endIcon={
+                            busca ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setBusca("")}
+                                    className="p-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                                    title="Limpar busca"
+                                    aria-label="Limpar busca"
+                                >
+                                    <X size={14} />
+                                </button>
+                            ) : undefined
+                        }
+                    />
+                </div>
+            </Card>
+
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -105,23 +106,35 @@ export function Categorias() {
                 ) : categorias.length === 0 ? (
                     <EmptyState
                         icon={Tags}
-                        title="Nenhuma categoria cadastrada"
-                        description="Crie categorias para agrupar e organizar os produtos do inventário."
+                        title={busca ? "Nenhuma categoria encontrada" : "Nenhuma categoria cadastrada"}
+                        description={
+                            busca
+                                ? "Tente ajustar os termos de pesquisa para localizar a categoria desejada."
+                                : "Crie categorias para agrupar e organizar os produtos do catálogo."
+                        }
+                        border="none"
                         action={
-                            <Button size="sm" onClick={handleOpenCreate}>
-                                <Plus size={16} />
-                                <span>Criar Categoria</span>
-                            </Button>
+                            busca ? (
+                                <Button variant="secondary" size="sm" onClick={() => setBusca("")}>
+                                    <span>Limpar busca</span>
+                                </Button>
+                            ) : (
+                                <Button size="sm" onClick={handleOpenCreate}>
+                                    <Plus size={15} />
+                                    <span>Criar Categoria</span>
+                                </Button>
+                            )
                         }
                     />
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left text-xs border-collapse">
                                 <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-medium">
                                     <tr>
                                         <th className="px-5 py-2.5">Nome da Categoria</th>
-                                        <th className="px-5 py-2.5 text-right">Ações</th>
+                                        <th className="px-5 py-2.5">Data de Cadastro</th>
+                                        <th className="px-5 py-2.5 text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -133,30 +146,68 @@ export function Categorias() {
                                             <td className="px-5 py-3">
                                                 <span className="font-medium text-slate-900">{cat.nome}</span>
                                             </td>
-                                            <td className="px-5 py-3 text-right">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleOpenEdit(cat)}
+                                            <td className="px-5 py-3 text-slate-500 font-medium tabular-nums">
+                                                {formatDate(cat.criado_em)}
+                                            </td>
+                                            <td className="px-5 py-3 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <IconButton
                                                         title="Editar categoria"
+                                                        aria-label={`Editar categoria ${cat.nome}`}
+                                                        onClick={() => handleOpenEdit(cat)}
                                                     >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleDelete(cat.id, cat.nome)}
+                                                        <Edit2 size={15} />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        variant="danger"
                                                         title="Excluir categoria"
+                                                        aria-label={`Excluir categoria ${cat.nome}`}
+                                                        onClick={() => handleDelete(cat.id, cat.nome)}
                                                     >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                        <Trash2 size={15} />
+                                                    </IconButton>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div className="md:hidden divide-y divide-slate-100">
+                            {categorias.map((cat) => (
+                                <div key={cat.id} className="p-4 space-y-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div>
+                                            <h4 className="font-medium text-slate-900 text-sm">{cat.nome}</h4>
+                                            {cat.criado_em && (
+                                                <span className="text-[11px] text-slate-400">
+                                                    Cadastrada em: {formatDate(cat.criado_em)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => handleOpenEdit(cat)}
+                                        >
+                                            <Edit2 size={14} />
+                                            <span>Editar</span>
+                                        </Button>
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            onClick={() => handleDelete(cat.id, cat.nome)}
+                                        >
+                                            <Trash2 size={14} />
+                                            <span>Excluir</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         <Pagination
@@ -169,41 +220,14 @@ export function Categorias() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
-            <Modal
+            <CategoriaFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
-                width="small"
-            >
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && (
-                        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                            <AlertCircle size={15} className="shrink-0 text-red-600" />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <Input
-                        label="Nome da Categoria"
-                        placeholder="Ex: Cabos e Conectores"
-                        value={novaCategoria}
-                        onChange={(e) => setNovaCategoria(e.target.value)}
-                        required
-                        autoFocus
-                    />
-
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
-                            Cancelar
-                        </Button>
-                        <Button type="submit" variant="primary" disabled={isSubmitting}>
-                            {isSubmitting ? "Salvando..." : categoriaEditando ? "Salvar Alterações" : "Criar Categoria"}
-                        </Button>
-                    </div>
-                </form>
-            </Modal>
+                categoriaToEdit={categoriaToEdit}
+                onSuccess={handleSuccess}
+            />
         </div>
     );
 }

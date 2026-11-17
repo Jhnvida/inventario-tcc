@@ -1,8 +1,8 @@
-import { type ReactNode } from "react";
+import { type HTMLAttributes, type ReactNode, forwardRef } from "react";
 
 export type CardPadding = "none" | "small" | "medium" | "large";
 
-interface CardProps {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
     className?: string;
     padding?: CardPadding;
@@ -15,14 +15,45 @@ const paddingStyles: Record<CardPadding, string> = {
     large: "p-6",
 };
 
-export function Card({ children, className = "", padding = "medium" }: CardProps) {
-    const padStyle = paddingStyles[padding] || paddingStyles.medium;
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+    ({ children, className = "", padding = "medium", ...props }, ref) => {
+        const padStyle = paddingStyles[padding] || paddingStyles.medium;
 
+        return (
+            <div
+                ref={ref}
+                className={`bg-white border border-slate-200 rounded-lg shadow-2xs transition-all duration-150 ease-out ${padStyle} ${className}`}
+                {...props}
+            >
+                {children}
+            </div>
+        );
+    },
+);
+
+Card.displayName = "Card";
+
+export function CardHeader({
+    children,
+    className = "",
+    action,
+}: {
+    children: ReactNode;
+    className?: string;
+    action?: ReactNode;
+}) {
     return (
-        <div
-            className={`bg-white border border-slate-200 rounded-lg transition-all duration-200 ease-out ${padStyle} ${className}`}
-        >
-            {children}
+        <div className={`px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-4 ${className}`}>
+            <div className="space-y-0.5 min-w-0">{children}</div>
+            {action && <div className="shrink-0">{action}</div>}
         </div>
     );
+}
+
+export function CardTitle({ children, className = "" }: { children: ReactNode; className?: string }) {
+    return <h2 className={`text-sm font-semibold text-slate-900 tracking-tight ${className}`}>{children}</h2>;
+}
+
+export function CardDescription({ children, className = "" }: { children: ReactNode; className?: string }) {
+    return <p className={`text-xs text-slate-500 ${className}`}>{children}</p>;
 }

@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
+import { Avatar } from "../ui/Avatar";
 
 export function Layout() {
     const { user, signOut } = useAuth();
@@ -44,11 +45,13 @@ export function Layout() {
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
-    useEffect(() => {
-        if (isMobile) {
+    const [prevPath, setPrevPath] = useState(location.pathname);
+    if (location.pathname !== prevPath) {
+        setPrevPath(location.pathname);
+        if (isMobile && isSidebarOpen) {
             setSidebarOpen(false);
         }
-    }, [location.pathname, isMobile]);
+    }
 
     useEffect(() => {
         async function fetchUserName() {
@@ -95,7 +98,7 @@ export function Layout() {
             ],
         },
         {
-            title: "Ferramentas",
+            title: "Inteligência",
             items: [{ path: "/assistente", label: "Assistente IA", icon: Brain }],
         },
     ];
@@ -117,19 +120,14 @@ export function Layout() {
         });
     });
 
-    const userInitials = userName
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
-
-    const todayFormatted = new Intl.DateTimeFormat("pt-BR", {
-        timeZone: "America/Sao_Paulo",
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    }).format(new Date());
+    const [todayFormatted] = useState<string>(() =>
+        new Intl.DateTimeFormat("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }).format(new Date()),
+    );
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans antialiased">
@@ -148,19 +146,21 @@ export function Layout() {
                     isSidebarOpen ? "w-60 translate-x-0" : isMobile ? "-translate-x-full w-60" : "w-16 translate-x-0"
                 }`}
             >
-                <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200">
-                    <div className="flex items-center gap-2.5 overflow-hidden">
-                        {isSidebarOpen && (
-                            <span className="text-sm font-semibold tracking-tight text-slate-900 truncate animate-fade-in">
-                                Gestão de Inventário
-                            </span>
-                        )}
-                    </div>
+                <div
+                    className={`h-14 flex items-center border-b border-slate-200 ${
+                        isSidebarOpen ? "justify-between px-4" : "justify-center px-2"
+                    }`}
+                >
+                    {isSidebarOpen && (
+                        <span className="text-sm font-semibold tracking-tight text-slate-900 truncate animate-fade-in min-w-0">
+                            Gestão de Inventário
+                        </span>
+                    )}
 
                     {!isMobile && (
                         <button
                             type="button"
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer shrink-0"
                             onClick={() => setSidebarOpen(!isSidebarOpen)}
                             title={isSidebarOpen ? "Recolher menu lateral" : "Expandir menu lateral"}
                             aria-label={isSidebarOpen ? "Recolher menu lateral" : "Expandir menu lateral"}
@@ -172,7 +172,7 @@ export function Layout() {
                     {isMobile && (
                         <button
                             type="button"
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer shrink-0"
                             onClick={() => setSidebarOpen(false)}
                             aria-label="Fechar menu"
                         >
@@ -224,7 +224,7 @@ export function Layout() {
                         {isMobile && (
                             <button
                                 type="button"
-                                className="p-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
+                                className="p-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer shadow-2xs"
                                 onClick={() => setSidebarOpen(true)}
                                 aria-label="Abrir menu"
                             >
@@ -245,15 +245,13 @@ export function Layout() {
                         </div>
 
                         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                            <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center border border-slate-200 select-none shrink-0 transition-colors duration-150">
-                                {userInitials || "U"}
-                            </div>
+                            <Avatar name={userName} size="md" />
                             <div className="hidden sm:flex flex-col text-left">
-                                <span className="text-xs font-medium text-slate-900 truncate max-w-35">{userName}</span>
+                                <span className="text-xs font-medium text-slate-900 truncate max-w-36">{userName}</span>
                             </div>
                             <button
                                 type="button"
-                                className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer ml-1"
+                                className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer ml-1"
                                 onClick={signOut}
                                 title="Encerrar sessão"
                                 aria-label="Sair"

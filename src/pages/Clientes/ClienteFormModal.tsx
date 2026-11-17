@@ -1,8 +1,10 @@
-import { AlertCircle, Building2, User } from "lucide-react";
+import { Building2, User } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
+import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
+import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import { useClientes } from "../../hooks/useClientes";
 import type { Cliente } from "../../types";
 import { formatCNPJ, formatCPF, formatTelefone, stripFormatting } from "../../utils/formatters";
@@ -143,46 +145,30 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
             isOpen={isOpen}
             onClose={onClose}
             title={isEditing ? `Editar Cliente: ${clienteToEdit.nome}` : "Novo Cliente"}
+            subtitle="Cadastro e manutenção de registro comercial de pessoa física ou jurídica"
             width="large"
         >
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                        <AlertCircle size={15} className="shrink-0 text-red-600" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                {error && <Alert variant="error">{error}</Alert>}
 
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-700">Classificação Cadastral *</label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button
-                            type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
-                                tipoPessoa === "PF"
-                                    ? "bg-slate-900 text-white border-slate-900"
-                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                            }`}
-                            onClick={() => handleTipoPessoaChange("PF")}
-                        >
-                            <User size={15} />
-                            <span>Pessoa Física (CPF)</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
-                                tipoPessoa === "PJ"
-                                    ? "bg-slate-900 text-white border-slate-900"
-                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                            }`}
-                            onClick={() => handleTipoPessoaChange("PJ")}
-                        >
-                            <Building2 size={15} />
-                            <span>Pessoa Jurídica (CNPJ)</span>
-                        </button>
-                    </div>
-                </div>
+                <SegmentedControl<"PF" | "PJ">
+                    label="Classificação Cadastral"
+                    value={tipoPessoa}
+                    onChange={handleTipoPessoaChange}
+                    options={[
+                        {
+                            value: "PF",
+                            label: "Pessoa Física (CPF)",
+                            icon: User,
+                        },
+                        {
+                            value: "PJ",
+                            label: "Pessoa Jurídica (CNPJ)",
+                            icon: Building2,
+                        },
+                    ]}
+                    required
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
@@ -251,9 +237,9 @@ export function ClienteFormModal({ isOpen, onClose, clienteToEdit, onSuccess }: 
                         name="ativo"
                         checked={formData.ativo}
                         onChange={handleChange}
-                        className="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        className="w-4 h-4 rounded-md border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer accent-slate-900"
                     />
-                    <label htmlFor="cliente-ativo" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    <label htmlFor="cliente-ativo" className="text-xs font-medium text-slate-700 cursor-pointer">
                         Cliente ativo para emissão de novos pedidos de venda
                     </label>
                 </div>

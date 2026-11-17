@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { translateDbError } from "../utils/errors";
 
 export type Usuario = {
     id: string;
@@ -15,6 +16,7 @@ export function useUsuarios() {
     const [totalUsuarios, setTotalUsuarios] = useState(0);
     const [pagina, setPagina] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [busca, setBusca] = useState("");
 
     const fetchUsuarios = useCallback(
         async (paginaAlvo = pagina) => {
@@ -23,11 +25,18 @@ export function useUsuarios() {
                 const from = (paginaAlvo - 1) * ITENS_POR_PAGINA;
                 const to = from + ITENS_POR_PAGINA - 1;
 
-                const { data, count, error } = await supabase
+                let query = supabase
                     .from("usuarios")
-                    .select("*", { count: "exact" })
-                    .order("nome")
-                    .range(from, to);
+                    .select("*", { count: "exact" });
+
+                const term = busca.trim().replace(/"/g, "");
+                if (term) {
+                    query = query.or(`nome.ilike."%${term}%",email.ilike."%${term}%"`);
+                }
+
+                query = query.order("nome", { ascending: true }).range(from, to);
+
+                const { data, count, error } = await query;
 
                 if (error) throw error;
 
@@ -47,12 +56,17 @@ export function useUsuarios() {
                 setLoading(false);
             }
         },
-        [pagina],
+        [pagina, busca],
     );
 
     useEffect(() => {
         fetchUsuarios(pagina);
     }, [fetchUsuarios, pagina]);
+
+    const handleSetBusca = (novaBusca: string) => {
+        setBusca(novaBusca);
+        setPagina(1);
+    };
 
     async function updateUsuario(id: string, updates: { nome?: string }) {
         try {
@@ -62,7 +76,7 @@ export function useUsuarios() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao atualizar usuário:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -74,7 +88,7 @@ export function useUsuarios() {
             return { success: true };
         } catch (error: any) {
             console.error("Erro ao excluir usuário:", error);
-            return { success: false, error: error.message };
+            return { success: false, error: translateDbError(error) };
         }
     }
 
@@ -86,6 +100,8 @@ export function useUsuarios() {
         totalPaginas: Math.ceil(totalUsuarios / ITENS_POR_PAGINA),
         itensPorPagina: ITENS_POR_PAGINA,
         loading,
+        busca,
+        setBusca: handleSetBusca,
         recarregar: () => fetchUsuarios(pagina),
         updateUsuario,
         deleteUsuario,

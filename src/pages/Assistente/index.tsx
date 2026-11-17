@@ -140,7 +140,7 @@ export function Assistente() {
                                         key={idx}
                                         type="button"
                                         onClick={() => handleQuickPrompt(prompt)}
-                                        className="rounded-lg border border-slate-200 bg-white p-3 text-left text-xs text-slate-700 hover:border-slate-400 hover:text-slate-900 hover:bg-slate-50/50 active:scale-[0.99] transition-all duration-150 ease-out cursor-pointer"
+                                        className="rounded-lg border border-slate-200 bg-white p-3 text-left text-xs text-slate-700 hover:border-slate-400 hover:text-slate-900 hover:bg-slate-50/50 active:scale-[0.99] transition-all duration-150 ease-out cursor-pointer shadow-2xs"
                                     >
                                         {prompt}
                                     </button>
@@ -167,7 +167,7 @@ export function Assistente() {
                                 key={sIdx}
                                 type="button"
                                 onClick={() => handleQuickPrompt(sug)}
-                                className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 hover:border-slate-300 hover:text-slate-900 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+                                className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 hover:border-slate-300 hover:text-slate-900 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer shadow-2xs"
                             >
                                 {sug}
                             </button>
@@ -178,7 +178,7 @@ export function Assistente() {
                 <div className="border-t border-slate-200 bg-white p-2.5 sm:p-3 shrink-0">
                     <form
                         onSubmit={handleSend}
-                        className="rounded-lg border border-slate-300 bg-white focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all duration-150 ease-out flex flex-col shadow-xs"
+                        className="rounded-lg border border-slate-300 bg-white focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all duration-150 ease-out flex flex-col shadow-2xs"
                     >
                         <textarea
                             ref={textareaRef}
@@ -201,10 +201,10 @@ export function Assistente() {
                                             ? "Recolher Biblioteca de Consultas"
                                             : "Exibir Biblioteca de Consultas"
                                     }
-                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium active:scale-95 transition-all duration-150 ease-out cursor-pointer ${
+                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium active:scale-95 transition-all duration-150 ease-out cursor-pointer ${
                                         isLibraryOpen
-                                            ? "bg-slate-200/90 text-slate-900 font-semibold"
-                                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/70"
+                                            ? "bg-slate-200 text-slate-900 font-semibold"
+                                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
                                     }`}
                                 >
                                     <BookText
@@ -232,7 +232,7 @@ export function Assistente() {
                                     type="submit"
                                     disabled={!inputValue.trim() || isLoading}
                                     title="Enviar mensagem (Enter)"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 active:scale-95 disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 active:scale-95 disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer shadow-2xs"
                                 >
                                     {isLoading ? (
                                         <>

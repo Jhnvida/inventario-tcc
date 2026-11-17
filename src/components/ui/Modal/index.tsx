@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { type ReactNode, useEffect, useId, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export type ModalWidth = "small" | "medium" | "large";
@@ -8,107 +8,105 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
+    subtitle?: string;
     children: ReactNode;
     width?: ModalWidth;
 }
 
 const widthStyles: Record<ModalWidth, { mobile: string; desktop: string }> = {
-    small: { mobile: "w-full sm:w-84", desktop: "lg:w-88 xl:w-96" },
-    medium: { mobile: "w-full sm:w-96", desktop: "lg:w-[440px] xl:w-[480px]" },
-    large: { mobile: "w-full sm:w-[500px]", desktop: "lg:w-[560px] xl:w-[640px]" },
+    small: { mobile: "w-full sm:w-88", desktop: "lg:w-96" },
+    medium: { mobile: "w-full sm:w-[420px]", desktop: "lg:w-[460px] xl:w-[500px]" },
+    large: { mobile: "w-full sm:w-[520px]", desktop: "lg:w-[580px] xl:w-[640px]" },
 };
 
-const activeModals = new Map<string, () => void>();
-
-function registerOpenModal(id: string, close: () => void) {
-    activeModals.forEach((closeOther, otherId) => {
-        if (otherId !== id) {
-            closeOther();
-        }
-    });
-    activeModals.set(id, close);
-}
-
-function unregisterModal(id: string) {
-    activeModals.delete(id);
-}
-
-export function Modal({ isOpen, onClose, title, children, width = "medium" }: ModalProps) {
-    const modalId = useId();
+export function Modal({ isOpen, onClose, title, subtitle, children, width = "medium" }: ModalProps) {
     const [isRendered, setIsRendered] = useState(isOpen);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(isOpen);
     const [mountTarget, setMountTarget] = useState<HTMLElement | null>(null);
 
-    if (isOpen && !isRendered) {
-        setIsRendered(true);
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (isOpen !== prevIsOpen) {
+        setPrevIsOpen(isOpen);
+        if (isOpen) {
+            setIsRendered(true);
+        }
     }
 
+    const onCloseRef = useRef(onClose);
     useEffect(() => {
-        setMountTarget(document.getElementById("app-sidebar-root") || document.body);
+        onCloseRef.current = onClose;
+    }, [onClose]);
+
+    useEffect(() => {
+        const root = document.getElementById("app-sidebar-root");
+        setMountTarget(root || document.body);
     }, []);
 
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout> | undefined;
 
         if (isOpen) {
-            registerOpenModal(modalId, onClose);
-
-            const animFrame = requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    setIsVisible(true);
-                });
-            });
-
-            const handleKeyDown = (e: KeyboardEvent) => {
-                if (e.key === "Escape") onClose();
-            };
-            window.addEventListener("keydown", handleKeyDown);
-
-            return () => {
-                cancelAnimationFrame(animFrame);
-                window.removeEventListener("keydown", handleKeyDown);
-            };
+            setIsRendered(true);
+            timer = setTimeout(() => {
+                setIsVisible(true);
+            }, 20);
         } else {
-            unregisterModal(modalId);
             setIsVisible(false);
-
             timer = setTimeout(() => {
                 setIsRendered(false);
             }, 280);
-
-            return () => {
-                if (timer) clearTimeout(timer);
-            };
         }
-    }, [isOpen, onClose, modalId]);
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [isOpen]);
 
     useEffect(() => {
-        return () => {
-            unregisterModal(modalId);
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onCloseRef.current();
+            }
         };
-    }, [modalId]);
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen]);
 
     if (!isRendered) return null;
 
     const targetWidth = widthStyles[width] || widthStyles.medium;
     const fullWidthClass = `${targetWidth.mobile} ${targetWidth.desktop}`;
+    const target = mountTarget || (typeof document !== "undefined" ? document.getElementById("app-sidebar-root") || document.body : null);
+    const isSidebarRoot = target?.id === "app-sidebar-root";
 
     const content = (
         <>
             <div
-                className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs lg:hidden transition-opacity duration-280 ease-out ${
+                className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs ${
+                    isSidebarRoot ? "lg:hidden" : ""
+                } transition-opacity duration-280 ease-out ${
                     isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
-                onClick={onClose}
+                onClick={() => onCloseRef.current()}
                 aria-hidden="true"
             />
 
             <aside
-                className={`fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-xl overflow-hidden transition-all duration-280 ease-[cubic-bezier(0.16,1,0.3,1)]
-                lg:static lg:z-auto lg:h-full lg:shrink-0 lg:shadow-none ${
-                    isVisible
-                        ? `${fullWidthClass} translate-x-0 opacity-100 lg:border-l lg:border-slate-200`
-                        : `${targetWidth.mobile} translate-x-full lg:translate-x-0 lg:w-0 opacity-0 pointer-events-none lg:border-l-0`
+                className={`fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-xl overflow-hidden transition-all duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isSidebarRoot
+                        ? `lg:static lg:z-auto lg:h-full lg:shrink-0 lg:shadow-none ${
+                              isVisible
+                                  ? `${fullWidthClass} translate-x-0 opacity-100 lg:border-l lg:border-slate-200`
+                                  : `${targetWidth.mobile} translate-x-full lg:translate-x-0 lg:w-0 opacity-0 pointer-events-none lg:border-l-0`
+                          }`
+                        : `${fullWidthClass} ${
+                              isVisible
+                                  ? "translate-x-0 opacity-100"
+                                  : "translate-x-full opacity-0 pointer-events-none"
+                          }`
                 }`}
                 role="dialog"
                 aria-modal="true"
@@ -116,18 +114,21 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
                 onClick={(e) => e.stopPropagation()}
             >
                 <div
-                    className={`flex flex-col h-full ${fullWidthClass} min-w-0 transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                    className={`flex flex-col h-full ${fullWidthClass} min-w-0 transition-opacity duration-200 ${
+                        isVisible ? "opacity-100" : "opacity-0"
+                    }`}
                 >
                     <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4 sm:px-6 bg-white">
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex flex-col min-w-0 pr-2">
                             <h2 id="modal-title" className="text-sm font-semibold text-slate-900 truncate">
                                 {title}
                             </h2>
+                            {subtitle && <p className="text-[11px] text-slate-400 truncate">{subtitle}</p>}
                         </div>
                         <button
                             type="button"
                             className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 active:scale-95 transition-all duration-150 ease-out cursor-pointer shrink-0"
-                            onClick={onClose}
+                            onClick={() => onCloseRef.current()}
                             title="Fechar painel"
                             aria-label="Fechar painel"
                         >
@@ -141,8 +142,8 @@ export function Modal({ isOpen, onClose, title, children, width = "medium" }: Mo
         </>
     );
 
-    if (mountTarget) {
-        return createPortal(content, mountTarget);
+    if (target) {
+        return createPortal(content, target);
     }
 
     return content;

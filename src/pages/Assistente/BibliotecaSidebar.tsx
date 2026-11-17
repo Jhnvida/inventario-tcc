@@ -1,5 +1,6 @@
 import { BookText, ChevronRight, Search, Send, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Input } from "../../components/ui/Input";
 
 const PROMPT_LIBRARY = [
     {
@@ -63,8 +64,14 @@ export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: Bibliotec
     const [isRendered, setIsRendered] = useState(isOpen);
     const [isVisible, setIsVisible] = useState(false);
 
-    if (isOpen && !isRendered) {
-        setIsRendered(true);
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (isOpen !== prevIsOpen) {
+        setPrevIsOpen(isOpen);
+        if (isOpen) {
+            setIsRendered(true);
+        } else {
+            setIsVisible(false);
+        }
     }
 
     useEffect(() => {
@@ -87,7 +94,6 @@ export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: Bibliotec
                 window.removeEventListener("keydown", handleKeyDown);
             };
         } else {
-            setIsVisible(false);
             timer = setTimeout(() => {
                 setIsRendered(false);
             }, 280);
@@ -126,7 +132,7 @@ export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: Bibliotec
     return (
         <>
             <div
-                className={`fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden transition-opacity duration-280 ease-out ${
+                className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs lg:hidden transition-opacity duration-280 ease-out ${
                     isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
                 onClick={onClose}
@@ -142,12 +148,14 @@ export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: Bibliotec
                 }`}
             >
                 <div
-                    className={`flex flex-col h-full w-full max-w-xs sm:w-80 md:w-84 lg:w-80 xl:w-88 min-w-0 transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                    className={`flex flex-col h-full w-full max-w-xs sm:w-80 md:w-84 lg:w-80 xl:w-88 min-w-0 transition-opacity duration-200 ${
+                        isVisible ? "opacity-100" : "opacity-0"
+                    }`}
                 >
                     <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4">
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0">
                             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-700">
-                                <BookText size={16} />
+                                <BookText size={15} />
                             </div>
                             <div className="min-w-0">
                                 <h3 className="text-xs font-semibold text-slate-900 truncate">
@@ -174,26 +182,25 @@ export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: Bibliotec
                     </div>
 
                     <div className="border-b border-slate-100 p-2.5 bg-slate-50/60 shrink-0">
-                        <div className="relative flex items-center">
-                            <Search size={14} className="absolute left-2.5 text-slate-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Filtrar consultas..."
-                                className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-7 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 focus:outline-none transition-all duration-150 ease-out"
-                            />
-                            {searchQuery && (
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchQuery("")}
-                                    className="absolute right-2 text-slate-400 hover:text-slate-600 active:scale-95 transition-all duration-150 cursor-pointer p-0.5"
-                                    title="Limpar busca"
-                                >
-                                    <X size={12} />
-                                </button>
-                            )}
-                        </div>
+                        <Input
+                            startIcon={<Search size={14} />}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Filtrar consultas..."
+                            className="h-8 text-xs"
+                            endIcon={
+                                searchQuery ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery("")}
+                                        className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                                        title="Limpar busca"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                ) : undefined
+                            }
+                        />
                     </div>
 
                     <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4">

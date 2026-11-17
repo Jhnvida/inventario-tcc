@@ -1,7 +1,8 @@
 import { Edit2, Plus, Power, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
-import { Button } from "../../components/ui/Button";
+import { StatusBadge } from "../../components/ui/Badge";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -76,25 +77,21 @@ export function Clientes() {
                 subtitle="Gerencie os dados cadastrais, situação contratual e contatos de clientes PF e PJ."
             >
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={16} />
                     <span>Novo Cliente</span>
                 </Button>
             </PageHeader>
 
-            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <div className="relative sm:col-span-6">
-                    <Search
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    />
+            <Card padding="small" className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex-1 w-full">
                     <Input
+                        startIcon={<Search size={15} />}
                         placeholder="Buscar por nome, documento, e-mail ou cidade..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="pl-8.5!"
                     />
                 </div>
-                <div className="sm:col-span-3">
+                <div className="w-full sm:w-56 shrink-0">
                     <Select
                         value={filtroStatus}
                         onChange={(e) => setFiltroStatus(e.target.value as FiltroStatusCliente)}
@@ -104,16 +101,16 @@ export function Clientes() {
                         <option value="inativos">Apenas Inativos</option>
                     </Select>
                 </div>
-                <div className="sm:col-span-3">
+                <div className="w-full sm:w-60 shrink-0">
                     <Select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as FiltroTipoCliente)}>
                         <option value="todos">Pessoa Física e Jurídica</option>
                         <option value="PF">Pessoa Física (PF)</option>
                         <option value="PJ">Pessoa Jurídica (PJ)</option>
                     </Select>
                 </div>
-            </div>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -128,10 +125,11 @@ export function Clientes() {
                                 ? "Tente alterar os termos ou filtros de pesquisa."
                                 : "Cadastre o primeiro cliente da sua base comercial."
                         }
+                        border="none"
                         action={
                             !busca && filtroStatus === "todos" && filtroTipo === "todos" ? (
                                 <Button size="sm" onClick={handleOpenCreate}>
-                                    <Plus size={16} />
+                                    <Plus size={15} />
                                     <span>Cadastrar Cliente</span>
                                 </Button>
                             ) : undefined
@@ -171,7 +169,7 @@ export function Clientes() {
                                                     {formatTelefone(cliente.telefone) || "-"}
                                                 </div>
                                                 {cliente.email && (
-                                                    <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-45">
+                                                    <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-44">
                                                         {cliente.email}
                                                     </div>
                                                 )}
@@ -180,40 +178,37 @@ export function Clientes() {
                                                 {cliente.cidade ? `${cliente.cidade}/${cliente.estado || ""}` : "-"}
                                             </td>
                                             <td className="px-5 py-3 text-center">
-                                                <Badge variant={cliente.ativo ? "success" : "neutral"}>
-                                                    {cliente.ativo ? "Ativo" : "Inativo"}
-                                                </Badge>
+                                                <StatusBadge status={cliente.ativo ? "ativo" : "inativo"} />
                                             </td>
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center justify-center gap-1">
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleOpenEdit(cliente)}
+                                                    <IconButton
                                                         title="Editar cliente"
+                                                        aria-label={`Editar cliente ${cliente.nome}`}
+                                                        onClick={() => handleOpenEdit(cliente)}
                                                     >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={`p-1.5 rounded-md active:scale-95 transition-all duration-150 ease-out cursor-pointer ${
+                                                        <Edit2 size={15} />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        title={cliente.ativo ? "Inativar cliente" : "Ativar cliente"}
+                                                        aria-label={cliente.ativo ? "Inativar cliente" : "Ativar cliente"}
+                                                        className={
                                                             cliente.ativo
                                                                 ? "text-slate-400 hover:text-amber-600 hover:bg-amber-50"
                                                                 : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
-                                                        }`}
+                                                        }
                                                         onClick={() => handleToggleStatus(cliente)}
-                                                        title={cliente.ativo ? "Inativar cliente" : "Ativar cliente"}
                                                     >
-                                                        <Power size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleDelete(cliente)}
+                                                        <Power size={15} />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        variant="danger"
                                                         title="Excluir cliente"
+                                                        aria-label={`Excluir cliente ${cliente.nome}`}
+                                                        onClick={() => handleDelete(cliente)}
                                                     >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                        <Trash2 size={15} />
+                                                    </IconButton>
                                                 </div>
                                             </td>
                                         </tr>
@@ -232,9 +227,7 @@ export function Clientes() {
                                                 {formatDocumento(cliente.documento, cliente.tipo_pessoa)}
                                             </span>
                                         </div>
-                                        <Badge variant={cliente.ativo ? "success" : "neutral"}>
-                                            {cliente.ativo ? "Ativo" : "Inativo"}
-                                        </Badge>
+                                        <StatusBadge status={cliente.ativo ? "ativo" : "inativo"} />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-md">
@@ -254,7 +247,7 @@ export function Clientes() {
 
                                     <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
                                         <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(cliente)}>
-                                            <Edit2 size={15} />
+                                            <Edit2 size={14} />
                                             <span>Editar</span>
                                         </Button>
                                         <Button
@@ -262,11 +255,11 @@ export function Clientes() {
                                             size="sm"
                                             onClick={() => handleToggleStatus(cliente)}
                                         >
-                                            <Power size={15} />
+                                            <Power size={14} />
                                             <span>{cliente.ativo ? "Inativar" : "Ativar"}</span>
                                         </Button>
                                         <Button variant="danger" size="sm" onClick={() => handleDelete(cliente)}>
-                                            <Trash2 size={15} />
+                                            <Trash2 size={14} />
                                             <span>Excluir</span>
                                         </Button>
                                     </div>
@@ -284,7 +277,7 @@ export function Clientes() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
             <ClienteFormModal
                 isOpen={isModalOpen}

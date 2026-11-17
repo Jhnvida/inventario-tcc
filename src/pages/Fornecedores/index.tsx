@@ -1,6 +1,7 @@
 import { Edit2, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../../components/ui/Button";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -60,27 +61,23 @@ export function Fornecedores() {
                 subtitle="Gerencie a base de parceiros comerciais, distribuidores e contatos para reposição."
             >
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={16} />
                     <span>Novo Fornecedor</span>
                 </Button>
             </PageHeader>
 
-            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 flex items-center gap-3">
-                <div className="relative flex-1 w-full">
-                    <Search
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    />
+            <Card padding="small" className="flex items-center gap-3">
+                <div className="flex-1 w-full">
                     <Input
+                        startIcon={<Search size={15} />}
                         placeholder="Buscar por razão social, nome fantasia ou CNPJ..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="pl-8.5!"
                     />
                 </div>
-            </div>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -95,10 +92,11 @@ export function Fornecedores() {
                                 ? "Tente alterar os termos de pesquisa para localizar o parceiro."
                                 : "Cadastre os fornecedores responsáveis pelo fornecimento dos produtos."
                         }
+                        border="none"
                         action={
                             !busca ? (
                                 <Button size="sm" onClick={handleOpenCreate}>
-                                    <Plus size={16} />
+                                    <Plus size={15} />
                                     <span>Cadastrar Fornecedor</span>
                                 </Button>
                             ) : undefined
@@ -139,29 +137,28 @@ export function Fornecedores() {
                                             <td className="px-5 py-3 text-slate-700 font-medium">
                                                 {formatTelefone(fornecedor.telefone) || "-"}
                                             </td>
-                                            <td className="px-5 py-3 text-slate-500 truncate max-w-50">
+                                            <td className="px-5 py-3 text-slate-500 truncate max-w-52">
                                                 {fornecedor.email || "-"}
                                             </td>
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center justify-center gap-1">
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleOpenEdit(fornecedor)}
+                                                    <IconButton
                                                         title="Editar fornecedor"
+                                                        aria-label={`Editar fornecedor ${fornecedor.razao_social}`}
+                                                        onClick={() => handleOpenEdit(fornecedor)}
                                                     >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
+                                                        <Edit2 size={15} />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        variant="danger"
+                                                        title="Excluir fornecedor"
+                                                        aria-label={`Excluir fornecedor ${fornecedor.razao_social}`}
                                                         onClick={() =>
                                                             handleDelete(fornecedor.id, fornecedor.razao_social)
                                                         }
-                                                        title="Excluir fornecedor"
                                                     >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                        <Trash2 size={15} />
+                                                    </IconButton>
                                                 </div>
                                             </td>
                                         </tr>
@@ -203,7 +200,7 @@ export function Fornecedores() {
                                             size="sm"
                                             onClick={() => handleOpenEdit(fornecedor)}
                                         >
-                                            <Edit2 size={15} />
+                                            <Edit2 size={14} />
                                             <span>Editar</span>
                                         </Button>
                                         <Button
@@ -211,7 +208,7 @@ export function Fornecedores() {
                                             size="sm"
                                             onClick={() => handleDelete(fornecedor.id, fornecedor.razao_social)}
                                         >
-                                            <Trash2 size={15} />
+                                            <Trash2 size={14} />
                                             <span>Excluir</span>
                                         </Button>
                                     </div>
@@ -229,7 +226,7 @@ export function Fornecedores() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
             <FornecedorFormModal
                 isOpen={isModalOpen}

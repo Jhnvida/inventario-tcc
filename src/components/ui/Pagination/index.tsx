@@ -25,8 +25,8 @@ export function Pagination({
     const endIndex = Math.min(currentPage * pageSize, totalItems);
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-3.5 border-t border-slate-200 bg-slate-50/50 text-xs sm:text-sm text-slate-600">
-            <div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-slate-200 bg-slate-50/50 text-xs text-slate-600 select-none">
+            <div className="text-center sm:text-left">
                 Mostrando <strong className="font-semibold text-slate-900">{startIndex}</strong> a{" "}
                 <strong className="font-semibold text-slate-900">{endIndex}</strong> de{" "}
                 <strong className="font-semibold text-slate-900">{totalItems}</strong> {itemName}
@@ -35,12 +35,13 @@ export function Pagination({
             <div className="flex items-center gap-2">
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer select-none"
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40"
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage <= 1 || disabled}
                     title="Página anterior"
+                    aria-label="Página anterior"
                 >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={15} />
                     <span>Anterior</span>
                 </button>
 
@@ -51,13 +52,14 @@ export function Pagination({
 
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer select-none"
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-150 ease-out cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40"
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages || disabled}
                     title="Próxima página"
+                    aria-label="Próxima página"
                 >
                     <span>Próxima</span>
-                    <ChevronRight size={16} />
+                    <ChevronRight size={15} />
                 </button>
             </div>
         </div>

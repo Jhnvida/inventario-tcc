@@ -1,7 +1,8 @@
 import { Edit2, Eye, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../components/ui/Badge";
-import { Button } from "../../components/ui/Button";
+import { StatusBadge } from "../../components/ui/Badge";
+import { Button, IconButton } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { PageHeader } from "../../components/ui/PageHeader";
@@ -61,17 +62,6 @@ export function PedidosVenda() {
         }
     }
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "concluido":
-                return <Badge variant="success">Concluído</Badge>;
-            case "cancelado":
-                return <Badge variant="critical">Cancelado</Badge>;
-            default:
-                return <Badge variant="neutral">Rascunho</Badge>;
-        }
-    };
-
     return (
         <div className="space-y-6">
             <PageHeader
@@ -79,22 +69,18 @@ export function PedidosVenda() {
                 subtitle="Gerencie as saídas comerciais, faturamento para clientes e baixa de estoque."
             >
                 <Button onClick={handleOpenCreate}>
-                    <Plus size={18} />
+                    <Plus size={16} />
                     <span>Nova Venda</span>
                 </Button>
             </PageHeader>
 
-            <div className="p-3 sm:p-4 rounded-lg bg-white border border-slate-200 flex flex-col sm:flex-row items-center gap-3">
-                <div className="relative flex-1 w-full">
-                    <Search
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    />
+            <Card padding="small" className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex-1 w-full">
                     <Input
+                        startIcon={<Search size={15} />}
                         placeholder="Buscar por cliente ou número da venda..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="pl-8.5!"
                     />
                 </div>
                 <div className="w-full sm:w-64 shrink-0">
@@ -105,9 +91,9 @@ export function PedidosVenda() {
                         <option value="cancelado">Cancelado</option>
                     </Select>
                 </div>
-            </div>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <Card padding="none" className="overflow-hidden">
                 {loading ? (
                     <div className="p-6 space-y-3">
                         <Skeleton className="w-full h-9" />
@@ -122,10 +108,11 @@ export function PedidosVenda() {
                                 ? "Tente ajustar os termos da busca para encontrar registros."
                                 : "Nenhuma venda registrada até o momento."
                         }
+                        border="none"
                         action={
                             !busca && !statusFiltro ? (
                                 <Button size="sm" onClick={handleOpenCreate}>
-                                    <Plus size={16} />
+                                    <Plus size={15} />
                                     <span>Registrar Nova Venda</span>
                                 </Button>
                             ) : undefined
@@ -175,33 +162,33 @@ export function PedidosVenda() {
                                             <td className="px-5 py-3 text-right font-medium text-slate-900 tabular-nums">
                                                 {formatCurrency(pedido.valor_total)}
                                             </td>
-                                            <td className="px-5 py-3 text-center">{getStatusBadge(pedido.status)}</td>
+                                            <td className="px-5 py-3 text-center">
+                                                <StatusBadge status={pedido.status} />
+                                            </td>
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center justify-center gap-1">
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleOpenDetails(pedido)}
+                                                    <IconButton
                                                         title="Ver Detalhes e Finalizar"
+                                                        aria-label="Ver Detalhes e Finalizar"
+                                                        onClick={() => handleOpenDetails(pedido)}
                                                     >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleOpenEdit(pedido)}
+                                                        <Eye size={15} />
+                                                    </IconButton>
+                                                    <IconButton
                                                         title="Editar Venda"
+                                                        aria-label="Editar Venda"
+                                                        onClick={() => handleOpenEdit(pedido)}
                                                     >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition-all duration-150 ease-out cursor-pointer"
-                                                        onClick={() => handleDelete(pedido.id)}
+                                                        <Edit2 size={15} />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        variant="danger"
                                                         title="Excluir"
+                                                        aria-label="Excluir"
+                                                        onClick={() => handleDelete(pedido.id)}
                                                     >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                        <Trash2 size={15} />
+                                                    </IconButton>
                                                 </div>
                                             </td>
                                         </tr>
@@ -222,7 +209,7 @@ export function PedidosVenda() {
                                                 {pedido.clientes?.nome || "Consumidor Final"}
                                             </h4>
                                         </div>
-                                        {getStatusBadge(pedido.status)}
+                                        <StatusBadge status={pedido.status} />
                                     </div>
 
                                     <div className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-md">
@@ -234,15 +221,15 @@ export function PedidosVenda() {
 
                                     <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
                                         <Button variant="secondary" size="sm" onClick={() => handleOpenDetails(pedido)}>
-                                            <Eye size={15} />
+                                            <Eye size={14} />
                                             <span>Detalhes</span>
                                         </Button>
                                         <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(pedido)}>
-                                            <Edit2 size={15} />
+                                            <Edit2 size={14} />
                                             <span>Editar</span>
                                         </Button>
                                         <Button variant="danger" size="sm" onClick={() => handleDelete(pedido.id)}>
-                                            <Trash2 size={15} />
+                                            <Trash2 size={14} />
                                             <span>Excluir</span>
                                         </Button>
                                     </div>
@@ -260,7 +247,7 @@ export function PedidosVenda() {
                         />
                     </>
                 )}
-            </div>
+            </Card>
 
             <PedidoVendaFormModal
                 isOpen={isFormModalOpen}

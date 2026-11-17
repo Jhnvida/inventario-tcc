@@ -1,8 +1,10 @@
-import { AlertCircle, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
+import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
+import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import { Select } from "../../components/ui/Select";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMovimentacoes } from "../../hooks/useMovimentacoes";
@@ -27,7 +29,7 @@ export function MovimentacaoFormModal({
     const { user } = useAuth();
     const [formData, setFormData] = useState({
         produto_id: initialProdutoId || "",
-        tipo: "entrada",
+        tipo: "entrada" as "entrada" | "saida",
         quantidade: 0,
         motivo: initialProdutoId ? "Reposição de estoque crítico" : "",
     });
@@ -90,45 +92,34 @@ export function MovimentacaoFormModal({
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Nova Movimentação Manual" width="medium">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Nova Movimentação Manual"
+            subtitle="Registre uma entrada ou saída de mercadorias no estoque físico"
+            width="medium"
+        >
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                        <AlertCircle size={15} className="shrink-0 text-red-600" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                {error && <Alert variant="error">{error}</Alert>}
 
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-700">Tipo de Operação *</label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button
-                            type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
-                                formData.tipo === "entrada"
-                                    ? "bg-slate-900 text-white border-slate-900"
-                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                            }`}
-                            onClick={() => setFormData((prev) => ({ ...prev, tipo: "entrada" }))}
-                        >
-                            <ArrowUpRight size={15} />
-                            <span>Entrada (+ Estoque)</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`flex items-center justify-center gap-2 h-9 rounded-md border text-xs font-medium active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer ${
-                                formData.tipo === "saida"
-                                    ? "bg-slate-900 text-white border-slate-900"
-                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                            }`}
-                            onClick={() => setFormData((prev) => ({ ...prev, tipo: "saida" }))}
-                        >
-                            <ArrowDownRight size={15} />
-                            <span>Saída (- Estoque)</span>
-                        </button>
-                    </div>
-                </div>
+                <SegmentedControl<"entrada" | "saida">
+                    label="Tipo de Operação"
+                    value={formData.tipo}
+                    onChange={(tipo) => setFormData((prev) => ({ ...prev, tipo }))}
+                    options={[
+                        {
+                            value: "entrada",
+                            label: "Entrada (+ Estoque)",
+                            icon: ArrowDownRight,
+                        },
+                        {
+                            value: "saida",
+                            label: "Saída (- Estoque)",
+                            icon: ArrowUpRight,
+                        },
+                    ]}
+                    required
+                />
 
                 <Select label="Produto" name="produto_id" value={formData.produto_id} onChange={handleChange} required>
                     <option value="">Selecione um produto...</option>

@@ -1,5 +1,5 @@
-import { AlertCircle } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
+import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
@@ -83,7 +83,7 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
         const payload = {
             razao_social: formData.razao_social.trim(),
             nome_fantasia: formData.nome_fantasia.trim() || null,
-            cnpj: cleanCnpj,
+            cnpj: cleanCnpj || "",
             telefone: stripFormatting(formData.telefone) || null,
             email: formData.email.trim() || null,
         };
@@ -104,15 +104,11 @@ export function FornecedorFormModal({ isOpen, onClose, fornecedorToEdit, onSucce
             isOpen={isOpen}
             onClose={onClose}
             title={isEditing ? `Editar Fornecedor: ${fornecedorToEdit.razao_social}` : "Novo Fornecedor"}
+            subtitle="Cadastro e manutenção de parceiros e distribuidores de mercadorias"
             width="medium"
         >
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 animate-fade-in">
-                        <AlertCircle size={15} className="shrink-0 text-red-600" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                {error && <Alert variant="error">{error}</Alert>}
 
                 <div className="space-y-4">
                     <Input

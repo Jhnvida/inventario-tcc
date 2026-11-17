@@ -29,6 +29,7 @@ export function Clientes() {
         setFiltroStatus,
         filtroTipo,
         setFiltroTipo,
+        recarregar,
         toggleStatusCliente,
         deleteCliente,
     } = useClientes();
@@ -44,6 +45,11 @@ export function Clientes() {
     function handleOpenEdit(cliente: Cliente) {
         setClienteToEdit(cliente);
         setIsModalOpen(true);
+    }
+
+    function handleSuccess() {
+        setIsModalOpen(false);
+        recarregar();
     }
 
     async function handleToggleStatus(cliente: Cliente) {
@@ -283,9 +289,7 @@ export function Clientes() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 clienteToEdit={clienteToEdit}
-                onSuccess={() => {
-                    setIsModalOpen(false);
-                }}
+                onSuccess={handleSuccess}
             />
         </div>
     );

@@ -62,7 +62,7 @@ interface BibliotecaSidebarProps {
 export function BibliotecaSidebar({ isOpen, onClose, onSelectPrompt }: BibliotecaSidebarProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [isRendered, setIsRendered] = useState(isOpen);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(isOpen);
 
     const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
     if (isOpen !== prevIsOpen) {

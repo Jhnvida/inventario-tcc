@@ -1,4 +1,4 @@
-import { stripFormatting } from "./formatters";
+import { stripFormatting } from "./formatters.ts";
 
 export function validarCPF(cpf: string | null | undefined): boolean {
     if (!cpf) return false;

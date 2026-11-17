@@ -86,15 +86,21 @@ export function useProdutos() {
 
     async function createProduto(produto: Partial<Produto>) {
         try {
+            const qtdInicial = produto.quantidade && produto.quantidade > 0 ? Number(produto.quantidade) : 0;
+            const produtoParaInserir = {
+                ...produto,
+                quantidade: 0,
+            };
+
             const { data: newProd, error: insertError } = await supabase
                 .from("produtos")
-                .insert([produto])
+                .insert([produtoParaInserir])
                 .select("id")
                 .single();
 
             if (insertError) throw insertError;
 
-            if (newProd && produto.quantidade && produto.quantidade > 0) {
+            if (newProd && qtdInicial > 0) {
                 const {
                     data: { user: currentUser },
                 } = await supabase.auth.getUser();
@@ -102,7 +108,7 @@ export function useProdutos() {
                 const { error: movError } = await supabase.rpc("registrar_movimentacao", {
                     p_produto_id: newProd.id,
                     p_tipo: "entrada",
-                    p_quantidade: produto.quantidade,
+                    p_quantidade: qtdInicial,
                     p_usuario_id: currentUser?.id || null,
                     p_motivo: "Saldo inicial de cadastro",
                 });

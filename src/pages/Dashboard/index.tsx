@@ -11,7 +11,7 @@ import { formatCurrency, formatDate } from "../../utils/formatters";
 
 export function Dashboard() {
     const navigate = useNavigate();
-    const { loading, metricas, itensCriticos, movimentacoesRecentes, userName } = useDashboard();
+    const { loading, metricas, itensCriticos, movimentacoesRecentes, resumoFluxo, userName } = useDashboard();
 
     return (
         <div className="space-y-6">
@@ -267,6 +267,49 @@ export function Dashboard() {
                             </>
                         )}
                     </Card>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <Card padding="medium" className="space-y-1">
+                            <span className="text-xs font-medium text-slate-500">Entradas (14d)</span>
+                            <div className="flex items-center gap-1.5 text-lg font-semibold text-emerald-600">
+                                <ArrowUpRight size={18} />
+                                <span>+{resumoFluxo.totalEntradas} un</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">Total recebido no período</p>
+                        </Card>
+                        <Card padding="medium" className="space-y-1">
+                            <span className="text-xs font-medium text-slate-500">Saídas (14d)</span>
+                            <div className="flex items-center gap-1.5 text-lg font-semibold text-slate-700">
+                                <ArrowDownRight size={18} />
+                                <span>-{resumoFluxo.totalSaidas} un</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">Total expedido / baixas</p>
+                        </Card>
+                        <Card padding="medium" className="space-y-1">
+                            <span className="text-xs font-medium text-slate-500">Saldo Líquido (14d)</span>
+                            <div
+                                className={`flex items-center gap-1.5 text-lg font-semibold ${
+                                    resumoFluxo.saldoLiquido >= 0 ? "text-emerald-700" : "text-amber-600"
+                                }`}
+                            >
+                                <span>
+                                    {resumoFluxo.saldoLiquido >= 0
+                                        ? `+${resumoFluxo.saldoLiquido}`
+                                        : resumoFluxo.saldoLiquido}{" "}
+                                    un
+                                </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">Variação física líquida</p>
+                        </Card>
+                        <Card padding="medium" className="space-y-1">
+                            <span className="text-xs font-medium text-slate-500">Operações Realizadas</span>
+                            <div className="flex items-center gap-1.5 text-lg font-semibold text-slate-900">
+                                <ArrowLeftRight size={18} className="text-slate-400" />
+                                <span>{resumoFluxo.totalMovimentacoes}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">Eventos nos últimos 14 dias</p>
+                        </Card>
+                    </div>
 
                     <Card padding="none" className="overflow-hidden">
                         <CardHeader

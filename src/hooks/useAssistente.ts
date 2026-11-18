@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { getSystemPrompt } from "../services/ai/prompts";
-import { classifyQueryIntent, REFUSAL_MESSAGE, sanitizeAndValidateResponse } from "../services/ai/scopeGuardrail";
+import { classifyQueryIntent, REFUSAL_MESSAGE, READONLY_REFUSAL_MESSAGE, sanitizeAndValidateResponse } from "../services/ai/scopeGuardrail";
 import { handleFunctionCall } from "../services/ai/toolHandlers";
 import { tools } from "../services/ai/tools";
 
@@ -15,6 +15,11 @@ type ChatMessage = {
     content: string;
     tool_calls?: any[];
 };
+
+let messageCounter = 0;
+function generateMsgId(): string {
+    return `${Date.now()}-${++messageCounter}`;
+}
 
 export function useAssistente() {
     const [messages, setMessages] = useState<Message[]>([
@@ -31,15 +36,15 @@ export function useAssistente() {
 
     function addUserMessage(text: string) {
         historyRef.current.push({ role: "user", content: text });
-        setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender: "user" }]);
+        setMessages((prev) => [...prev, { id: generateMsgId(), text, sender: "user" }]);
     }
 
     function addAiMessage(text: string) {
-        setMessages((prev) => [...prev, { id: Date.now().toString(), text, sender: "ai" }]);
+        setMessages((prev) => [...prev, { id: generateMsgId(), text, sender: "ai" }]);
     }
 
     function addErrorMessage(errorMessage: string) {
-        setMessages((prev) => [...prev, { id: Date.now().toString(), text: errorMessage, sender: "ai" }]);
+        setMessages((prev) => [...prev, { id: generateMsgId(), text: errorMessage, sender: "ai" }]);
     }
 
     function setUiFeedback(id: string, text: string) {
@@ -192,6 +197,13 @@ export function useAssistente() {
             return;
         }
 
+        if (intent === "WRITE_ATTEMPT") {
+            historyRef.current.push({ role: "assistant", content: READONLY_REFUSAL_MESSAGE });
+            addAiMessage(READONLY_REFUSAL_MESSAGE);
+            setIsLoading(false);
+            return;
+        }
+
         const tempToolId = "temp-tool-msg";
 
         try {
@@ -202,7 +214,7 @@ export function useAssistente() {
                 if (currentGenId !== generationIdRef.current) return;
                 removeUiFeedback(tempToolId);
                 if (!streamingMsgId) {
-                    streamingMsgId = Date.now().toString();
+                    streamingMsgId = generateMsgId();
                     currentStreamText = token;
                     setMessages((prev) => [
                         ...prev.filter((m) => m.id !== tempToolId),

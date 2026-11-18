@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import test from "node:test";
-import { ehPerdaOperacional, handleFunctionCall } from "../services/ai/toolHandlers.ts";
+import { buildProductSearchFilter, ehPerdaOperacional, handleFunctionCall } from "../services/ai/toolHandlers.ts";
 import { formatDate, formatDateOnly } from "../utils/formatters.ts";
 
 test("Formatters: formatDate e formatDateOnly formatam no padrão pt-BR (America/Sao_Paulo)", () => {
@@ -32,6 +32,28 @@ test("RN13: ehPerdaOperacional classifica motivos de descarte, quebra e avaria c
     assert.strictEqual(ehPerdaOperacional(null), false);
     assert.strictEqual(ehPerdaOperacional(undefined), false);
     assert.strictEqual(ehPerdaOperacional(""), false);
+});
+
+test("Tool Handlers: buildProductSearchFilter gera termos singulares e plurais para buscas em linguagem natural", () => {
+    const filterParafusos = buildProductSearchFilter("parafusos");
+    assert.match(filterParafusos, /nome\.ilike\.%parafusos%/);
+    assert.match(filterParafusos, /nome\.ilike\.%parafuso%/);
+
+    const filterComPontuacao = buildProductSearchFilter("parafusos?");
+    assert.match(filterComPontuacao, /nome\.ilike\.%parafusos%/);
+    assert.match(filterComPontuacao, /nome\.ilike\.%parafuso%/);
+    assert.ok(!filterComPontuacao.includes("?"), "Não deve incluir ponto de interrogação");
+
+    const filterComAspas = buildProductSearchFilter('"parafusos"');
+    assert.match(filterComAspas, /nome\.ilike\.%parafusos%/);
+    assert.ok(!filterComAspas.includes('"'), "Não deve incluir aspas");
+
+    const filterFuradeiras = buildProductSearchFilter("furadeiras de impacto");
+    assert.match(filterFuradeiras, /nome\.ilike\.%furadeiras%/);
+    assert.match(filterFuradeiras, /nome\.ilike\.%furadeira%/);
+    assert.match(filterFuradeiras, /nome\.ilike\.%impacto%/);
+
+    assert.strictEqual(buildProductSearchFilter(""), "");
 });
 
 function checkRemoteDbOrSkip(result: any, t: any): boolean {
@@ -92,6 +114,20 @@ test("Tool Handlers: consultar_produtos executa sem erro", async (t) => {
 
     assert.strictEqual(result?.erro, undefined);
     assert.ok(Array.isArray(result));
+});
+
+test("Tool Handlers: consultar_produtos prioriza termo_busca e retorna array direto sem descartar itens por filtro indevido", async (t) => {
+    const result = await handleFunctionCall({
+        name: "consultar_produtos",
+        args: { termo_busca: "parafusos", filtro_estoque: "baixo" },
+    });
+
+    if (checkRemoteDbOrSkip(result, t)) return;
+
+    assert.ok(Array.isArray(result), "Deve retornar array diretamente");
+    if (result.length > 0) {
+        assert.ok(result.some((p: any) => p.nome.toLowerCase().includes("parafuso")));
+    }
 });
 
 test("Tool Handlers: consultar_categorias e consultar_fornecedores estão mapeadas", async (t) => {

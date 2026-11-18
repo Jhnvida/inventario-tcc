@@ -1,7 +1,10 @@
 export const REFUSAL_MESSAGE =
     "Posso ajudar com informações e operações relacionadas ao inventário do sistema (produtos, estoque, movimentações, pedidos, fornecedores e relatórios). O que você gostaria de consultar?";
 
-export type QueryIntent = "OUT_OF_SCOPE" | "GREETING_OR_SYSTEM_INFO" | "IN_SCOPE";
+export const READONLY_REFUSAL_MESSAGE =
+    "O Assistente opera exclusivamente em modo somente leitura para preservar a integridade e auditoria do inventário. Para cadastrar, editar, excluir ou movimentar produtos, por favor utilize as telas correspondentes no menu do sistema (Produtos ou Movimentações).";
+
+export type QueryIntent = "OUT_OF_SCOPE" | "WRITE_ATTEMPT" | "GREETING_OR_SYSTEM_INFO" | "IN_SCOPE";
 
 function normalizeText(text: string): string {
     return text
@@ -26,6 +29,17 @@ export function classifyQueryIntent(query: string): QueryIntent {
 
     if (jailbreakPatterns.some((pattern) => pattern.test(normalized))) {
         return "OUT_OF_SCOPE";
+    }
+
+    const writeAttemptPatterns = [
+        /(altere|atualize|mude|modifique|cadastre|crie|inserir|insira|delete|exclua|remova|adicione|adicionar|salve|salvar)\s+(a\s+quantidade|o\s+estoque|o\s+produto|um\s+produto|novo\s+produto|para\s+\d+)/i,
+        /quero\s+(alterar|mudar|atualizar|cadastrar|deletar|excluir)\s+(a\s+quantidade|o\s+estoque|o\s+produto)/i,
+        /cadastre\s+\d+\s+/i,
+        /insira\s+\d+\s+/i,
+    ];
+
+    if (writeAttemptPatterns.some((pattern) => pattern.test(normalized))) {
+        return "WRITE_ATTEMPT";
     }
 
     const outOfScopePatterns = [

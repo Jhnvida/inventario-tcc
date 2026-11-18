@@ -52,6 +52,27 @@ test("Camada de Escopo: Bloqueia tentativas de manipulação e alteração de pa
     }
 });
 
+test("Camada de Escopo: Bloqueia tentativas de alteração ou gravação de dados (Modo Somente Leitura)", () => {
+    const writeQueries = [
+        "Por favor, altere a quantidade de furadeiras para 50 unidades no sistema.",
+        "Mude o estoque do parafuso para 200",
+        "Atualize a quantidade do produto FER-001",
+        "Cadastre 10 unidades de cimento",
+        "Delete o produto 123",
+        "Exclua o produto do estoque",
+        "Quero alterar a quantidade do item",
+    ];
+
+    for (const q of writeQueries) {
+        const intent = classifyQueryIntent(q);
+        assert.strictEqual(
+            intent,
+            "WRITE_ATTEMPT",
+            `A solicitação "${q}" deveria ser classificada como WRITE_ATTEMPT, mas retornou ${intent}`,
+        );
+    }
+});
+
 test("Camada de Escopo: Preserva perguntas legítimas de inventário sem falso-positivo", () => {
     const legitimateQueries = [
         "Quantos produtos temos em estoque?",

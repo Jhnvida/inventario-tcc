@@ -32,7 +32,8 @@ export const tools = [
                     },
                     filtro_estoque: {
                         type: "string",
-                        description: "Filtro opcional. Valores aceitos: 'todos', 'baixo', 'zerado'.",
+                        description:
+                            "Filtro opcional. Use 'baixo' APENAS quando o usuário pedir explicitamente produtos com estoque baixo ou crítico. Use 'zerado' APENAS para produtos esgotados. Para buscas normais de produtos ('temos parafusos?', 'buscar parafuso'), NUNCA passe este filtro (omita ou use 'todos').",
                     },
                     ordenacao: {
                         type: "string",

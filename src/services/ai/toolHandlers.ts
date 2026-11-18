@@ -23,6 +23,35 @@ export function ehPerdaOperacional(motivo: string | null | undefined): boolean {
     return termosPerda.some((termo) => m.includes(termo));
 }
 
+export function buildProductSearchFilter(termo: string): string {
+    const cleaned = termo.replace(/[?"'!,.:;()\[\]{}]/g, " ").trim();
+    if (!cleaned) return "";
+
+    const stopWords = new Set(["de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas", "por", "para", "com"]);
+    const words = cleaned.split(/\s+/).filter((w) => w.length >= 2 && !stopWords.has(w.toLowerCase()));
+
+    const filters: string[] = [];
+    if (cleaned.length >= 2) {
+        filters.push(`nome.ilike.%${cleaned}%`, `sku.ilike.%${cleaned}%`);
+    }
+
+    for (const w of words) {
+        if (w.length < 3) continue;
+        filters.push(`nome.ilike.%${w}%`, `sku.ilike.%${w}%`);
+        let singular = w;
+        if (w.endsWith("es") && w.length > 4) {
+            singular = w.slice(0, -2);
+        } else if (w.endsWith("s") && w.length > 3) {
+            singular = w.slice(0, -1);
+        }
+        if (singular !== w && singular.length >= 3) {
+            filters.push(`nome.ilike.%${singular}%`, `sku.ilike.%${singular}%`);
+        }
+    }
+
+    return Array.from(new Set(filters)).join(",");
+}
+
 const handlers: Record<string, (args: any) => Promise<any>> = {
     recusar_fora_do_escopo: async function (args) {
         return {
@@ -50,7 +79,10 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
         }
 
         if (args?.termo_busca) {
-            query = query.or(`nome.ilike.%${args.termo_busca}%,sku.ilike.%${args.termo_busca}%`);
+            const orFilter = buildProductSearchFilter(args.termo_busca);
+            if (orFilter) {
+                query = query.or(orFilter);
+            }
         }
 
         const { data, error } = await query;
@@ -60,15 +92,19 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             return { erro: "Falha ao consultar produtos no banco de dados." };
         }
 
+        if (args?.termo_busca) {
+            return data || [];
+        }
+
         if (args?.filtro_estoque === "baixo") {
-            return data?.filter((p: any) => p.quantidade > 0 && p.quantidade <= p.estoque_minimo);
+            return data?.filter((p: any) => p.quantidade > 0 && p.quantidade <= p.estoque_minimo) || [];
         }
 
         if (args?.filtro_estoque === "zerado") {
-            return data?.filter((p: any) => p.quantidade === 0);
+            return data?.filter((p: any) => p.quantidade === 0) || [];
         }
 
-        return data;
+        return data || [];
     },
 
     consultar_resumo_estoque: async function (_args?: any) {
@@ -253,7 +289,10 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
             .select("id, nome, sku, quantidade, estoque_minimo, preco, localizacao, categorias(nome)");
 
         if (args?.termo_busca) {
-            queryProdutos = queryProdutos.or(`nome.ilike.%${args.termo_busca}%,sku.ilike.%${args.termo_busca}%`);
+            const orFilter = buildProductSearchFilter(args.termo_busca);
+            if (orFilter) {
+                queryProdutos = queryProdutos.or(orFilter);
+            }
         }
 
         const { data: produtosData, error: errProdutos } = await queryProdutos;
